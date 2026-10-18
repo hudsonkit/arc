@@ -540,7 +540,6 @@ import themesMd from '../../../docs/themes.md?raw'
 import exportsMd from '../../../docs/exports.md?raw'
 import mermaidImportMd from '../../../docs/mermaid-import.md?raw'
 import mermaidSequencesMd from '../../../docs/mermaid-sequences.md?raw'
-import mermaidImportMd from '../../../docs/mermaid-import.md?raw'
 import viewsMd from '../../../docs/views.md?raw'
 import focusStoriesMd from '../../../docs/focus-stories.md?raw'
 import groupLayoutMd from '../../../docs/group-layout.md?raw'
@@ -609,7 +608,6 @@ const pageTree: PageNode[] = [
     children: [
       { type: 'page', id: 'mermaid-import', name: 'Mermaid Imports', icon: 'GitBranch', description: 'Source from Mermaid, Pele, and Beautiful Mermaid' },
       { type: 'page', id: 'mermaid-sequences', name: 'Mermaid Sequences', icon: 'GitBranch', description: 'Native sequence renderer & player' },
-      { type: 'page', id: 'mermaid-import', name: 'Mermaid Import', icon: 'Import', description: 'Project Mermaid into Arc data' },
     ],
   },
   {
@@ -1082,12 +1080,6 @@ Return the complete config with:
     title: 'The agentic loop',
     description: 'Diagrams maintained by the same agents that change the code.',
     badge: 'Guides',
-  },
-  'mermaid-import': {
-    content: stripFrontmatter(mermaidImportMd),
-    title: 'Mermaid import',
-    description: 'Project Mermaid flowcharts and state diagrams into positioned Arc data.',
-    badge: 'Rendering Engines',
   },
   themes: {
     content: stripFrontmatter(themesMd),
