@@ -2,7 +2,8 @@ import puppeteer from 'puppeteer'
 import { execFileSync } from 'child_process'
 import { fileURLToPath } from 'url'
 import path from 'path'
-import { mkdirSync, existsSync } from 'fs'
+import { mkdirSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'fs'
+import os from 'os'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.join(__dirname, '..', 'public')
@@ -59,6 +60,7 @@ const BASE_CSS = `
   }
   .shell.split { grid-template-columns: 1.08fr 0.92fr; }
   .shell.solo { grid-template-columns: 1fr; }
+  .shell.wide { grid-template-columns: 0.88fr 1.12fr; gap: 40px; padding-right: 48px; }
   .brand {
     display: flex;
     align-items: center;
@@ -66,6 +68,30 @@ const BASE_CSS = `
     margin-bottom: 22px;
   }
   .brand svg { display: block; }
+  .kit {
+    margin-left: 6px;
+    padding: 5px 8px 4px;
+    border: 1px solid rgba(46, 95, 165, 0.28);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    color: #2e5fa5;
+    line-height: 1;
+  }
+  .diagram { padding: 22px 18px 18px; background: #fff; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(16, 21, 24, 0.10);
+    background: #fbfcfd;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    color: #6b757a;
+  }
+  .card-foot b { font-weight: 500; color: #2e5fa5; }
   .lockup { display: grid; gap: 5px; line-height: 1; }
   .name { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
   .descriptor {
@@ -240,7 +266,7 @@ function specBar(items) {
   return items.map((item) => `<span>${item}</span>`).join('')
 }
 
-function plate({ eyebrow, title, lead, spec, right, compactTitle = false }) {
+function plate({ eyebrow, title, lead, spec, right, compactTitle = false, wide = false, kit = false, repo = 'github.com/hudsonkit/arc' }) {
   const split = Boolean(right)
   return `<!DOCTYPE html>
 <html>
@@ -251,7 +277,7 @@ function plate({ eyebrow, title, lead, spec, right, compactTitle = false }) {
 </head>
 <body>
   <div class="grid"></div>
-  <div class="shell ${split ? 'split' : 'solo'}">
+  <div class="shell ${split ? (wide ? 'wide' : 'split') : 'solo'}">
     <div>
       <div class="brand">
         ${MARK}
@@ -259,8 +285,9 @@ function plate({ eyebrow, title, lead, spec, right, compactTitle = false }) {
           <span class="name">Arc</span>
           <span class="descriptor">diagrams as code</span>
         </span>
+        ${kit ? '<span class="kit">PART OF HUDSON KIT</span>' : ''}
       </div>
-      <div class="repo">github.com/hudsonkit/arc</div>
+      <div class="repo">${repo}</div>
       ${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}
       <h1${compactTitle ? ' class="compact"' : ''}>${title}</h1>
       <p class="lead">${lead}</p>
@@ -272,25 +299,6 @@ function plate({ eyebrow, title, lead, spec, right, compactTitle = false }) {
 </body>
 </html>`
 }
-
-const codeCard = `
-  <div class="card">
-    <div class="card-bar">
-      <div class="dots"><i></i><i></i><i></i></div>
-      <span class="card-name">system.arc.ts</span>
-    </div>
-    <pre><span class="c">// the diagram is the source</span>
-<span class="k">const</span> system = {
-  nodes: { editor, model, exporters },
-  connectors: [
-    { from: <span class="s">'editor'</span>, to: <span class="s">'model'</span> },
-    { from: <span class="s">'model'</span>,  to: <span class="s">'exporters'</span> },
-  ],
-  theme: <span class="s">'cool'</span>,
-}
-<span class="c">// → render · diff · export</span></pre>
-  </div>
-`
 
 const docsIndexCard = `
   <div class="card">
@@ -396,11 +404,43 @@ const editorCard = `
   </div>
 `
 
+// The main card shows a real diagram, drawn by Arc's own renderer from
+// og-diagram.json — not a mock-up of one.
+function renderDiagramSvg(file) {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'arc-og-'))
+  const out = path.join(dir, 'diagram.svg')
+  try {
+    execFileSync(process.execPath, [
+      path.join(__dirname, '..', 'bin', 'arc.mjs'), 'render', file,
+      '--out', out, '--format', 'svg', '--theme', 'cool', '--mode', 'light',
+      '--padding', '0', '--background', 'none',
+    ], { stdio: ['ignore', 'ignore', 'inherit'] })
+    return readFileSync(out, 'utf8').replace(/<\?xml[^>]*>\s*/, '')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
+const diagramCard = `
+  <div class="card">
+    <div class="card-bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <span class="card-name">request-path.arc.json</span>
+    </div>
+    <div class="diagram">${renderDiagramSvg(path.join(__dirname, 'og-diagram.json'))}</div>
+    <div class="card-foot"><span><b>$</b> arc render request-path.arc.json</span><span>6 nodes · 5 edges</span></div>
+  </div>
+`
+
 const mainOGHtml = plate({
   title: 'Diagrams that live where your system does.',
   lead: 'Typed, diffable config. Visual editor. The picture ships with the code.',
-  spec: ['REACT', 'TYPESCRIPT', 'SVG / PNG', 'JSON / TS'],
-  right: codeCard,
+  spec: ['REACT', 'TYPESCRIPT', 'SVG / PNG', 'MCP'],
+  right: diagramCard,
+  compactTitle: true,
+  wide: true,
+  kit: true,
+  repo: 'hudsonkit.com/arc',
 })
 
 const docsOGHtml = plate({

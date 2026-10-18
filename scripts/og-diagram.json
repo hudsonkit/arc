@@ -1,0 +1,137 @@
+{
+  "_comment": "The request path drawn on the landing hero, spaced for the 1200x630 social card. Rendered by `arc render` in generate-og.js.",
+  "layout": {
+    "width": 820,
+    "height": 336
+  },
+  "nodes": {
+    "client": {
+      "x": 0,
+      "y": 142,
+      "size": "m"
+    },
+    "gateway": {
+      "x": 220,
+      "y": 142,
+      "size": "m"
+    },
+    "orders": {
+      "x": 450,
+      "y": 48,
+      "size": "m"
+    },
+    "search": {
+      "x": 450,
+      "y": 236,
+      "size": "m"
+    },
+    "postgres": {
+      "x": 660,
+      "y": 48,
+      "size": "m"
+    },
+    "cache": {
+      "x": 660,
+      "y": 236,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "client": {
+      "icon": "Monitor",
+      "name": "Web client",
+      "subtitle": "React",
+      "color": "blue"
+    },
+    "gateway": {
+      "icon": "Shield",
+      "name": "API gateway",
+      "subtitle": "Auth · rate",
+      "color": "violet"
+    },
+    "orders": {
+      "icon": "Server",
+      "name": "Orders",
+      "subtitle": "Service",
+      "color": "emerald"
+    },
+    "search": {
+      "icon": "Search",
+      "name": "Search",
+      "subtitle": "Service",
+      "color": "sky"
+    },
+    "postgres": {
+      "icon": "Database",
+      "name": "Postgres",
+      "subtitle": "Primary",
+      "color": "amber"
+    },
+    "cache": {
+      "icon": "Zap",
+      "name": "Redis",
+      "subtitle": "Cache",
+      "color": "rose"
+    }
+  },
+  "connectors": [
+    {
+      "from": "client",
+      "to": "gateway",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "https"
+    },
+    {
+      "from": "gateway",
+      "to": "orders",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "rpc"
+    },
+    {
+      "from": "gateway",
+      "to": "search",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "rpc"
+    },
+    {
+      "from": "orders",
+      "to": "postgres",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "sql"
+    },
+    {
+      "from": "search",
+      "to": "cache",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "kv"
+    }
+  ],
+  "connectorStyles": {
+    "https": {
+      "color": "blue",
+      "strokeWidth": 1.5,
+      "label": "HTTPS"
+    },
+    "rpc": {
+      "color": "violet",
+      "strokeWidth": 1.5,
+      "label": "gRPC"
+    },
+    "sql": {
+      "color": "amber",
+      "strokeWidth": 1.5,
+      "label": "SQL"
+    },
+    "kv": {
+      "color": "rose",
+      "strokeWidth": 1.5,
+      "label": "GET",
+      "dashed": true
+    }
+  }
+}
