@@ -1,7 +1,7 @@
 # Arc - LLM Context File
 
 > Diagrams as code — visual editor + React renderer for architecture diagrams
-> Source: https://github.com/arach/arc
+> Source: https://github.com/hudsonkit/arc
 > Docs: https://arc.arach.dev/docs
 > Contributor guide: CLAUDE.md (repo root — read before editor changes)
 

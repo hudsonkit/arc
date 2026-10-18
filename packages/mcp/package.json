@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arach/arc.git",
+    "url": "https://github.com/hudsonkit/arc.git",
     "directory": "packages/mcp"
   },
   "homepage": "https://arc.jdi.sh",
   "bugs": {
-    "url": "https://github.com/arach/arc/issues"
+    "url": "https://github.com/hudsonkit/arc/issues"
   },
   "engines": {
     "node": ">=22"

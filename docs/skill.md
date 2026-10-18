@@ -99,7 +99,7 @@ export const systemArchitecture: ArcDiagramData = {
 Install Arc's diagram skill with the open Skills CLI:
 
 ```bash
-npx skills add arach/arc --skill arc-diagrams
+npx skills add hudsonkit/arc --skill arc-diagrams
 ```
 
 The installer detects supported coding agents and places the skill in their

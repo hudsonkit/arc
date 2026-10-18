@@ -43,8 +43,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arach/arc.git",
+    "url": "https://github.com/hudsonkit/arc.git",
     "directory": "packages/arc-editor"
   },
-  "homepage": "https://github.com/arach/arc#readme"
+  "homepage": "https://github.com/hudsonkit/arc#readme"
 }

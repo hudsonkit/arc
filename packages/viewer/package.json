@@ -58,7 +58,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arach/arc.git",
+    "url": "https://github.com/hudsonkit/arc.git",
     "directory": "packages/viewer"
   },
   "homepage": "https://arc.jdi.sh"

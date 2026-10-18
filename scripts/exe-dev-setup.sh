@@ -24,7 +24,7 @@ if [ ! -x "$BUN" ]; then
 fi
 
 if [ ! -d "$APP_DIR/.git" ]; then
-  git clone --depth 1 https://github.com/arach/arc.git "$APP_DIR"
+  git clone --depth 1 https://github.com/hudsonkit/arc.git "$APP_DIR"
 fi
 
 cd "$APP_DIR"

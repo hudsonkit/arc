@@ -84,7 +84,7 @@ Architecture diagrams typically live in design tools, disconnected from the code
 
 ## Links
 
-- [GitHub Repository](https://github.com/arach/arc)
+- [GitHub Repository](https://github.com/hudsonkit/arc)
 - [NPM: @arach/arc](https://www.npmjs.com/package/@arach/arc)
 - [NPM: @arach/arc-mcp](https://www.npmjs.com/package/@arach/arc-mcp)
 

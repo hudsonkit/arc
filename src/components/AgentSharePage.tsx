@@ -140,7 +140,7 @@ const SKILLS_CONFIG: SharePageConfig = {
   lead: 'Reusable instructions for creating, repairing, and exporting architecture diagrams that stay typed, readable, and reviewable.',
   metaTitle: 'Arc Skills | Architecture diagram playbooks for agents',
   metaDescription: 'Reusable agent skills for creating, repairing, reviewing, and exporting architecture diagrams with Arc.',
-  primaryCode: 'npx skills add arach/arc --skill arc-diagrams',
+  primaryCode: 'npx skills add hudsonkit/arc --skill arc-diagrams',
   docsHref: '/docs/skills',
   docsLabel: 'Browse the skills reference',
   outcomes: [
@@ -289,7 +289,7 @@ export default function AgentSharePage({ kind }: { kind: SharePageKind }) {
             <Link className={kind === 'skills' ? 'is-active' : ''} to="/skills">Skills</Link>
             <Link to="/architecture-diagram-software">Software</Link>
             <Link to="/docs">Docs</Link>
-            <a href="https://github.com/arach/arc" target="_blank" rel="noreferrer">GitHub ↗</a>
+            <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noreferrer">GitHub ↗</a>
           </nav>
         </header>
 

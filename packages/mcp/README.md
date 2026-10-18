@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/arach/arc/main/public/arc-mark.svg" alt="Arc" width="52" height="52" />
+<img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mark.svg" alt="Arc" width="52" height="52" />
 
 # @arach/arc-mcp
 
@@ -11,7 +11,7 @@ author, validate, lay out, render, and diff architecture diagrams from any
 MCP client.
 
 [![npm version](https://img.shields.io/npm/v/@arach/arc-mcp.svg?color=6d5efc&label=%40arach%2Farc-mcp)](https://www.npmjs.com/package/@arach/arc-mcp)
-[![license](https://img.shields.io/npm/l/@arach/arc-mcp.svg?color=41b883)](https://github.com/arach/arc/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/@arach/arc-mcp.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
 
 </div>
 
@@ -81,7 +81,7 @@ Arc to clients on other machines, run the Streamable HTTP server from a checkout
 of the repo:
 
 ```bash
-git clone https://github.com/arach/arc && cd arc
+git clone https://github.com/hudsonkit/arc && cd arc
 bun install
 ARC_MCP_HOST=127.0.0.1 ARC_MCP_PORT=5190 bun run mcp:http
 # MCP endpoint: http://127.0.0.1:5190/mcp · health: /health
@@ -94,7 +94,7 @@ ARC_MCP_HOST=127.0.0.1 ARC_MCP_PORT=5190 bun run mcp:http
 | `ARC_EDITOR_URL` | `http://localhost:5188` | Studio base that `editor_handoff` links point to |
 
 Arc doesn't run a public MCP endpoint. If you need a hosted one, open an issue
-at [github.com/arach/arc](https://github.com/arach/arc/issues).
+at [github.com/hudsonkit/arc](https://github.com/hudsonkit/arc/issues).
 
 ## Related packages
 
@@ -102,8 +102,8 @@ at [github.com/arach/arc](https://github.com/arach/arc/issues).
 - [`@arach/arc-viewer`](https://www.npmjs.com/package/@arach/arc-viewer) — native Mermaid sequence diagrams + Mermaid import
 - [`@arach/arc-iso`](https://www.npmjs.com/package/@arach/arc-iso) — isometric renderer for vanilla JS and the browser
 
-Studio + docs: [arc.jdi.sh](https://arc.jdi.sh) · Source: [github.com/arach/arc](https://github.com/arach/arc)
+Studio + docs: [arc.jdi.sh](https://arc.jdi.sh) · Source: [github.com/hudsonkit/arc](https://github.com/hudsonkit/arc)
 
 ## License
 
-[MIT](https://github.com/arach/arc/blob/main/LICENSE)
+[MIT](https://github.com/hudsonkit/arc/blob/main/LICENSE)

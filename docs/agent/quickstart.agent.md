@@ -5,7 +5,7 @@
 ```bash
 npm install @arach/arc          # or: bun add @arach/arc
 # Visual studio (not an npm one-liner for full shell):
-git clone https://github.com/arach/arc && cd arc && bun install && bun run dev
+git clone https://github.com/hudsonkit/arc && cd arc && bun install && bun run dev
 ```
 
 ## Minimal Example

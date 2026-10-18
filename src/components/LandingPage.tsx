@@ -346,7 +346,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               <a href="#agentic"><span className="tl-nav-n">05</span>AGENTS</a>
               <Link to="/examples">EXAMPLES</Link>
               <Link to="/docs">DOCS</Link>
-              <a className="tl-nav-accent" href="https://github.com/arach/arc" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
+              <a className="tl-nav-accent" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
             </nav>
             <Link className="tl-nav-mobile" to="/examples">Examples →</Link>
             <button
@@ -656,7 +656,7 @@ import { ArcDiagram } from '@arach/arc'
         {/* FOOTER */}
         <footer className="tl-footer">
           <span className="tl-footer-brand"><ArcMark />Arc — diagrams that live where your system does.</span>
-          <span>MIT · <a href="https://github.com/arach/arc" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
+          <span>MIT · <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
         </footer>
       </div>
     </div>

@@ -90,7 +90,7 @@ export default function SoftwareListPage() {
             <Link to="/skills">Skills</Link>
             <Link className="is-active" to={`/${data.slug}`}>Software</Link>
             <Link to="/docs">Docs</Link>
-            <a href="https://github.com/arach/arc" target="_blank" rel="noreferrer">GitHub ↗</a>
+            <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noreferrer">GitHub ↗</a>
           </nav>
         </header>
 

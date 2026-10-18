@@ -20,7 +20,7 @@ export default function NativeMermaidSequencesPost() {
         </Link>
         <nav aria-label="Build note links">
           <Link to="/docs/mermaid-sequences">Sequence docs</Link>
-          <a href="https://github.com/arach/arc" target="_blank" rel="noreferrer">
+          <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noreferrer">
             <Github size={14} aria-hidden="true" /> GitHub
           </a>
         </nav>

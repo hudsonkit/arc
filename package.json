@@ -11,11 +11,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arach/arc.git"
+    "url": "git+https://github.com/hudsonkit/arc.git"
   },
   "homepage": "https://hudsonkit.com/arc",
   "bugs": {
-    "url": "https://github.com/arach/arc/issues"
+    "url": "https://github.com/hudsonkit/arc/issues"
   },
   "engines": {
     "node": ">=22"

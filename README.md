@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1><img src="https://raw.githubusercontent.com/arach/arc/main/public/arc-mark.svg" alt="" width="40" height="40" /> Arc</h1>
+<h1><img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mark.svg" alt="" width="40" height="40" /> Arc</h1>
 
 ### Build explanations people can explore.
 
@@ -10,10 +10,10 @@ studio and developer tools. Start with Arc data or supported Mermaid source.
 Embed the result, or export **PNG, SVG, GIF, and MP4**.
 
 [![npm version](https://img.shields.io/npm/v/@arach/arc.svg?color=6d5efc&label=%40arach%2Farc)](https://www.npmjs.com/package/@arach/arc)
-[![license](https://img.shields.io/npm/l/@arach/arc.svg?color=41b883)](https://github.com/arach/arc/blob/main/LICENSE)
-[![types](https://img.shields.io/npm/types/@arach/arc.svg?color=3b82f6)](https://github.com/arach/arc/blob/main/src/types/diagram.ts)
+[![license](https://img.shields.io/npm/l/@arach/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
+[![types](https://img.shields.io/npm/types/@arach/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
 
-[Explore Arc](https://arc.jdi.sh/) · [Browse 16 examples](https://arc.jdi.sh/examples/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/arach/arc/blob/main/docs/overview.md)
+[Explore Arc](https://arc.jdi.sh/) · [Browse 16 examples](https://arc.jdi.sh/examples/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md)
 
 </div>
 
@@ -38,7 +38,7 @@ repository so the diagram can be reviewed and updated in the same pull request.
 are Mermaid renderers. Bring the original Mermaid text to Arc; Arc applies its
 own layout, themes, and interactions. Their rendered SVGs, theme settings, and
 full diagram catalogs are not imported. Check the
-[import coverage](https://github.com/arach/arc/blob/main/docs/mermaid-import.md) and [sequence guide](https://github.com/arach/arc/blob/main/docs/mermaid-sequences.md)
+[import coverage](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-import.md) and [sequence guide](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md)
 for supported syntax and diagnostics.
 
 | Output | Use it for |
@@ -54,7 +54,7 @@ for supported syntax and diagnostics.
 The file exports above use Arc architecture data. GIF and MP4 render authored
 flow routes through the CLI or MCP; they require Chrome/Chromium and ffmpeg.
 Native Mermaid sequence playback is available through the React viewer.
-[Choose an export and see the commands →](https://github.com/arach/arc/blob/main/docs/exports.md)
+[Choose an export and see the commands →](https://github.com/hudsonkit/arc/blob/main/docs/exports.md)
 
 ## Turn the map into a walkthrough
 
@@ -62,7 +62,7 @@ Start with services, databases, queues, and the connections between them. Arc
 provides semantic node kinds, icons, groups, relationship styles, and automatic
 layout to give the system a clear structure. Then make that structure explorable.
 
-![An Arc architecture diagram in the light Engineering theme](https://raw.githubusercontent.com/arach/arc/main/public/readme-architecture.png)
+![An Arc architecture diagram in the light Engineering theme](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-architecture.png)
 
 - **Focus on the path that matters.** Hover or select a component to reveal its
   relationships. Author a focus story with a caption and steps to explain a
@@ -78,7 +78,7 @@ Pan, zoom, fit, minimaps, and legends keep the system navigable. Chapters,
 focus stories, and animated routes are authored data that can be edited and
 reviewed alongside the drawing.
 
-[Guided views](https://github.com/arach/arc/blob/main/docs/views.md) · [Focus stories](https://github.com/arach/arc/blob/main/docs/focus-stories.md) · [Flow API](https://github.com/arach/arc/blob/main/docs/api.md) · [Source for the image](#example-output)
+[Guided views](https://github.com/hudsonkit/arc/blob/main/docs/views.md) · [Focus stories](https://github.com/hudsonkit/arc/blob/main/docs/focus-stories.md) · [Flow API](https://github.com/hudsonkit/arc/blob/main/docs/api.md) · [Source for the image](#example-output)
 
 ## Play the conversation
 
@@ -87,7 +87,7 @@ follow one message at a time. Actors, lifelines, self-calls, notes, branches,
 and loops retain their place in the story. Play the sequence, step backward or
 forward, focus a participant, or open it fullscreen.
 
-![Arc's native sequence player showing the route from a Scout message to a direct reply or delegated work](https://raw.githubusercontent.com/arach/arc/main/public/readme-sequence.png)
+![Arc's native sequence player showing the route from a Scout message to a direct reply or delegated work](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-sequence.png)
 
 Mermaid text stays the source. Arc owns the typed sequence model, layout,
 SVG rendering, and playback. You can customize theme tokens and replace
@@ -97,7 +97,7 @@ at runtime.
 Existing Mermaid flowcharts and state diagrams have a separate import path
 into Arc's architecture format.
 
-[Native sequence guide](https://github.com/arach/arc/blob/main/docs/mermaid-sequences.md) · [Supported Mermaid imports](https://github.com/arach/arc/blob/main/docs/mermaid-import.md)
+[Native sequence guide](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md) · [Supported Mermaid imports](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-import.md)
 
 ## Give the system depth
 
@@ -107,13 +107,13 @@ floors, staggered layers, translucent components, and pillars. Hover a layer
 to lift it out of the stack; use node and layer callbacks to connect the view
 to your application.
 
-[![An example agent fleet with readable callouts for its agent, project, and runtime layers](https://raw.githubusercontent.com/arach/arc/main/public/agent-fleet.png)](https://raw.githubusercontent.com/arach/arc/main/public/agent-fleet.png)
+[![An example agent fleet with readable callouts for its agent, project, and runtime layers](https://raw.githubusercontent.com/hudsonkit/arc/main/public/agent-fleet.png)](https://raw.githubusercontent.com/hudsonkit/arc/main/public/agent-fleet.png)
 
 Choose shaded solids, hatched blueprint linework, cyanotype plates, or a
 retro-print material with mineral inks and deterministic stipple. The tiered
 renderer has React and static SVG APIs, including a vanilla JavaScript embed.
 
-[Isometric types and options](https://github.com/arach/arc/blob/main/src/iso/types.ts) · [Example fleet composition](https://github.com/arach/arc/blob/main/scripts/agent-fleet-iso.ts)
+[Isometric types and options](https://github.com/hudsonkit/arc/blob/main/src/iso/types.ts) · [Example fleet composition](https://github.com/hudsonkit/arc/blob/main/scripts/agent-fleet-iso.ts)
 
 ## Let readers operate the explanation
 
@@ -122,14 +122,14 @@ All four database connections fill, and requests start waiting. Step through a
 handoff to see which request gets the next connection. Stop arrivals and watch
 the queue drain.
 
-[![The connection-pool explainer with four busy connections, waiting requests, and demand controls](https://raw.githubusercontent.com/arach/arc/main/public/readme-connection-pool.png)](https://arc.jdi.sh/examples/connection-pool/)
+[![The connection-pool explainer with four busy connections, waiting requests, and demand controls](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-connection-pool.png)](https://arc.jdi.sh/examples/connection-pool/)
 
 The queue, leases, counts, and handoffs come from the same deterministic model.
 This working example combines a custom mechanism view with an Arc diagram
 projection. It shows how to build an explanation that responds to the reader's
 actions and makes cause and effect visible.
 
-[Operate the pool](https://arc.jdi.sh/examples/connection-pool/) · [Read the model](https://github.com/arach/arc/blob/main/src/components/explainers/connectionPoolModel.ts) · [See the Arc projection](https://github.com/arach/arc/blob/main/src/components/explainers/connectionPoolDiagram.ts)
+[Operate the pool](https://arc.jdi.sh/examples/connection-pool/) · [Read the model](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolModel.ts) · [See the Arc projection](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolDiagram.ts)
 
 ## Create on the canvas. Refine in code.
 
@@ -138,7 +138,7 @@ place, connect their anchors, shape groups, and refine the result in the
 inspector. Edit the JSON and the canvas updates. Move a node and the source
 updates with it.
 
-![The Arc Studio with its canvas and diagram properties](https://raw.githubusercontent.com/arach/arc/main/public/studio.png)
+![The Arc Studio with its canvas and diagram properties](https://raw.githubusercontent.com/hudsonkit/arc/main/public/studio.png)
 
 Multi-selection, keyboard shortcuts, undo/redo, templates, image layers,
 custom dimensions, connector routing, and export crops give you control over
@@ -161,11 +161,11 @@ dark modes; individual nodes and relationships can carry their own styling.
 <details>
 <summary>See the same architecture in three visual languages</summary>
 
-![Engineering: graph grid, drawing-sheet border, and title block](https://raw.githubusercontent.com/arach/arc/main/public/theme-engineering.png)
+![Engineering: graph grid, drawing-sheet border, and title block](https://raw.githubusercontent.com/hudsonkit/arc/main/public/theme-engineering.png)
 
-![Workbench: dot grid, hairline frame, and soft corners](https://raw.githubusercontent.com/arach/arc/main/public/theme-workbench.png)
+![Workbench: dot grid, hairline frame, and soft corners](https://raw.githubusercontent.com/hudsonkit/arc/main/public/theme-workbench.png)
 
-![Tactical: crosshair grid, corner brackets, and hard edges](https://raw.githubusercontent.com/arach/arc/main/public/theme-tactical.png)
+![Tactical: crosshair grid, corner brackets, and hard edges](https://raw.githubusercontent.com/hudsonkit/arc/main/public/theme-tactical.png)
 
 </details>
 
@@ -173,7 +173,7 @@ The themes are `default`, `warm`, `cool`, `mono`, `engineering`, `workbench`,
 `tactical`, `command`, `spacex`, `claude`, and `codex`. Studio shell skins and
 interface density are configurable independently of the diagram.
 
-[Theme guide](https://github.com/arach/arc/blob/main/docs/themes.md)
+[Theme guide](https://github.com/hudsonkit/arc/blob/main/docs/themes.md)
 
 ## Build with agents. Review with people.
 
@@ -199,7 +199,7 @@ import { ArcDiagram, diffDiagram } from '@arach/arc'
 That gives a code review both the changed source and a visual explanation of
 the changed structure.
 
-[Structural diffs](https://github.com/arach/arc/blob/main/docs/diff.md) · [Agent guide](https://github.com/arach/arc/blob/main/docs/agent/quickstart.agent.md) · [Authoring benchmarks](https://github.com/arach/arc/blob/main/benchmarks/README.md)
+[Structural diffs](https://github.com/hudsonkit/arc/blob/main/docs/diff.md) · [Agent guide](https://github.com/hudsonkit/arc/blob/main/docs/agent/quickstart.agent.md) · [Authoring benchmarks](https://github.com/hudsonkit/arc/blob/main/benchmarks/README.md)
 
 ## Take the explanation where it belongs
 
@@ -217,7 +217,7 @@ or render a repeatable sequence of frames. The studio also copies source and
 creates URLs carrying diagram data; browser session links reopen work stored
 in that browser.
 
-[Export guide](https://github.com/arach/arc/blob/main/docs/exports.md)
+[Export guide](https://github.com/hudsonkit/arc/blob/main/docs/exports.md)
 
 ## Get started
 
@@ -318,7 +318,7 @@ and editor handoff. It also serves the schema, authoring skill, and LLM guide
 as resources. Packages are versioned separately; use `bun run mcp` to run the
 server from this checkout, or `bun run mcp:http` for self-hosted HTTP transport.
 
-[MCP setup and tool reference](https://github.com/arach/arc/blob/main/packages/mcp/README.md)
+[MCP setup and tool reference](https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md)
 
 ### Use the terminal
 
@@ -351,21 +351,21 @@ Use `ARC_CHROME` and `ARC_FFMPEG` to select executables.
 Architecture uses `ArcDiagramData`; native sequences use `ArcSequenceDocument`;
 tiered isometric scenes use `DiagramConfig`. Each model preserves the structure
 its renderer needs. Animated flow markers, guided camera framing, and visual
-delta overlays currently render in 2D. The [sequence guide](https://github.com/arach/arc/blob/main/docs/mermaid-sequences.md)
-and [import guide](https://github.com/arach/arc/blob/main/docs/mermaid-import.md) document supported Mermaid syntax.
+delta overlays currently render in 2D. The [sequence guide](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md)
+and [import guide](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-import.md) document supported Mermaid syntax.
 
 ## Explore the API
 
 | Area | Reference |
 | --- | --- |
-| Nodes, relationships, groups, player controls, and flow timing | [Component and CLI API](https://github.com/arach/arc/blob/main/docs/api.md) |
-| Ordered walkthroughs and node-triggered explanations | [Views](https://github.com/arach/arc/blob/main/docs/views.md) · [Focus stories](https://github.com/arach/arc/blob/main/docs/focus-stories.md) |
-| Automatic placement and group layout | [Group layout](https://github.com/arach/arc/blob/main/docs/group-layout.md) |
-| Native sequence playback and Mermaid migration | [Sequences](https://github.com/arach/arc/blob/main/docs/mermaid-sequences.md) · [Import](https://github.com/arach/arc/blob/main/docs/mermaid-import.md) |
-| Tiered scenes, materials, and spatial interaction | [Isometric API](https://github.com/arach/arc/blob/main/src/iso/types.ts) |
-| Visual identity and output formats | [Themes](https://github.com/arach/arc/blob/main/docs/themes.md) · [Exports](https://github.com/arach/arc/blob/main/docs/exports.md) |
-| Source references, diagnostics, and change review | [Schema](https://github.com/arach/arc/blob/main/schemas/arc-diagram.schema.json) · [Diffs](https://github.com/arach/arc/blob/main/docs/diff.md) |
-| Agent authoring and verification | [MCP](https://github.com/arach/arc/blob/main/packages/mcp/README.md) · [Benchmarks](https://github.com/arach/arc/blob/main/benchmarks/README.md) |
+| Nodes, relationships, groups, player controls, and flow timing | [Component and CLI API](https://github.com/hudsonkit/arc/blob/main/docs/api.md) |
+| Ordered walkthroughs and node-triggered explanations | [Views](https://github.com/hudsonkit/arc/blob/main/docs/views.md) · [Focus stories](https://github.com/hudsonkit/arc/blob/main/docs/focus-stories.md) |
+| Automatic placement and group layout | [Group layout](https://github.com/hudsonkit/arc/blob/main/docs/group-layout.md) |
+| Native sequence playback and Mermaid migration | [Sequences](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md) · [Import](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-import.md) |
+| Tiered scenes, materials, and spatial interaction | [Isometric API](https://github.com/hudsonkit/arc/blob/main/src/iso/types.ts) |
+| Visual identity and output formats | [Themes](https://github.com/hudsonkit/arc/blob/main/docs/themes.md) · [Exports](https://github.com/hudsonkit/arc/blob/main/docs/exports.md) |
+| Source references, diagnostics, and change review | [Schema](https://github.com/hudsonkit/arc/blob/main/schemas/arc-diagram.schema.json) · [Diffs](https://github.com/hudsonkit/arc/blob/main/docs/diff.md) |
+| Agent authoring and verification | [MCP](https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md) · [Benchmarks](https://github.com/hudsonkit/arc/blob/main/benchmarks/README.md) |
 
 ## Where we're going
 
@@ -374,7 +374,7 @@ same workflow. Arc already provides the format, source references, validation,
 rendering, and structural review. Automatic impact discovery and drift
 notifications are the next part of that loop.
 
-[The agent workflow and roadmap](https://github.com/arach/arc/blob/main/docs/agentic-loop.md)
+[The agent workflow and roadmap](https://github.com/hudsonkit/arc/blob/main/docs/agentic-loop.md)
 
 ## Example output
 
@@ -425,7 +425,7 @@ const diagram: ArcDiagramData = {
 The repository uses Bun, React, TypeScript, and Vite.
 
 ```bash
-git clone https://github.com/arach/arc
+git clone https://github.com/hudsonkit/arc
 cd arc
 bun install
 bun dev
@@ -448,9 +448,9 @@ reproducible or offline build, set `ARC_SITE_VERSION` to a verified release,
 for example `ARC_SITE_VERSION=0.12.1 bun run build:site`. A failed registry
 lookup stops generation instead of displaying the older checkout version.
 
-See the [visual regression guide](https://github.com/arach/arc/blob/main/visual/README.md) for fixture updates and
+See the [visual regression guide](https://github.com/hudsonkit/arc/blob/main/visual/README.md) for fixture updates and
 optional PNG comparisons.
 
 ## License
 
-[MIT](https://github.com/arach/arc/blob/main/LICENSE)
+[MIT](https://github.com/hudsonkit/arc/blob/main/LICENSE)

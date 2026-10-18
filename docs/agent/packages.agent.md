@@ -15,7 +15,7 @@ Need isometric / tier-based YAML diagrams?
 └─ @arach/arc-iso (vanilla renderToElement also available)
 
 Need the full drag-and-drop studio?
-└─ Clone github.com/arach/arc, bun run dev, open /editor
+└─ Clone github.com/hudsonkit/arc, bun run dev, open /editor
 
 Contributing to Arc itself?
 └─ This monorepo — packages/* are publish targets, src/ is the studio app

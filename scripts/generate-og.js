@@ -260,7 +260,7 @@ function plate({ eyebrow, title, lead, spec, right, compactTitle = false }) {
           <span class="descriptor">diagrams as code</span>
         </span>
       </div>
-      <div class="repo">github.com/arach/arc</div>
+      <div class="repo">github.com/hudsonkit/arc</div>
       ${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}
       <h1${compactTitle ? ' class="compact"' : ''}>${title}</h1>
       <p class="lead">${lead}</p>
