@@ -6,6 +6,21 @@ order: 4
 
 # Examples
 
+## Live example library
+
+[Browse all 16 examples](/examples) to preview a diagram, switch between light and dark, inspect its source, and download the JSON or Mermaid file.
+
+| Family | Examples |
+| --- | --- |
+| Architecture | [Cache-aside](/examples/cache-aside), [background jobs](/examples/job-queue), [event fan-out](/examples/event-fanout), [retrieval](/examples/retrieval-pipeline), [edge delivery](/examples/edge-delivery), [webhook ingress](/examples/webhook-ingress), [delivery pipeline](/examples/delivery-pipeline), [regional failover](/examples/multi-region) |
+| Native sequences | [Authorization code](/examples/oauth-code), [payment retries](/examples/payment-retry), [cache miss](/examples/cache-sequence), [webhook retries](/examples/webhook-retry) |
+| Imported flowcharts | [Release decision](/examples/release-decision), [request routing](/examples/request-routing) |
+| Imported state diagrams | [Order lifecycle](/examples/order-lifecycle), [circuit breaker](/examples/circuit-breaker) |
+
+Architecture examples include animated packet routes. Sequences use the native message player. Flowcharts and state diagrams import Mermaid source into editable Arc nodes and connectors.
+
+For a deeper interactive explanation, try the [connection pool](/examples/connection-pool): adjust demand and see borrowing, waiting, and reuse.
+
 ## Simple Three-Tier Architecture
 
 ```tsx

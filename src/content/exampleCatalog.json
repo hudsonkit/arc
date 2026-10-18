@@ -1,0 +1,1243 @@
+[
+  {
+    "id": "cache-aside",
+    "title": "Cache-aside reads",
+    "description": "Follow a cache miss through the database and populate the cache for the next request.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "cache-aside",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "app": {
+          "x": 40,
+          "y": 180,
+          "size": "m"
+        },
+        "cache": {
+          "x": 340,
+          "y": 60,
+          "size": "m"
+        },
+        "db": {
+          "x": 650,
+          "y": 280,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "app": {
+          "name": "Application",
+          "subtitle": "Read product",
+          "icon": "Monitor",
+          "color": "blue",
+          "description": "Read product"
+        },
+        "cache": {
+          "name": "Cache",
+          "subtitle": "Short-lived values",
+          "icon": "Zap",
+          "color": "violet",
+          "description": "Short-lived values"
+        },
+        "db": {
+          "name": "Database",
+          "subtitle": "Source of truth",
+          "icon": "Database",
+          "color": "emerald",
+          "description": "Source of truth"
+        }
+      },
+      "connectors": [
+        {
+          "id": "cache",
+          "from": "app",
+          "to": "cache",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "cache"
+        },
+        {
+          "id": "read",
+          "from": "app",
+          "to": "db",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "read"
+        },
+        {
+          "id": "return",
+          "from": "db",
+          "to": "app",
+          "fromAnchor": "bottom",
+          "toAnchor": "bottom",
+          "style": "return",
+          "curve": "natural",
+          "curveDepth": 20
+        }
+      ],
+      "connectorStyles": {
+        "cache": {
+          "color": "violet",
+          "label": "lookup / populate",
+          "strokeWidth": 2
+        },
+        "read": {
+          "color": "blue",
+          "label": "read on miss",
+          "strokeWidth": 2
+        },
+        "return": {
+          "color": "emerald",
+          "label": "return row",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "app",
+              "to": "cache"
+            },
+            {
+              "from": "app",
+              "to": "cache",
+              "direction": "reverse"
+            },
+            {
+              "from": "app",
+              "to": "db"
+            },
+            {
+              "from": "db",
+              "to": "app"
+            },
+            {
+              "from": "app",
+              "to": "cache"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "job-queue",
+    "title": "Background jobs",
+    "description": "Separate request handling from slow work, with a dead-letter queue for failed jobs.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "job-queue",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "api": {
+          "x": 40,
+          "y": 65,
+          "size": "m"
+        },
+        "q": {
+          "x": 340,
+          "y": 65,
+          "size": "m"
+        },
+        "worker": {
+          "x": 650,
+          "y": 65,
+          "size": "m"
+        },
+        "db": {
+          "x": 650,
+          "y": 330,
+          "size": "m"
+        },
+        "dlq": {
+          "x": 340,
+          "y": 330,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "api": {
+          "name": "API",
+          "subtitle": "Accept request",
+          "icon": "Globe",
+          "color": "blue",
+          "description": "Accept request"
+        },
+        "q": {
+          "name": "Job queue",
+          "subtitle": "Buffer work",
+          "icon": "Layers",
+          "color": "violet",
+          "description": "Buffer work"
+        },
+        "worker": {
+          "name": "Worker",
+          "subtitle": "Process job",
+          "icon": "Cpu",
+          "color": "emerald",
+          "description": "Process job"
+        },
+        "db": {
+          "name": "Result store",
+          "subtitle": "Persist outcome",
+          "icon": "Database",
+          "color": "amber",
+          "description": "Persist outcome"
+        },
+        "dlq": {
+          "name": "Dead letters",
+          "subtitle": "Inspect failures",
+          "icon": "AlertTriangle",
+          "color": "sky",
+          "description": "Inspect failures"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "api",
+          "to": "q",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "q",
+          "to": "worker",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "worker",
+          "to": "db",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "worker",
+          "to": "dlq",
+          "fromAnchor": "left",
+          "toAnchor": "right",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "enqueue",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "deliver",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "save",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "exhausted retries",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "api",
+              "to": "q"
+            },
+            {
+              "from": "q",
+              "to": "worker"
+            },
+            {
+              "from": "worker",
+              "to": "db"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "event-fanout",
+    "title": "Event fan-out",
+    "description": "One order event reaches billing, fulfillment, and analytics independently.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "event-fanout",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "orders": {
+          "x": 40,
+          "y": 185,
+          "size": "m"
+        },
+        "bus": {
+          "x": 310,
+          "y": 185,
+          "size": "m"
+        },
+        "billing": {
+          "x": 650,
+          "y": 40,
+          "size": "m"
+        },
+        "shipping": {
+          "x": 650,
+          "y": 210,
+          "size": "m"
+        },
+        "analytics": {
+          "x": 650,
+          "y": 380,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "orders": {
+          "name": "Orders",
+          "subtitle": "Publish once",
+          "icon": "ShoppingCart",
+          "color": "blue",
+          "description": "Publish once"
+        },
+        "bus": {
+          "name": "Event bus",
+          "subtitle": "Order placed",
+          "icon": "Radio",
+          "color": "violet",
+          "description": "Order placed"
+        },
+        "billing": {
+          "name": "Billing",
+          "subtitle": "Issue invoice",
+          "icon": "CreditCard",
+          "color": "emerald",
+          "description": "Issue invoice"
+        },
+        "shipping": {
+          "name": "Fulfillment",
+          "subtitle": "Prepare shipment",
+          "icon": "Package",
+          "color": "amber",
+          "description": "Prepare shipment"
+        },
+        "analytics": {
+          "name": "Analytics",
+          "subtitle": "Update metrics",
+          "icon": "BarChart3",
+          "color": "sky",
+          "description": "Update metrics"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "orders",
+          "to": "bus",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "bus",
+          "to": "billing",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "bus",
+          "to": "shipping",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "bus",
+          "to": "analytics",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "publish",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "subscribe",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "subscribe",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "subscribe",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "orders",
+              "to": "bus"
+            },
+            {
+              "from": "bus",
+              "to": "shipping"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "retrieval-pipeline",
+    "title": "Retrieval-augmented answers",
+    "description": "Retrieve relevant passages before asking a model to produce a grounded answer.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "retrieval-pipeline",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "query": {
+          "x": 40,
+          "y": 170,
+          "size": "m"
+        },
+        "embed": {
+          "x": 310,
+          "y": 60,
+          "size": "m"
+        },
+        "index": {
+          "x": 650,
+          "y": 60,
+          "size": "m"
+        },
+        "model": {
+          "x": 650,
+          "y": 330,
+          "size": "m"
+        },
+        "answer": {
+          "x": 310,
+          "y": 330,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "query": {
+          "name": "Question",
+          "subtitle": "User input",
+          "icon": "MessageSquare",
+          "color": "blue",
+          "description": "User input"
+        },
+        "embed": {
+          "name": "Embedding",
+          "subtitle": "Encode query",
+          "icon": "Cpu",
+          "color": "violet",
+          "description": "Encode query"
+        },
+        "index": {
+          "name": "Vector index",
+          "subtitle": "Find passages",
+          "icon": "Database",
+          "color": "emerald",
+          "description": "Find passages"
+        },
+        "model": {
+          "name": "Language model",
+          "subtitle": "Question + context",
+          "icon": "Sparkles",
+          "color": "amber",
+          "description": "Question + context"
+        },
+        "answer": {
+          "name": "Answer",
+          "subtitle": "With references",
+          "icon": "FileText",
+          "color": "sky",
+          "description": "With references"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "query",
+          "to": "embed",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "embed",
+          "to": "index",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "index",
+          "to": "model",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "model",
+          "to": "answer",
+          "fromAnchor": "left",
+          "toAnchor": "right",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "encode",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "search",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "context",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "generate",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "query",
+              "to": "embed"
+            },
+            {
+              "from": "embed",
+              "to": "index"
+            },
+            {
+              "from": "index",
+              "to": "model"
+            },
+            {
+              "from": "model",
+              "to": "answer"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge-delivery",
+    "title": "Edge delivery",
+    "description": "Serve cached assets close to the browser and route dynamic requests to the origin.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "edge-delivery",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "browser": {
+          "x": 40,
+          "y": 190,
+          "size": "m"
+        },
+        "cdn": {
+          "x": 320,
+          "y": 190,
+          "size": "m"
+        },
+        "assets": {
+          "x": 650,
+          "y": 60,
+          "size": "m"
+        },
+        "api": {
+          "x": 650,
+          "y": 320,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "browser": {
+          "name": "Browser",
+          "subtitle": "Page request",
+          "icon": "Monitor",
+          "color": "blue",
+          "description": "Page request"
+        },
+        "cdn": {
+          "name": "Edge cache",
+          "subtitle": "Global delivery",
+          "icon": "Globe",
+          "color": "violet",
+          "description": "Global delivery"
+        },
+        "assets": {
+          "name": "Object storage",
+          "subtitle": "Static assets",
+          "icon": "HardDrive",
+          "color": "emerald",
+          "description": "Static assets"
+        },
+        "api": {
+          "name": "Origin API",
+          "subtitle": "Dynamic data",
+          "icon": "Server",
+          "color": "amber",
+          "description": "Dynamic data"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "browser",
+          "to": "cdn",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "cdn",
+          "to": "assets",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "cdn",
+          "to": "api",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e2"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "HTTPS",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "asset miss",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "API request",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "browser",
+              "to": "cdn"
+            },
+            {
+              "from": "cdn",
+              "to": "assets"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "webhook-ingress",
+    "title": "Reliable webhook ingress",
+    "description": "Verify and deduplicate incoming events before handing them to an asynchronous worker.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "webhook-ingress",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "provider": {
+          "x": 40,
+          "y": 60,
+          "size": "m"
+        },
+        "verify": {
+          "x": 320,
+          "y": 60,
+          "size": "m"
+        },
+        "queue": {
+          "x": 650,
+          "y": 60,
+          "size": "m"
+        },
+        "dedupe": {
+          "x": 320,
+          "y": 330,
+          "size": "m"
+        },
+        "worker": {
+          "x": 650,
+          "y": 330,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "provider": {
+          "name": "Provider",
+          "subtitle": "Webhook event",
+          "icon": "Radio",
+          "color": "blue",
+          "description": "Webhook event"
+        },
+        "verify": {
+          "name": "Ingress",
+          "subtitle": "Verify signature",
+          "icon": "Shield",
+          "color": "violet",
+          "description": "Verify signature"
+        },
+        "queue": {
+          "name": "Queue",
+          "subtitle": "Accepted events",
+          "icon": "Layers",
+          "color": "emerald",
+          "description": "Accepted events"
+        },
+        "dedupe": {
+          "name": "Event ledger",
+          "subtitle": "Idempotency key",
+          "icon": "Database",
+          "color": "amber",
+          "description": "Idempotency key"
+        },
+        "worker": {
+          "name": "Worker",
+          "subtitle": "Apply update",
+          "icon": "Cpu",
+          "color": "sky",
+          "description": "Apply update"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "provider",
+          "to": "verify",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "verify",
+          "to": "dedupe",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "verify",
+          "to": "queue",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "queue",
+          "to": "worker",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "POST event",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "deduplicate",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "enqueue",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "process",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "provider",
+              "to": "verify"
+            },
+            {
+              "from": "verify",
+              "to": "queue"
+            },
+            {
+              "from": "queue",
+              "to": "worker"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery-pipeline",
+    "title": "Build to production",
+    "description": "Make the path from a pull request to a deployable artifact visible in code review.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "delivery-pipeline",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "pr": {
+          "x": 40,
+          "y": 60,
+          "size": "m"
+        },
+        "ci": {
+          "x": 320,
+          "y": 60,
+          "size": "m"
+        },
+        "registry": {
+          "x": 650,
+          "y": 60,
+          "size": "m"
+        },
+        "staging": {
+          "x": 650,
+          "y": 330,
+          "size": "m"
+        },
+        "prod": {
+          "x": 320,
+          "y": 330,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "pr": {
+          "name": "Pull request",
+          "subtitle": "Review change",
+          "icon": "GitPullRequest",
+          "color": "blue",
+          "description": "Review change"
+        },
+        "ci": {
+          "name": "CI checks",
+          "subtitle": "Test and build",
+          "icon": "CheckCircle",
+          "color": "violet",
+          "description": "Test and build"
+        },
+        "registry": {
+          "name": "Registry",
+          "subtitle": "Versioned artifact",
+          "icon": "Package",
+          "color": "emerald",
+          "description": "Versioned artifact"
+        },
+        "staging": {
+          "name": "Staging",
+          "subtitle": "Smoke test",
+          "icon": "Monitor",
+          "color": "amber",
+          "description": "Smoke test"
+        },
+        "prod": {
+          "name": "Production",
+          "subtitle": "Promote release",
+          "icon": "Globe",
+          "color": "sky",
+          "description": "Promote release"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "pr",
+          "to": "ci",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "ci",
+          "to": "registry",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "registry",
+          "to": "staging",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "staging",
+          "to": "prod",
+          "fromAnchor": "left",
+          "toAnchor": "right",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "push",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "publish",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "deploy",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "approve",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "pr",
+              "to": "ci"
+            },
+            {
+              "from": "ci",
+              "to": "registry"
+            },
+            {
+              "from": "registry",
+              "to": "staging"
+            },
+            {
+              "from": "staging",
+              "to": "prod"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-region",
+    "title": "Regional failover",
+    "description": "Show primary and standby traffic paths, with asynchronous data replication.",
+    "category": "Architecture",
+    "diagram": {
+      "id": "multi-region",
+      "layout": {
+        "width": 900,
+        "height": 510
+      },
+      "nodes": {
+        "users": {
+          "x": 40,
+          "y": 190,
+          "size": "m"
+        },
+        "routing": {
+          "x": 310,
+          "y": 190,
+          "size": "m"
+        },
+        "primary": {
+          "x": 650,
+          "y": 50,
+          "size": "m"
+        },
+        "standby": {
+          "x": 650,
+          "y": 340,
+          "size": "m"
+        }
+      },
+      "nodeData": {
+        "users": {
+          "name": "Clients",
+          "subtitle": "Global traffic",
+          "icon": "Users",
+          "color": "blue",
+          "description": "Global traffic"
+        },
+        "routing": {
+          "name": "Traffic routing",
+          "subtitle": "Health checks",
+          "icon": "Globe",
+          "color": "violet",
+          "description": "Health checks"
+        },
+        "primary": {
+          "name": "Primary region",
+          "subtitle": "Active service",
+          "icon": "Server",
+          "color": "emerald",
+          "description": "Active service"
+        },
+        "standby": {
+          "name": "Standby region",
+          "subtitle": "Failover target",
+          "icon": "Server",
+          "color": "amber",
+          "description": "Failover target"
+        }
+      },
+      "connectors": [
+        {
+          "id": "e0",
+          "from": "users",
+          "to": "routing",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e0"
+        },
+        {
+          "id": "e1",
+          "from": "routing",
+          "to": "primary",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e1"
+        },
+        {
+          "id": "e2",
+          "from": "routing",
+          "to": "standby",
+          "fromAnchor": "right",
+          "toAnchor": "left",
+          "style": "e2"
+        },
+        {
+          "id": "e3",
+          "from": "primary",
+          "to": "standby",
+          "fromAnchor": "bottom",
+          "toAnchor": "top",
+          "style": "e3"
+        }
+      ],
+      "connectorStyles": {
+        "e0": {
+          "color": "blue",
+          "label": "request",
+          "strokeWidth": 2
+        },
+        "e1": {
+          "color": "violet",
+          "label": "healthy",
+          "strokeWidth": 2
+        },
+        "e2": {
+          "color": "emerald",
+          "label": "on failure",
+          "strokeWidth": 2
+        },
+        "e3": {
+          "color": "amber",
+          "label": "replicate",
+          "strokeWidth": 2
+        }
+      },
+      "flows": [
+        {
+          "id": "request",
+          "legs": [
+            {
+              "from": "users",
+              "to": "routing"
+            },
+            {
+              "from": "routing",
+              "to": "primary"
+            },
+            {
+              "from": "primary",
+              "to": "standby"
+            }
+          ],
+          "duration": 7,
+          "marker": "packet",
+          "color": "blue",
+          "trail": "fade"
+        }
+      ]
+    }
+  },
+  {
+    "id": "oauth-code",
+    "title": "Authorization code flow",
+    "description": "Step through the browser redirect and server-side token exchange.",
+    "category": "Sequence",
+    "source": "sequenceDiagram\n  actor User\n  participant App\n  participant Auth as Auth server\n  User->>App: Sign in\n  App-->>User: Redirect to authorization\n  User->>Auth: Approve access\n  Auth-->>App: Authorization code\n  App->>Auth: Exchange code and verifier\n  Auth-->>App: Access token\n  App-->>User: Signed in\n"
+  },
+  {
+    "id": "payment-retry",
+    "title": "Payment retries",
+    "description": "Keep one idempotency key across a retry after a network timeout.",
+    "category": "Sequence",
+    "source": "sequenceDiagram\n  participant Checkout\n  participant API as Payment API\n  participant Ledger\n  Checkout->>API: Pay with idempotency key\n  API->>Ledger: Record payment\n  Ledger-->>API: Payment accepted\n  Note over Checkout,API: Response lost in transit\n  Checkout->>API: Retry with same key\n  API->>Ledger: Find existing payment\n  Ledger-->>API: Original result\n  API-->>Checkout: Payment accepted\n"
+  },
+  {
+    "id": "cache-sequence",
+    "title": "A cache miss, step by step",
+    "description": "Compare the cache-hit and cache-miss paths in one sequence.",
+    "category": "Sequence",
+    "source": "sequenceDiagram\n  participant Client\n  participant API\n  participant Cache\n  participant DB as Database\n  Client->>API: Get product\n  API->>Cache: Lookup key\n  alt Cache hit\n    Cache-->>API: Cached value\n  else Cache miss\n    Cache-->>API: Not found\n    API->>DB: Read product\n    DB-->>API: Product row\n    API->>Cache: Store with TTL\n  end\n  API-->>Client: Product\n"
+  },
+  {
+    "id": "webhook-retry",
+    "title": "Webhook delivery retries",
+    "description": "Acknowledge only accepted events and retry a temporary service failure.",
+    "category": "Sequence",
+    "source": "sequenceDiagram\n  participant Provider\n  participant Ingress\n  participant Queue\n  Provider->>Ingress: Event delivery\n  Ingress-->>Provider: Service unavailable\n  Note over Provider: Back off before retrying\n  Provider->>Ingress: Retry same event\n  Ingress->>Queue: Persist event\n  Queue-->>Ingress: Accepted\n  Ingress-->>Provider: 202 Accepted\n"
+  },
+  {
+    "id": "release-decision",
+    "title": "Release decision",
+    "description": "A Mermaid flowchart with a review gate and an explicit failure path.",
+    "category": "Flowchart",
+    "source": "flowchart TD\n  A[Pull request] --> B[Run checks]\n  B --> C{Checks pass?}\n  C -->|Yes| D[Review change]\n  C -->|No| E[Fix failure]\n  E --> B\n  D --> F[Deploy]\n"
+  },
+  {
+    "id": "request-routing",
+    "title": "Request routing",
+    "description": "Import a small Mermaid flowchart and inspect its layout in Arc.",
+    "category": "Flowchart",
+    "source": "flowchart LR\n  A[Request] --> B{Authenticated?}\n  B -->|Yes| C{Cached?}\n  B -->|No| D[Sign in]\n  C -->|Yes| E[Return cached response]\n  C -->|No| F[Query database]\n  F --> G[Return response]\n"
+  },
+  {
+    "id": "order-lifecycle",
+    "title": "Order lifecycle",
+    "description": "Show the states and transitions of an order, including cancellation.",
+    "category": "State",
+    "source": "stateDiagram-v2\n  [*] --> Draft\n  Draft --> Submitted: place order\n  Submitted --> Paid: payment received\n  Submitted --> Cancelled: cancel\n  Paid --> Shipped: dispatch\n  Shipped --> Delivered: arrive\n  Delivered --> [*]\n  Cancelled --> [*]\n"
+  },
+  {
+    "id": "circuit-breaker",
+    "title": "Circuit breaker",
+    "description": "Document the closed, open, and half-open states of a resilient client.",
+    "category": "State",
+    "source": "stateDiagram-v2\n  [*] --> Closed\n  Closed --> Open: failure threshold\n  Open --> HalfOpen: timeout expires\n  HalfOpen --> Closed: probe succeeds\n  HalfOpen --> Open: probe fails\n"
+  }
+]

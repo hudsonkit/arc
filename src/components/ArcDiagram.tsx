@@ -1,4 +1,5 @@
 "use client"
+import { HOST_THEME_CSS, colorAlpha } from '../../packages/viewer/src/theme/host'
 import React, { useState, useCallback, useMemo } from 'react'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -36,6 +37,9 @@ import type { ArcDiagramData as CanonicalArcDiagramData, DiagramFlow, DiagramFlo
 import { renderFlowLayer } from '../utils/flowSvg'
 import { sourceLabel } from '../utils/sourceRef'
 import { isRtlLocale, isValidLocale } from '../utils/locale'
+
+// Keep absent groups stable so content bounds and the fit observer stay memoized.
+const EMPTY_GROUPS: NonNullable<CanonicalArcDiagramData['groups']> = []
 
 // ============================================
 // Types
@@ -716,7 +720,7 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
   const clipPath = shapeClipPath(shape, cut)
   const borderWidth = brand?.nodeBorderWidth || '1px'
 
-  const glowShadow = `0 0 20px -6px ${color.stroke}55, 0 8px 24px -8px ${color.stroke}33`
+  const glowShadow = `0 0 20px -6px ${colorAlpha(color.stroke, '55')}, 0 8px 24px -8px ${colorAlpha(color.stroke, '33')}`
   const innerHighlight = `inset 0 1px 0 rgba(255,255,255,${isLight ? (hovered ? 0.35 : 0.25) : hovered ? 0.06 : 0.04})`
 
   const body = (
@@ -724,7 +728,7 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
       <NodeDecoration decor={decor} stroke={color.stroke} cut={clipPath ? cut : 0} />
       <div
         className="flex items-center gap-3"
-        style={decor === 'rule' ? { borderBottom: `1px solid ${color.stroke}33`, paddingBottom: 6, marginBottom: 5 } : undefined}
+        style={decor === 'rule' ? { borderBottom: `1px solid ${colorAlpha(color.stroke, '33')}`, paddingBottom: 6, marginBottom: 5 } : undefined}
       >
         <div className={`
           flex-shrink-0
@@ -732,11 +736,11 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
           flex items-center justify-center
         `} style={{
           borderRadius: nodeRadius === '9999px' ? '9999px' : (nodeRadius || '2px'),
-          border: `1px solid ${color.stroke}30`,
-          background: `${color.stroke}12`,
+          border: `1px solid ${colorAlpha(color.stroke, '30')}`,
+          background: `${colorAlpha(color.stroke, '12')}`,
           backdropFilter: 'blur(6px)',
           WebkitBackdropFilter: 'blur(6px)',
-          boxShadow: `inset 0 1px 0 ${color.stroke}18`,
+          boxShadow: `inset 0 1px 0 ${colorAlpha(color.stroke, '18')}`,
         }}>
           <Icon
             className={`${isLarge ? 'w-4 h-4' : isSmall ? 'w-3 h-3' : 'w-3.5 h-3.5'} ${color.icon}`}
@@ -814,7 +818,7 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
         style={{
           ...placement,
           height: size.height,
-          filter: hovered && glow ? `drop-shadow(0 4px 12px ${color.stroke}55)` : undefined,
+          filter: hovered && glow ? `drop-shadow(0 4px 12px ${colorAlpha(color.stroke, '55')})` : undefined,
         }}
         data-arc-node
         {...sourceAttr}
@@ -1979,7 +1983,7 @@ export default function ArcDiagram({
     [data, useAutoLayout],
   )
 
-  const { id, layout, nodes, nodeData, connectors, connectorStyles, groups = [] } = activeData
+  const { id, layout, nodes, nodeData, connectors, connectorStyles, groups = EMPTY_GROUPS } = activeData
   const views = activeData.views
   const focusTargets = activeData.focusTargets
   const activeViewIndex = activeViewId ? (views?.findIndex(v => v.id === activeViewId) ?? -1) : -1
@@ -2281,6 +2285,7 @@ export default function ArcDiagram({
       data-arc-diagram
       lang={langAttr}
       dir={dirAttr}
+      data-arc-theme={theme}
       className={`rounded-2xl overflow-hidden relative ${themeColors.background.container} ${className}`}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -2289,6 +2294,7 @@ export default function ArcDiagram({
       onMouseLeave={handleMouseUp}
       style={{ cursor: interactive ? (isPanning ? 'grabbing' : 'grab') : 'default', fontFamily: brand?.fontFamily, borderRadius: brand?.nodeRadius, borderColor: frameVariant !== 'hairline' && frameVariant !== 'none' ? 'transparent' : undefined }}
     >
+      {theme === 'inherit' && <style>{HOST_THEME_CSS}</style>}
       {/* Paper stock fills the whole surface for the technical isometric styles;
           its graph grid is pinned to the panned/zoomed drawing underneath. */}
       {isIso && isoStyle.technical && (

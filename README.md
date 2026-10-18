@@ -6,13 +6,14 @@
 
 **A visual explanation toolkit for software systems.**<br />
 Build interactive maps, playable sequences, and spatial views with a visual
-studio and developer tools. Bring them into your app or documentation.
+studio and developer tools. Start with Arc data or supported Mermaid source.
+Embed the result, or export **PNG, SVG, GIF, and MP4**.
 
 [![npm version](https://img.shields.io/npm/v/@arach/arc.svg?color=6d5efc&label=%40arach%2Farc)](https://www.npmjs.com/package/@arach/arc)
 [![license](https://img.shields.io/npm/l/@arach/arc.svg?color=41b883)](https://github.com/arach/arc/blob/main/LICENSE)
 [![types](https://img.shields.io/npm/types/@arach/arc.svg?color=3b82f6)](https://github.com/arach/arc/blob/main/src/types/diagram.ts)
 
-[Explore Arc](https://arc.jdi.sh/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/arach/arc/blob/main/docs/overview.md)
+[Explore Arc](https://arc.jdi.sh/) · [Browse 16 examples](https://arc.jdi.sh/examples/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/arach/arc/blob/main/docs/overview.md)
 
 </div>
 
@@ -20,6 +21,40 @@ Trace a request, play an exchange between services, or open up the layers of
 an architecture. Build an onboarding walkthrough, interactive article, or
 design review that lets people explore how the system works. Author on the
 canvas, in code, or with an agent, and keep the source alongside your software.
+
+A diagram in Figma can drift as the system changes. Keep its source in the
+repository so the diagram can be reviewed and updated in the same pull request.
+
+## Bring your source. Choose your output.
+
+| Start with | What Arc supports |
+| --- | --- |
+| **Arc JSON / TypeScript** | Architecture diagrams, guided views, animated flow routes, and isometric views. |
+| **Mermaid flowcharts and state diagrams** | Import into editable Arc architecture data with `importMermaid()` from `@arach/arc-viewer`. |
+| **Mermaid sequence diagrams** | Native rendering and step-by-step playback with `ArcMermaidPlayer` from `@arach/arc-viewer`. |
+| **Mermaid source used with Pele or Beautiful Mermaid** | Reuse the supported flowchart, state, and sequence syntax through those same Arc APIs. |
+
+[Pele](https://pele.run/) and [Beautiful Mermaid](https://github.com/lukilabs/beautiful-mermaid)
+are Mermaid renderers. Bring the original Mermaid text to Arc; Arc applies its
+own layout, themes, and interactions. Their rendered SVGs, theme settings, and
+full diagram catalogs are not imported. Check the
+[import coverage](https://github.com/arach/arc/blob/main/docs/mermaid-import.md) and [sequence guide](https://github.com/arach/arc/blob/main/docs/mermaid-sequences.md)
+for supported syntax and diagnostics.
+
+| Output | Use it for |
+| --- | --- |
+| **PNG** | Still images for documents, chat, and social posts. |
+| **SVG** | Scalable vector drawings, including animated flow routes. |
+| **GIF** | Looping flow animations for READMEs and demos. |
+| **MP4** | Flow videos for presentations and announcements. |
+| **React / HTML** | Interactive components, iframe embeds, or a standalone SVG page. |
+| **ASCII / Unicode** | Diagrams in terminals and plain text. |
+| **JSON / TypeScript** | Editable source to version, review, and reuse. |
+
+The file exports above use Arc architecture data. GIF and MP4 render authored
+flow routes through the CLI or MCP; they require Chrome/Chromium and ffmpeg.
+Native Mermaid sequence playback is available through the React viewer.
+[Choose an export and see the commands →](https://github.com/arach/arc/blob/main/docs/exports.md)
 
 ## Turn the map into a walkthrough
 
@@ -397,7 +432,7 @@ bun dev
 ```
 
 Open [localhost:5188/editor](http://localhost:5188/editor) for the studio.
-The local site also includes `/showcase`, `/iso-examples`, and
+The local site also includes `/examples` (16 live diagrams with source), `/showcase`, `/iso-examples`, and
 `/examples/connection-pool` for exploring the players and examples.
 
 ```bash
@@ -406,6 +441,12 @@ bun test scripts
 bun run visual       # compare the SVG fixtures
 bun run build:site   # build the library, site, and documentation pages
 ```
+
+The site resolves the latest published `@arach/arc` version from npm during
+Vite startup and build. `dist/version.json` records the resolved release. For a
+reproducible or offline build, set `ARC_SITE_VERSION` to a verified release,
+for example `ARC_SITE_VERSION=0.12.1 bun run build:site`. A failed registry
+lookup stops generation instead of displaying the older checkout version.
 
 See the [visual regression guide](https://github.com/arach/arc/blob/main/visual/README.md) for fixture updates and
 optional PNG comparisons.

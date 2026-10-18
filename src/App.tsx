@@ -20,6 +20,7 @@ const IsometricExamples = lazy(() => import('./components/IsometricExamples'))
 const PlayerShowcase = lazy(() => import('./components/PlayerShowcase'))
 const NativeMermaidSequencesPost = lazy(() => import('./components/blog/NativeMermaidSequencesPost'))
 const ConnectionPoolExplainer = lazy(() => import('./components/explainers/ConnectionPoolExplainer'))
+const ExamplesPage = lazy(() => import('./components/ExamplesPage'))
 
 interface HashPayload {
   diagram: any
@@ -94,6 +95,7 @@ function parseHashData(): HashPayload | null {
       nodeData: d.nodeData || {},
       connectors: d.connectors || [],
       connectorStyles: d.connectorStyles || {},
+      flows: d.flows,
       focusTargets: d.focusTargets,
       views: d.views,
       groups: d.groups || [],
@@ -107,6 +109,7 @@ function parseHashData(): HashPayload | null {
         nodeData: d.nodeData || {},
         connectors: d.connectors || [],
         connectorStyles: d.connectorStyles || {},
+        flows: d.flows,
         focusTargets: d.focusTargets,
         views: d.views,
         groups,
@@ -467,6 +470,8 @@ function App() {
         <Route path="/iso-demo" element={<IsometricDemo />} />
         <Route path="/iso-examples" element={<IsometricExamples />} />
         <Route path="/showcase" element={<PlayerShowcase />} />
+        <Route path="/examples" element={<ExamplesPage />} />
+        <Route path="/examples/:exampleId" element={<ExamplesPage />} />
         <Route path="/examples/connection-pool" element={<ConnectionPoolExplainer />} />
         <Route path="/inspiration" element={<InspirationPage />} />
         <Route path="*" element={<NotFoundPage />} />

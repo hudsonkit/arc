@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from 'react'
 import { ScanSearch } from 'lucide-react'
 import type { HudsonApp } from 'hudsonkit'
-import { version } from '../../../package.json'
+import { siteVersion as version } from '../../utils/siteVersion'
 import { ArcEditorProvider, type ArcEditorInit } from './ArcEditorContext'
 import ArcEditorContent from './ArcEditorContent'
 import ArcEditorInspector from './ArcEditorInspector'
@@ -28,7 +28,7 @@ export function createArcEditorApp(init: ArcEditorInit, initialDiagram: any): Hu
     name: 'Arc',
     description: 'Visual architecture diagram editor',
     mode: 'panel',
-    // Read from the manifest, not hand-written — the badge used to drift.
+    // Use the release resolved when the site is generated.
     icon: createElement('span', { className: 'arc-editor-ver' }, `v${version}`),
     rightPanel: {
       title: '',

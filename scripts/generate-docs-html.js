@@ -135,7 +135,15 @@ const softwareJsonLd = JSON.stringify({
   ],
 })
 
+const exampleCatalog = JSON.parse(readFileSync(path.join(__dirname, '..', 'src/content/exampleCatalog.json'), 'utf-8'))
+const examplePages = [
+  { path: 'examples/connection-pool', title: 'Connection pool | Arc', description: 'Adjust demand and explore borrowing, waiting, and connection reuse.', image: 'readme-connection-pool.png' },
+  { path: 'examples', title: 'Diagram examples | Arc', description: 'Explore architecture, sequence, flowchart, and state diagrams with downloadable source.', image: 'og-landing.png' },
+  ...exampleCatalog.map(example => ({ path: `examples/${example.id}`, title: `${example.title} | Arc examples`, description: example.description, image: 'og-landing.png' })),
+]
+
 const sharePages = [
+  ...examplePages,
   {
     path: 'examples/connection-pool',
     title: 'How a connection pool works | Arc',
@@ -255,6 +263,7 @@ for (const page of sharePages) {
 // robots.txt + sitemap.xml are generated here so the URLs follow SITE_URL.
 const sitemapRoutes = [
   ['/', '1.0'],
+  ...examplePages.map(page => ['/' + page.path, '0.7']),
   ['/' + softwareData.slug, '0.9'],
   ['/mcp', '0.9'],
   ['/skills', '0.9'],

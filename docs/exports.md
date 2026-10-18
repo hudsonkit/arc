@@ -1,7 +1,36 @@
 # Export Formats
 
-An Arc diagram is just data, so it leaves the editor in whatever shape your pipeline
-needs — versionable source, typed code, or rendered images.
+Export Arc architecture data as **PNG, SVG, GIF, or MP4**, embed it in a page,
+or keep it as editable source.
+
+| Output | Best for | Available through |
+| --- | --- | --- |
+| PNG | Still images in docs, chat, and social posts | Studio, CLI, MCP |
+| SVG | Scalable drawings and animated flow routes | Studio, CLI, MCP, `generateSVG()` |
+| GIF | Looping flow animations | CLI, MCP `render_animation` |
+| MP4 | Flow videos for decks and demos | CLI, MCP `render_animation` |
+| HTML / React | Standalone SVG pages, iframe embeds, React components | MCP `render_html` |
+| ASCII / Unicode | Terminals and plain text | `renderAscii()`, `arc-ascii` |
+| JSON / TypeScript | Editable, versionable source | Studio |
+
+These file exports use `ArcDiagramData`. Native Mermaid sequence playback uses
+`ArcMermaidPlayer` in React; the animation exporter captures architecture flow
+routes, not the sequence player's timeline.
+
+## Export with the CLI
+
+Install `@arach/arc`, then render an Arc JSON file. The output extension selects
+the format:
+
+```bash
+npx arc render diagram.json --out diagram.png
+npx arc render diagram.json --out diagram.svg
+npx arc render diagram.json --out diagram.gif --duration 4 --fps 12
+npx arc render diagram.json --out diagram.mp4 --duration 4 --fps 30
+```
+
+PNG needs Chrome/Chromium. GIF and MP4 also need ffmpeg. Set `ARC_CHROME` and
+`ARC_FFMPEG` if the executables are not discovered automatically.
 
 ## JSON
 
@@ -35,6 +64,16 @@ Raster export for places that can't render SVG (READMEs, chat, social cards).
 The editor and `/capture` screenshot endpoint produce PNGs, and MCP `render_png`
 returns image content when a Chrome/Chromium executable is available (`ARC_CHROME`,
 `CHROME_PATH`, `PUPPETEER_EXECUTABLE_PATH`, or a common install/PATH location).
+
+## GIF and MP4
+
+Render authored `flows` as repeatable animations. The CLI and MCP
+`render_animation` sample deterministic frames in Chrome/Chromium and encode
+them with ffmpeg. Set `duration` and `fps` to control the clip. GIF works well for
+short loops; MP4 produces H.264 video for presentations and video workflows.
+
+SVG can animate flow routes directly. PNG captures a still; use the CLI's
+`--flow-time` option to choose the instant.
 
 ## HTML / embeds
 

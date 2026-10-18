@@ -6,9 +6,9 @@ order: 1
 
 ## What is Arc?
 
-Arc is a diagram editor that bridges the gap between visual design tools and code. Instead of exporting opaque image files, Arc outputs clean, declarative configurations that can be version-controlled, reviewed in PRs, and rendered anywhere.
+Arc is a visual editor and rendering toolkit for software diagrams. Author diagrams on a canvas or in code, embed interactive views, and export PNG, SVG, GIF, or MP4. The editable source is TypeScript or JSON that you can keep in version control and review in pull requests.
 
-Think of it as Figma for architecture diagrams, but the output is TypeScript or JSON that lives alongside your codebase.
+A diagram in Figma can drift as the system changes. Arc stores the diagram as TypeScript or JSON in your repository, so you can review and update it in the same pull request as the code it describes.
 
 ## Key Concepts
 
@@ -24,7 +24,7 @@ Structural presets that define box shapes, line styles, and layout behaviors. Te
 
 ### Themes
 
-Color palettes that can be applied to any template. Switch between light and dark modes, or match your brand colors, without changing the diagram structure. There are 8 built-in themes: `default`, `warm`, `cool`, `mono`, `engineering`, `workbench`, `tactical`, and `command` (the Arc editor default).
+Color palettes that can be applied to any template. Switch between light and dark modes, or match your brand colors, without changing the diagram structure. Use a built-in preset or inherit semantic color tokens from your host app. See [Themes](/docs/themes) for the available palettes and tokens.
 
 ## Why Arc?
 
@@ -36,13 +36,14 @@ Architecture diagrams typically live in design tools, disconnected from the code
 
 ## Packages
 
-Arc publishes three npm packages:
+Arc publishes four npm packages:
 
 | Package | Description |
 |---------|-------------|
 | `@arach/arc` | Full editor + renderer |
 | `@arach/arc-viewer` | Lightweight diagram viewer |
 | `@arach/arc-iso` | Isometric diagram renderer |
+| `@arach/arc-mcp` | Diagram tools for AI agents |
 
 ## Next Steps
 

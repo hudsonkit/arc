@@ -538,6 +538,7 @@ import architectureMd from '../../../docs/architecture.md?raw'
 import agentsMd from '../../../docs/AGENTS.md?raw'
 import themesMd from '../../../docs/themes.md?raw'
 import exportsMd from '../../../docs/exports.md?raw'
+import mermaidImportMd from '../../../docs/mermaid-import.md?raw'
 import mermaidSequencesMd from '../../../docs/mermaid-sequences.md?raw'
 import mermaidImportMd from '../../../docs/mermaid-import.md?raw'
 import viewsMd from '../../../docs/views.md?raw'
@@ -606,6 +607,7 @@ const pageTree: PageNode[] = [
     type: 'folder',
     name: 'Rendering Engines',
     children: [
+      { type: 'page', id: 'mermaid-import', name: 'Mermaid Imports', icon: 'GitBranch', description: 'Source from Mermaid, Pele, and Beautiful Mermaid' },
       { type: 'page', id: 'mermaid-sequences', name: 'Mermaid Sequences', icon: 'GitBranch', description: 'Native sequence renderer & player' },
       { type: 'page', id: 'mermaid-import', name: 'Mermaid Import', icon: 'Import', description: 'Project Mermaid into Arc data' },
     ],
@@ -621,7 +623,7 @@ const pageTree: PageNode[] = [
     type: 'folder',
     name: 'Exports',
     children: [
-      { type: 'page', id: 'exports', name: 'Export Formats', icon: 'Upload', description: 'SVG, PNG, JSON, TS' },
+      { type: 'page', id: 'exports', name: 'Export Formats', icon: 'Upload', description: 'PNG, SVG, GIF, MP4, HTML, and source' },
     ],
   },
   {
@@ -1174,11 +1176,18 @@ Return the complete config with:
     description: 'Color palettes that can be applied to any template.',
     badge: 'Styling',
   },
+  'mermaid-import': {
+    content: stripFrontmatter(mermaidImportMd),
+    agentContent: stripFrontmatter(mermaidImportMd),
+    title: 'Mermaid Imports',
+    description: 'Reuse supported Mermaid source from Pele, Beautiful Mermaid, or your existing docs.',
+    badge: 'Rendering Engines',
+  },
   exports: {
     content: stripFrontmatter(exportsMd),
     agentContent: stripFrontmatter(exportsMd),
     title: 'Export Formats',
-    description: 'Take a diagram out as JSON, TypeScript, SVG, PNG, or ASCII.',
+    description: 'Export PNG, SVG, GIF, MP4, HTML, ASCII, or editable source.',
     badge: 'Exports',
   },
   agents: {

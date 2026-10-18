@@ -22,6 +22,18 @@ result.warnings     // source-specific, non-fatal losses
 result.unsupported  // de-duplicated unsupported capability names
 ```
 
+## Bring source from Pele or Beautiful Mermaid
+
+[Pele](https://pele.run/) and
+[Beautiful Mermaid](https://github.com/lukilabs/beautiful-mermaid) both render
+Mermaid text. Use that original text with Arc's supported flowchart, state, or
+sequence APIs. Arc supplies the layout, styling, and interaction.
+
+Compatibility covers the syntax listed below and in the
+[native sequence guide](./mermaid-sequences.md). Arc does not import those
+renderers' SVG output or theme configuration, and does not support their full
+diagram catalogs. Review parser diagnostics before using imported source.
+
 ## Choose the correct Mermaid API
 
 `importMermaid()` is a compatibility adapter. It projects Mermaid concepts
