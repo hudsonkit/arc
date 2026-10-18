@@ -299,8 +299,8 @@ type LandingPageProps = { onLaunchEditor: () => void }
 
 export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
   useMeta({
-    title: 'Arc | Diagrams as code',
-    description: 'Build interactive diagrams from Arc data or supported Mermaid source. Export PNG, SVG, GIF, and MP4, or embed the explanation in your app.',
+    title: 'Arc | Architecture diagrams as code, with a visual editor',
+    description: 'Architecture diagrams as typed, diffable code. Edit them visually, export PNG, SVG, GIF or MP4, or embed them in your app.',
     image: '/og-landing.png',
     url: '/',
   })
