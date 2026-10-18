@@ -10,6 +10,8 @@ import '../sequence-showcase.css'
 interface SequenceEngineShowcaseProps {
   mode?: 'light' | 'dark'
   showSource?: boolean
+  /** The eyebrow, heading and lede; hosts that already title the section turn it off. */
+  showIntro?: boolean
   compact?: boolean
   className?: string
 }
@@ -150,10 +152,18 @@ function MermaidSourceCode({ source }: { source: string }) {
 export default function SequenceEngineShowcase({
   mode = 'light',
   showSource = false,
+  showIntro = true,
   compact = false,
   className = '',
 }: SequenceEngineShowcaseProps) {
   const [view, setView] = useState<'player' | 'source'>('player')
+  // The player reads its zoom once at mount and the sequence is 1040 wide, so a
+  // phone needs a smaller start or the right-hand lifelines open off-screen.
+  const [startZoom] = useState(() => {
+    const preferred = compact ? 0.72 : 0.82
+    if (typeof window === 'undefined') return preferred
+    return Math.max(0.5, Math.min(preferred, (window.innerWidth - 60) / 1040))
+  })
 
   return (
     <section
@@ -162,14 +172,16 @@ export default function SequenceEngineShowcase({
       aria-label="Interactive Scout sequence diagram"
     >
       <header className="arc-sequence-showcase__header">
-        <div>
-          <div className="arc-sequence-showcase__eyebrow">
-            <Sparkles size={13} aria-hidden="true" />
-            Rendered by Arc
+        {showIntro && (
+          <div>
+            <div className="arc-sequence-showcase__eyebrow">
+              <Sparkles size={13} aria-hidden="true" />
+              Rendered by Arc
+            </div>
+            <h3>A Scout request, end to end</h3>
+            <p>Follow a message from local routing to a direct reply or delegated work.</p>
           </div>
-          <h3>A Scout request, end to end</h3>
-          <p>Follow a message from local routing to a direct reply or delegated work.</p>
-        </div>
+        )}
         {showSource && (
           <div className="arc-sequence-showcase__tabs" aria-label="Sequence view">
             <button
@@ -195,7 +207,7 @@ export default function SequenceEngineShowcase({
           <ArcMermaidPlayer
             source={scoutSequenceSource}
             mode={mode}
-            defaultZoom={compact ? 0.72 : 0.82}
+            defaultZoom={startZoom}
             minZoom={0.5}
             maxZoom={1.6}
             title="Scout interaction model"
