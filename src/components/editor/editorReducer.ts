@@ -34,7 +34,7 @@ export const initialState = {
     zoom: 1, // Zoom level (0.5 to 2)
     viewMode: '2d', // '2d' | 'isometric'
     isoStyle: 'solid', // 'solid' | 'blueprint' | 'cyanotype' (isometric render style)
-    themeId: 'command', // Arc diagram theme (command = HUD console default)
+    themeId: 'workbench', // Arc diagram theme (workbench = quiet slate default)
     colorMode: 'dark', // 'light' | 'dark'
   },
   meta: {

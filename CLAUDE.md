@@ -257,13 +257,19 @@ independent of the diagram theme, which colors the drawing.
 | Skin | Look |
 |------|------|
 | `console` | Signal blue with soft glow (the base; no CSS block of its own) |
-| `graphite` | Neutral, no chroma, minimal glow |
+| `graphite` | Neutral, no chroma, minimal glow — **the default** |
 | `amber` | Warm terminal |
 | `viridian` | Phosphor green |
 | `paper` | Drafting table, warm neutral |
 | `spacex` | Mission console, telemetry cyan |
 | `claude` | Warm parchment and clay |
 | `codex` | Graphite console, mint signal |
+
+A new visitor gets `graphite` (`DEFAULT_CHROME_THEME`), paired with the
+`workbench` diagram theme (`DEFAULT_THEME`, which new editor sessions start
+from) — console blue and the `command` HUD were a loud first impression. The
+editor fits its first view at no more than 110%; it used to fit up to 200%,
+which blew a small diagram's 1px borders up into heavy outlines.
 
 Each skin lives in `src/chrome-themes.css` as a set of token overrides keyed by
 `data-arc-chrome` on `<html>`; `src/utils/chromeThemes.ts` is the registry and

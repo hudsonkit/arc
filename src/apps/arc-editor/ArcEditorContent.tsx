@@ -84,7 +84,7 @@ export default function ArcEditorContent() {
         <DiagramCanvas
           onViewportChange={setViewportBounds}
           embedConfig={{ enableViewModeToggle: true }}
-          zoomConfig={{ defaultZoom: 'fit', maxFitZoom: 2 }}
+          zoomConfig={{ defaultZoom: 'fit', maxFitZoom: 1.1 }}
           surface="chrome"
           themeOverride={themeId || undefined}
           isDark={isDark}

@@ -24,7 +24,7 @@ export const CHROME_THEMES: ChromeTheme[] = [
   { id: 'codex', name: 'Codex', description: 'Graphite console, mint signal', swatch: ['#0f9d6e', '#34d399'] },
 ]
 
-export const DEFAULT_CHROME_THEME = 'console'
+export const DEFAULT_CHROME_THEME = 'graphite'
 
 const STORAGE_KEY = 'arc-chrome-theme'
 

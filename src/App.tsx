@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, useParams, useSearchPa
 import LandingPage from './components/LandingPage'
 import ArcDiagram from './components/ArcDiagram'
 import architectureDiagram from './components/diagrams/architecture.diagram'
-import { getTheme, THEMES, type ThemeId } from './utils/themes'
+import { DEFAULT_THEME, getTheme, THEMES, type ThemeId } from './utils/themes'
 import { GoogleAnalytics } from './components/GoogleAnalytics'
 import { useMeta } from './hooks/useMeta'
 import { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession } from './utils/sessionStorage'
@@ -168,7 +168,7 @@ function resolveEditorSession(urlSessionId?: string) {
 
   // Priority 3: Fresh editor
   const newId = generateSessionId()
-  return { sessionId: newId, initialData: null, originalDiagram: null, themeId: 'command', colorMode: 'dark' as const, diagramMeta: { themeId: 'command', colorMode: 'dark' }, needsRedirect: !urlSessionId }
+  return { sessionId: newId, initialData: null, originalDiagram: null, themeId: DEFAULT_THEME, colorMode: 'dark' as const, diagramMeta: { themeId: DEFAULT_THEME, colorMode: 'dark' }, needsRedirect: !urlSessionId }
 }
 
 function EditorPage() {

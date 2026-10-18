@@ -106,6 +106,8 @@ interface EditableNodeProps {
   onMouseLeave: () => void
   themeColors?: ResolvedThemeMode | null
   brand?: BrandSpec
+  /** The editor's light/dark mode — which of the theme's palettes `themeColors` is. */
+  colorMode?: 'light' | 'dark'
 }
 
 function SelectionOutline({ width, height, shape, cut, radius }: {
@@ -153,6 +155,7 @@ const EditableNode = memo(function EditableNode({
   onMouseLeave,
   themeColors,
   brand,
+  colorMode: editorColorMode,
 }: EditableNodeProps) {
   const Icon = getIconComponent(resolveNodeIcon(data))
   const size = node.size || 'm'
@@ -175,8 +178,12 @@ const EditableNode = memo(function EditableNode({
   // Resolve color through theme palette when available
   const resolvedPalette = themeColors?.palette?.[color as keyof typeof themeColors.palette]
   const isThemed = !!resolvedPalette
-  // Detect light mode from the theme's background container class
-  const isLightTheme = isThemed && !themeColors?.background?.container?.includes('950') && !themeColors?.background?.container?.includes('arc-inherit-dark')
+  // Light/dark comes from the editor. Guessing it from the container class
+  // (looking for '950') read most dark palettes as light, which put a white
+  // underlay behind light text on every non-glass theme.
+  const isLightTheme = isThemed && (editorColorMode
+    ? editorColorMode === 'light'
+    : !themeColors?.background?.container?.includes('950') && !themeColors?.background?.container?.includes('arc-inherit-dark'))
 
   // Get template-specific styles (used when no theme override)
   const nodeStyle = (template?.node || {}) as Record<string, string>

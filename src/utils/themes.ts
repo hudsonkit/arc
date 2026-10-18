@@ -672,7 +672,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   codex: codexTheme,
 }
 
-export const DEFAULT_THEME: ThemeId = 'command'
+export const DEFAULT_THEME: ThemeId = 'workbench'
 
 export function getTheme(id: ThemeId): Theme {
   return THEMES[id] || THEMES[DEFAULT_THEME]

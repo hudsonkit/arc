@@ -1041,6 +1041,7 @@ export default function DiagramCanvas({ onViewportChange, embedConfig, zoomConfi
                         onMouseLeave={() => editor.mode === 'addConnector' && setHoveredNodeId(null)}
                         themeColors={themeColors}
                         brand={brand}
+                        colorMode={editor.colorMode === 'light' ? 'light' : 'dark'}
                       />
                     )
                   })}
