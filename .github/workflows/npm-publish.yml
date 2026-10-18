@@ -68,6 +68,22 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || inputs.package != 'arc'
         run: bun run --filter '@arach/arc-mcp' build
 
+      - name: Publish helper
+        # A release re-run must be able to finish what an earlier run started:
+        # publishing a version npm already has is an error, so skip it.
+        run: |
+          cat > "$RUNNER_TEMP/publish.sh" <<'SH'
+          publish() {
+            name=$(node -p "require('./package.json').name")
+            version=$(node -p "require('./package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version is already on npm; skipping"
+            else
+              npm publish --provenance --access public "$@"
+            fi
+          }
+          SH
+
       - name: Get version from tag
         if: startsWith(github.ref, 'refs/tags/v')
         id: tag_version
@@ -83,28 +99,33 @@ jobs:
 
       - name: Publish @arach/arc (tag)
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npm publish --provenance --access public
+        run: |
+          . "$RUNNER_TEMP/publish.sh"
+          publish
 
       - name: Publish @arach/arc-viewer (tag)
         if: startsWith(github.ref, 'refs/tags/v')
         working-directory: packages/viewer
         run: |
           npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          npm publish --provenance --access public --workspaces=false
+          . "$RUNNER_TEMP/publish.sh"
+          publish --workspaces=false
 
       - name: Publish @arach/arc-iso (tag)
         if: startsWith(github.ref, 'refs/tags/v')
         working-directory: packages/iso
         run: |
           npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          npm publish --provenance --access public --workspaces=false
+          . "$RUNNER_TEMP/publish.sh"
+          publish --workspaces=false
 
       - name: Publish @arach/arc-mcp (tag)
         if: startsWith(github.ref, 'refs/tags/v')
         working-directory: packages/mcp
         run: |
           npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          npm publish --provenance --access public --workspaces=false
+          . "$RUNNER_TEMP/publish.sh"
+          publish --workspaces=false
 
       - name: Publish @arach/arc (manual)
         if: github.event_name == 'workflow_dispatch'
@@ -114,7 +135,8 @@ jobs:
             bun run check:dist
             npm pack --dry-run --ignore-scripts
           else
-            npm publish --provenance --access public
+            . "$RUNNER_TEMP/publish.sh"
+            publish
           fi
 
       - name: Publish @arach/arc-viewer (manual)
@@ -126,7 +148,8 @@ jobs:
             echo "DRY RUN: Would publish @arach/arc-viewer"
             npm pack --dry-run --ignore-scripts --workspaces=false
           else
-            npm publish --provenance --access public --workspaces=false
+            . "$RUNNER_TEMP/publish.sh"
+            publish --workspaces=false
           fi
 
       - name: Publish @arach/arc-iso (manual)
@@ -138,7 +161,8 @@ jobs:
             echo "DRY RUN: Would publish @arach/arc-iso"
             npm pack --dry-run --ignore-scripts --workspaces=false
           else
-            npm publish --provenance --access public --workspaces=false
+            . "$RUNNER_TEMP/publish.sh"
+            publish --workspaces=false
           fi
 
       - name: Publish @arach/arc-mcp (manual)
@@ -150,5 +174,6 @@ jobs:
             echo "DRY RUN: Would publish @arach/arc-mcp"
             npm pack --dry-run --ignore-scripts --workspaces=false
           else
-            npm publish --provenance --access public --workspaces=false
+            . "$RUNNER_TEMP/publish.sh"
+            publish --workspaces=false
           fi
