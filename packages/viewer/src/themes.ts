@@ -1,7 +1,9 @@
+import { hostThemeMode } from './theme/host'
+
 // Diagram color themes - palettes and background treatments
 // Separate from templates (structural) - themes handle colors only
 
-export type ThemeId = 'default' | 'warm' | 'cool' | 'mono'
+export type ThemeId = 'inherit' | 'default' | 'warm' | 'cool' | 'mono'
 
 export interface ColorPalette {
   violet:  { border: string; bg: string; icon: string; stroke: string }
@@ -204,6 +206,11 @@ const monoTheme: Theme = {
 }
 
 export const THEMES: Record<ThemeId, Theme> = {
+  inherit: {
+    id: 'inherit', name: 'Inherit from host',
+    description: 'Use the host page semantic CSS tokens',
+    light: hostThemeMode('light'), dark: hostThemeMode('dark'),
+  },
   default: defaultTheme,
   warm: warmTheme,
   cool: coolTheme,

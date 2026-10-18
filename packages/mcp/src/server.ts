@@ -30,7 +30,7 @@ import skillMarkdown from '../../../skills/arc-diagrams/SKILL.md' with { type: '
 import llmBriefing from '../../../docs/llm.txt' with { type: 'text' }
 
 const diagramSchema = z.record(z.unknown())
-const themeDescription = 'Arc theme id: default, warm, cool, mono, engineering, workbench, tactical, command, spacex, claude, or codex'
+const themeDescription = 'Arc theme id: default, warm, cool, mono, engineering, workbench, tactical, command, spacex, claude, codex, or inherit'
 
 function parseDiagram(value: unknown, label = 'diagram'): ArcDiagramData {
   const parsed = typeof value === 'string' ? JSON.parse(value) : value

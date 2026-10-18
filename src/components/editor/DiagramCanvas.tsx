@@ -1,3 +1,4 @@
+import { HOST_THEME_CSS } from '../../../packages/viewer/src/theme/host'
 import { useRef, useCallback, useState, useEffect, useMemo } from 'react'
 import { useEditor, useDiagram, useEditorState, useTemplate, useViewMode, useIsoStyle, useMeta, useResolvedTheme, useResolvedBrand } from './EditorProvider'
 import { NODE_SIZES } from '../../utils/constants'
@@ -881,7 +882,8 @@ export default function DiagramCanvas({ onViewportChange, embedConfig, zoomConfi
     (diagram.images || []).length === 0
 
   return (
-    <div className={`arc-canvas-frame relative w-full h-full${isNarrow ? ' is-narrow' : ''}`}>
+    <div className={`arc-canvas-frame relative w-full h-full${isNarrow ? ' is-narrow' : ''} ${themeColors?.background.container.startsWith('arc-inherit-') ? themeColors.background.container : ''}`}>
+      {themeColors?.background.container.startsWith('arc-inherit-') && <style>{HOST_THEME_CSS}</style>}
       {/* Transform container - handles wheel/pan events */}
       <div
         ref={containerRef}

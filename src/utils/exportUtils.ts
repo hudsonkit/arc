@@ -1,3 +1,4 @@
+import { hostThemeTokens, colorAlpha } from '../../packages/viewer/src/theme/host'
 import { NODE_SIZES } from './constants'
 import type { AnchorPosition } from '../types/editor'
 import type { ArcDiagramData } from '../types/diagram'
@@ -53,6 +54,7 @@ function classColor(className: string | undefined, fallback: string): string {
 }
 
 function hexWithAlpha(color: string, alpha: number): string {
+  if (color.startsWith('var(')) return colorAlpha(color, Math.round(alpha * 255).toString(16).padStart(2, '0'))
   const hex = color.replace('#', '')
   if (hex.length !== 3 && hex.length !== 6) return color
   return `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`
@@ -214,11 +216,12 @@ export function generateSVG(diagram: any, options: any = {}) {
   const mode = (options.mode ?? theme?.defaultMode ?? 'light') as ExportMode
   const themeColors = theme?.[mode]
   const brand = theme?.brand
-  const fontFamily = brand?.fontFamily || 'ui-sans-serif, system-ui, sans-serif'
+  const host = theme?.id === 'inherit' ? hostThemeTokens(mode) : undefined
+  const fontFamily = (host ? 'var(--arc-diagram-font, ui-sans-serif, system-ui, sans-serif)' : brand?.fontFamily) || 'ui-sans-serif, system-ui, sans-serif'
   const monoFamily = brand?.monoFamily || fontFamily
   const backgroundColor = options.backgroundColor ?? (theme ? themeCanvas(theme.id, mode) : '#ffffff')
-  const ink = themeColors ? classColor(themeColors.text.primary, mode === 'dark' ? '#f4f4f5' : '#111827') : '#ffffff'
-  const mutedInk = themeColors ? classColor(themeColors.text.secondary, mode === 'dark' ? '#a1a1aa' : '#475569') : '#ffffff'
+  const ink = host?.foreground ?? (themeColors ? classColor(themeColors.text.primary, mode === 'dark' ? '#f4f4f5' : '#111827') : '#ffffff')
+  const mutedInk = host?.muted ?? (themeColors ? classColor(themeColors.text.secondary, mode === 'dark' ? '#a1a1aa' : '#475569') : '#ffffff')
   const accent = themeColors?.palette.zinc.stroke || '#71717a'
   const showGrid = options.includeGrid ?? Boolean(brand?.gridType && brand.gridType !== 'none')
 
@@ -387,9 +390,9 @@ export function generateSVG(diagram: any, options: any = {}) {
     const colors = nodeColors[resolvedColor] || nodeColors.zinc
     const tone = themeColors?.palette[resolvedColor]
     const nodeAccent = tone?.stroke || colors.bg
-    const nodeFill = themeColors
+    const nodeFill = host?.surface ?? (themeColors
       ? hexWithAlpha(nodeAccent, brand?.nodeGlass ? 0.10 : mode === 'dark' ? 0.12 : 0.08)
-      : colors.bg
+      : colors.bg)
     const nodeText = themeColors ? ink : colors.text
     const nodeRadius = resolveNodeRadius(brand)
     const shape = resolveNodeShape(data.shape || brand?.nodeShape, nodeRadius)
@@ -427,9 +430,9 @@ export function generateSVG(diagram: any, options: any = {}) {
       : `<rect width="${width}" height="${height}" rx="${rx}"/>`
     const clipId = `clip-${String(nodeId).replace(/[^a-zA-Z0-9_-]/g, '-')}`
     if (shapePath) {
-      svg += `    <path d="${shapePath}" transform="translate(${node.x} ${node.y})" fill="${nodeFill}"${themeColors ? ` stroke="${nodeAccent}" stroke-width="${borderWidth}" stroke-opacity="${borderOpacity}"` : ''}/>\n`
+      svg += `    <path d="${shapePath}" transform="translate(${node.x} ${node.y})" fill="${nodeFill}"${themeColors ? ` stroke="${host?.border ?? nodeAccent}" stroke-width="${borderWidth}" stroke-opacity="${borderOpacity}"` : ''}/>\n`
     } else {
-      svg += `    <rect x="${node.x}" y="${node.y}" width="${width}" height="${height}" rx="${rx}" fill="${nodeFill}"${themeColors ? ` stroke="${nodeAccent}" stroke-width="${borderWidth}" stroke-opacity="${borderOpacity}"` : ''}/>\n`
+      svg += `    <rect x="${node.x}" y="${node.y}" width="${width}" height="${height}" rx="${rx}" fill="${nodeFill}"${themeColors ? ` stroke="${host?.border ?? nodeAccent}" stroke-width="${borderWidth}" stroke-opacity="${borderOpacity}"` : ''}/>\n`
     }
     svg += `    <defs><clipPath id="${clipId}">${silhouette}</clipPath></defs>\n`
     if (decor !== 'none') {

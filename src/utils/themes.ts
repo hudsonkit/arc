@@ -1,7 +1,9 @@
+import { hostThemeMode } from '../../packages/viewer/src/theme/host'
+
 // Diagram color themes - palettes and background treatments
 // Separate from templates (structural) - themes handle colors only
 
-export type ThemeId = 'default' | 'warm' | 'cool' | 'mono' | 'engineering' | 'workbench' | 'tactical' | 'command' | 'spacex' | 'claude' | 'codex'
+export type ThemeId = 'inherit' | 'default' | 'warm' | 'cool' | 'mono' | 'engineering' | 'workbench' | 'tactical' | 'command' | 'spacex' | 'claude' | 'codex'
 
 export interface ColorPalette {
   violet:  { border: string; bg: string; icon: string; stroke: string }
@@ -651,6 +653,12 @@ const codexTheme: Theme = {
 }
 
 export const THEMES: Record<ThemeId, Theme> = {
+  inherit: {
+    id: 'inherit', name: 'Inherit from host',
+    description: 'Use the host page semantic CSS tokens',
+    light: hostThemeMode('light'), dark: hostThemeMode('dark'),
+    brand: { fontFamily: 'var(--arc-diagram-font, inherit)', monoFamily: 'var(--arc-diagram-font-mono, ui-monospace, monospace)' },
+  },
   default: defaultTheme,
   warm: warmTheme,
   cool: coolTheme,

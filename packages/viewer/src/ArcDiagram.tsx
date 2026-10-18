@@ -1,4 +1,5 @@
 "use client"
+import { HOST_THEME_CSS, colorAlpha } from './theme/host'
 import React, { useState, useCallback, useMemo } from 'react'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -215,7 +216,7 @@ function Node({ node, data, mode, themeColors, editable, onDragStart, hovered, d
         </div>
         {data.name && (
           <div className={`mt-1.5 text-center ${themeColors.text.muted} text-[8px] tracking-wide uppercase`}
-            style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
+            style={{ fontFamily: themeColors.text.primary === 'arc-host-foreground' ? 'var(--arc-diagram-font, inherit)' : 'ui-sans-serif, system-ui, sans-serif' }}
           >
             {data.name}
           </div>
@@ -243,7 +244,7 @@ function Node({ node, data, mode, themeColors, editable, onDragStart, hovered, d
         backdropFilter: 'blur(8px)',
         transform: hovered && lift ? 'translateY(-2px)' : 'none',
         boxShadow: hovered && glow
-          ? `0 8px 24px -4px ${color.stroke}33, 0 0 0 1px ${color.stroke}22`
+          ? `0 8px 24px -4px ${colorAlpha(color.stroke, '33')}, 0 0 0 1px ${colorAlpha(color.stroke, '22')}`
           : 'none',
         opacity: dimmed ? dimOpacity : 1,
         cursor: onClick ? 'pointer' : undefined,
@@ -273,7 +274,7 @@ function Node({ node, data, mode, themeColors, editable, onDragStart, hovered, d
         </div>
         {data.subtitle && (
           <div className={`${themeColors.text.muted} ${isSmall ? 'text-[8px] mt-0.5' : 'text-[9px] mt-1'} leading-tight`}
-            style={{ fontFamily: 'ui-monospace, monospace' }}
+            style={{ fontFamily: themeColors.text.primary === 'arc-host-foreground' ? 'var(--arc-diagram-font-mono, ui-monospace, monospace)' : 'ui-monospace, monospace' }}
           >
             {data.subtitle}
           </div>
@@ -497,7 +498,7 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
             textAnchor={textAnchor}
             fill={color}
             className="text-[9px] font-mono"
-            style={{ fontFamily: 'ui-monospace, monospace', fontWeight: highlighted ? 700 : 500 }}
+            style={{ fontFamily: themeColors.text.primary === 'arc-host-foreground' ? 'var(--arc-diagram-font-mono, ui-monospace, monospace)' : 'ui-monospace, monospace', fontWeight: highlighted ? 700 : 500 }}
           >
             {labelText}
           </text>
@@ -506,12 +507,12 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
 
       {/* Relationship role annotations near each end */}
       {connector.fromRole && (
-        <text x={from.x + Math.cos(((angle + 0) * Math.PI) / 180) * 20} y={from.y + Math.sin((angle * Math.PI) / 180) * 20 + 10} textAnchor="middle" fill={color} fontSize="7.5" fontFamily="ui-monospace, monospace" opacity={0.6}>
+        <text x={from.x + Math.cos(((angle + 0) * Math.PI) / 180) * 20} y={from.y + Math.sin((angle * Math.PI) / 180) * 20 + 10} textAnchor="middle" fill={color} fontSize="7.5" fontFamily={themeColors.text.primary === 'arc-host-foreground' ? 'var(--arc-diagram-font-mono, ui-monospace, monospace)' : 'ui-monospace, monospace'} opacity={0.6}>
           {connector.fromRole}
         </text>
       )}
       {connector.toRole && (
-        <text x={to.x - Math.cos((angle * Math.PI) / 180) * 20} y={to.y - Math.sin((angle * Math.PI) / 180) * 20 + 10} textAnchor="middle" fill={color} fontSize="7.5" fontFamily="ui-monospace, monospace" opacity={0.6}>
+        <text x={to.x - Math.cos((angle * Math.PI) / 180) * 20} y={to.y - Math.sin((angle * Math.PI) / 180) * 20 + 10} textAnchor="middle" fill={color} fontSize="7.5" fontFamily={themeColors.text.primary === 'arc-host-foreground' ? 'var(--arc-diagram-font-mono, ui-monospace, monospace)' : 'ui-monospace, monospace'} opacity={0.6}>
           {connector.toRole}
         </text>
       )}
@@ -893,6 +894,7 @@ export function ArcDiagram({ data, className = '', interactive = true, mode = 'd
 
   return (
     <div
+      data-arc-theme={theme}
       className={`rounded-2xl overflow-hidden relative ${themeColors.background.container} ${className}`}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -901,6 +903,7 @@ export function ArcDiagram({ data, className = '', interactive = true, mode = 'd
       onMouseLeave={handleMouseUp}
       style={{ cursor: draggingNode ? 'grabbing' : interactive ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
     >
+      {theme === 'inherit' && <style>{HOST_THEME_CSS}</style>}
       <div
         className="relative transition-transform duration-150 ease-out"
         style={{

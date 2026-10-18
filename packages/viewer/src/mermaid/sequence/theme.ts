@@ -1,3 +1,4 @@
+import { hostThemeTokens } from '../../theme/host'
 import { getTheme, type ThemeId } from '../../themes'
 
 function withAlpha(hex: string, alpha: number): string {
@@ -14,6 +15,22 @@ export function getSequenceThemeTokens(
   mode: 'light' | 'dark',
   themeId: ThemeId = 'default',
 ): SequenceThemeTokens {
+  if (themeId === 'inherit') {
+    const t = hostThemeTokens(mode)
+    return {
+      background: t.background, surface: t.surface, border: t.border,
+      text: t.foreground, textSecondary: t.muted, textMuted: t.muted,
+      lifeline: t.border, messageSolid: t.line, messageDashed: t.muted, messageLabel: t.foreground,
+      actorFill: t.surface, actorStroke: t.accent, actorText: t.foreground,
+      participantFill: t.surface, participantStroke: t.border, participantText: t.foreground,
+      noteFill: t.surface, noteStroke: t.border, noteText: t.foreground,
+      localFill: t.surface, localStroke: t.success, localText: t.foreground,
+      modelFill: t.surface, modelStroke: t.warning, modelText: t.foreground,
+      fragmentFill: t.surface, fragmentStroke: t.border, fragmentLabelBg: t.background,
+      fragmentLabelText: t.foreground, fragmentDivider: t.border,
+      highlight: t.accent, dimOpacity: 0.45,
+    }
+  }
   const arcTheme = getTheme(themeId)[mode]
   const violet = arcTheme.palette.violet.stroke
   const emerald = arcTheme.palette.emerald.stroke

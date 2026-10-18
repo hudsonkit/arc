@@ -124,7 +124,8 @@ export function renderDiagramSvg(diagram: ArcDiagramData, options: RenderSvgOpti
   }
   const themeBackground = theme ? themeCanvas(theme, mode ?? 'light') : undefined
   const backgroundColor = options.backgroundColor ?? themeBackground ?? '#ffffff'
-  if (typeof backgroundColor !== 'string' || !/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(backgroundColor)) {
+  // Theme-owned CSS variable expressions are trusted; user input stays restricted.
+  if (options.backgroundColor !== undefined && (typeof backgroundColor !== 'string' || !/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(backgroundColor))) {
     throw new RenderError('render/invalid-option', 'backgroundColor must be a hex or CSS named color', ['use #ffffff, #00000000, or a CSS color name'])
   }
 

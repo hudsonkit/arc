@@ -1,0 +1,38 @@
+#host {
+  --arc-diagram-background: #faf8f2;
+  --arc-diagram-foreground: #272b28;
+  --arc-diagram-muted: #525f56;
+  --arc-diagram-surface: #eeeee5;
+  --arc-diagram-border: #919a8a;
+  --arc-diagram-line: #526753;
+  --arc-diagram-accent: #365bd0;
+  --arc-diagram-success: #26734c;
+  --arc-diagram-warning: #8f5b16;
+  --arc-diagram-danger: #ae3554;
+  --arc-diagram-font: Georgia, serif;
+  --arc-diagram-font-mono: ui-monospace, monospace;
+  min-height: 100vh;
+  padding: 32px max(20px, calc((100vw - 900px) / 2));
+  background: var(--arc-diagram-background);
+  color: var(--arc-diagram-foreground);
+}
+#host[data-mode="dark"] {
+  --arc-diagram-background: #17241d;
+  --arc-diagram-foreground: #f0f3e9;
+  --arc-diagram-muted: #b5c4b7;
+  --arc-diagram-surface: #26382c;
+  --arc-diagram-border: #7c9782;
+  --arc-diagram-line: #b2c4ad;
+  --arc-diagram-accent: #a6bbff;
+  --arc-diagram-success: #8ed2a6;
+  --arc-diagram-warning: #e7c484;
+  --arc-diagram-danger: #f3a4b5;
+}
+#host header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid var(--arc-diagram-border); }
+#host h1 { font: 32px Georgia, serif; margin: 0 0 8px; }
+#host p { color: var(--arc-diagram-muted); }
+#host button { padding: 10px 14px; border: 1px solid var(--arc-diagram-border); border-radius: 4px; cursor: pointer; }
+#host button:focus-visible { outline: 2px solid var(--arc-diagram-accent); outline-offset: 4px; }
+#host section { margin-top: 28px; }
+#host h2 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+#svg-export svg { width: 100%; max-width: 580px; margin: auto; height: auto; }

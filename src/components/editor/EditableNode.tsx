@@ -176,7 +176,7 @@ const EditableNode = memo(function EditableNode({
   const resolvedPalette = themeColors?.palette?.[color as keyof typeof themeColors.palette]
   const isThemed = !!resolvedPalette
   // Detect light mode from the theme's background container class
-  const isLightTheme = isThemed && !themeColors?.background?.container?.includes('950')
+  const isLightTheme = isThemed && !themeColors?.background?.container?.includes('950') && !themeColors?.background?.container?.includes('arc-inherit-dark')
 
   // Get template-specific styles (used when no theme override)
   const nodeStyle = (template?.node || {}) as Record<string, string>

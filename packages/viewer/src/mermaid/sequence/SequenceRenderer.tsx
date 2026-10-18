@@ -1,3 +1,4 @@
+import { HOST_THEME_CSS } from '../../theme/host'
 /**
  * Native Arc sequence diagram renderer (not an ArcDiagramData projection).
  */
@@ -175,7 +176,7 @@ export function SequenceRenderer({
 
   return (
     <div
-      className={className}
+      className={`${theme === 'inherit' ? `arc-inherit-${mode} arc-host-sequence` : ''} ${className}`}
       style={{
         width: '100%',
         minWidth: 0,
@@ -184,6 +185,7 @@ export function SequenceRenderer({
       }}
       data-arc-mermaid-family="sequence"
     >
+      {theme === 'inherit' && <style>{HOST_THEME_CSS}</style>}
       <svg
         viewBox={`0 0 ${metrics.width} ${metrics.height}`}
         width={`${(presentation?.scale ?? 1) * 100}%`}
