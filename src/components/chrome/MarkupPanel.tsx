@@ -57,7 +57,7 @@ export function toTsSource(data: unknown, name = 'diagram'): string {
   const json = JSON.stringify(data, null, 2)
     .replace(/"([^"]+)":/g, '$1:')
     .replace(/"/g, "'")
-  return `import type { ArcDiagramData } from '@arach/arc'\n\nconst ${name}: ArcDiagramData = ${json}\n\nexport default ${name}\n`
+  return `import type { ArcDiagramData } from '@hudsonkit/arc'\n\nconst ${name}: ArcDiagramData = ${json}\n\nexport default ${name}\n`
 }
 
 type Status =

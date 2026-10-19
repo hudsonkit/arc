@@ -1,6 +1,6 @@
 {
-  "name": "@arach/arc-viewer",
-  "version": "0.13.1",
+  "name": "@hudsonkit/arc-viewer",
+  "version": "0.13.3",
   "description": "Native React renderers for diagrams as code, including interactive Mermaid sequences",
   "type": "module",
   "publishConfig": {

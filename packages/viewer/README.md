@@ -1,4 +1,4 @@
-# @arach/arc-viewer
+# @hudsonkit/arc-viewer
 
 Native React renderers for diagrams as code, including typed architecture
 diagrams and interactive Mermaid sequences.
@@ -10,21 +10,21 @@ flowchart and state syntax with `importMermaid()`, or play sequence diagrams wit
 styling and other Mermaid diagram families are outside this compatibility path.
 
 For **PNG, SVG, GIF, and MP4** file exports from Arc architecture data, use the
-CLI in [`@arach/arc`](https://www.npmjs.com/package/@arach/arc). GIF and MP4 capture
+CLI in [`@hudsonkit/arc`](https://www.npmjs.com/package/@hudsonkit/arc). GIF and MP4 capture
 authored flow routes and require Chrome/Chromium plus ffmpeg. This viewer package
 provides the React components; it does not include the export CLI.
 
 ## Installation
 
 ```bash
-npm install @arach/arc-viewer
+npm install @hudsonkit/arc-viewer
 ```
 
 ## Usage
 
 ```tsx
-import { ArcDiagram } from '@arach/arc-viewer'
-import type { ArcDiagramData } from '@arach/arc-viewer'
+import { ArcDiagram } from '@hudsonkit/arc-viewer'
+import type { ArcDiagramData } from '@hudsonkit/arc-viewer'
 
 const diagram: ArcDiagramData = {
   id: 'MY.DIAGRAM.001',
@@ -68,7 +68,7 @@ native player. The source remains reviewable while Arc owns the theme,
 interaction, and playback controls.
 
 ```tsx
-import { ArcMermaidPlayer } from '@arach/arc-viewer'
+import { ArcMermaidPlayer } from '@hudsonkit/arc-viewer'
 
 const source = `sequenceDiagram
   participant App
@@ -105,7 +105,7 @@ export function Sequence() {
 
 ## Editor
 
-To visually design diagrams, use [@arach/arc-editor](https://www.npmjs.com/package/@arach/arc-editor).
+To visually design diagrams, use [@hudsonkit/arc-editor](https://www.npmjs.com/package/@hudsonkit/arc-editor).
 
 ## License
 

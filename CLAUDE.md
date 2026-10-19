@@ -371,7 +371,7 @@ The isometric view has its own render styles, defined in `src/utils/isoStyles.ts
 
 The technical styles (`blueprint`, `cyanotype`) are drawn by shared,
 model-agnostic pieces in `src/components/technical/` so both renderers — the
-editor canvas and the packaged `@arach/arc-iso` renderer — draw the same plate:
+editor canvas and the packaged `@hudsonkit/arc-iso` renderer — draw the same plate:
 
 | Piece | Draws |
 |-------|-------|

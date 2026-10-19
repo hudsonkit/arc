@@ -4,10 +4,10 @@
  * arc-ascii — Render Arc diagram JSON as monospace ASCII art.
  *
  * Usage:
- *   bunx @arach/arc diagram.json
- *   cat diagram.json | bunx @arach/arc
- *   bunx @arach/arc diagram.json --charset ascii
- *   bunx @arach/arc diagram.json --max-width 80
+ *   bunx @hudsonkit/arc diagram.json
+ *   cat diagram.json | bunx @hudsonkit/arc
+ *   bunx @hudsonkit/arc diagram.json --charset ascii
+ *   bunx @hudsonkit/arc diagram.json --max-width 80
  */
 
 import { readFileSync } from 'node:fs'
@@ -104,8 +104,8 @@ function printHelp() {
 arc-ascii — Render Arc diagrams as ASCII art
 
 Usage:
-  bunx @arach/arc <file.json>        Read diagram from file
-  cat diagram.json | bunx @arach/arc Read from stdin
+  bunx @hudsonkit/arc <file.json>        Read diagram from file
+  cat diagram.json | bunx @hudsonkit/arc Read from stdin
 
 Options:
   -c, --charset <unicode|ascii>      Character set (default: unicode)

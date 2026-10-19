@@ -81,7 +81,7 @@ Export Arc diagrams to various formats.
 
 **Example output** (TypeScript):
 ```typescript
-import type { ArcDiagramData } from '@arach/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 export const systemArchitecture: ArcDiagramData = {
   layout: { width: 700, height: 400 },
@@ -131,4 +131,4 @@ See `docs/prompts/`:
 
 ## MCP
 
-Available via the `arc-mcp` bin on `@arach/arc-mcp`. See `docs/agent/mcp.agent.md`.
+Available via the `arc-mcp` bin on `@hudsonkit/arc-mcp`. See `docs/agent/mcp.agent.md`.

@@ -1,9 +1,9 @@
 # MCP Server — Agent Context
 
-## Status: Shipped (`arc-mcp` bin on `@arach/arc-mcp`)
+## Status: Shipped (`arc-mcp` bin on `@hudsonkit/arc-mcp`)
 
-The MCP server ships as its own package, `@arach/arc-mcp` — split out of
-`@arach/arc` so agent installs don't pull the studio/renderer bundle. Source
+The MCP server ships as its own package, `@hudsonkit/arc-mcp` — split out of
+`@hudsonkit/arc` so agent installs don't pull the studio/renderer bundle. Source
 lives in `packages/mcp/` in the same repo.
 
 ## Run
@@ -14,7 +14,7 @@ bun run mcp
 
 # published bin (after build:mcp)
 arc-mcp
-npx -y @arach/arc-mcp
+npx -y @hudsonkit/arc-mcp
 ```
 
 Build the bundled bin: `bun run build:mcp` → `packages/mcp/dist/arc-mcp.mjs`
@@ -24,13 +24,13 @@ Build the bundled bin: `bun run build:mcp` → `packages/mcp/dist/arc-mcp.mjs`
 Claude Code, project scope:
 
 ```bash
-claude mcp add --scope project arc -- npx -y @arach/arc-mcp
+claude mcp add --scope project arc -- npx -y @hudsonkit/arc-mcp
 ```
 
 Devin CLI:
 
 ```bash
-devin mcp add arc -- npx -y @arach/arc-mcp
+devin mcp add arc -- npx -y @hudsonkit/arc-mcp
 ```
 
 ## Cursor / Claude Desktop Config
@@ -91,7 +91,7 @@ From a global install (after publish):
 
 ## PNG rasterization
 
-`render_png` keeps `@arach/arc-mcp` dependency-free by reusing `generateSVG()` and
+`render_png` keeps `@hudsonkit/arc-mcp` dependency-free by reusing `generateSVG()` and
 launching an installed Chrome/Chromium binary in headless screenshot mode. It
 looks for `ARC_CHROME`, `CHROME_PATH`, `PUPPETEER_EXECUTABLE_PATH`, common OS
 install paths, then `google-chrome`/`chromium` on `PATH`. If none is available,
@@ -106,9 +106,9 @@ These stay CLI/studio/API paths for now:
 | Capability | Where |
 |------------|-------|
 | Dev PNG capture | `/capture/:sessionId` (dev server) |
-| Mermaid import | `@arach/arc-viewer` |
-| Read-only embed | `@arach/arc-viewer` (`<ArcDiagram />`) |
-| Isometric YAML | `@arach/arc-iso` |
+| Mermaid import | `@hudsonkit/arc-viewer` |
+| Read-only embed | `@hudsonkit/arc-viewer` (`<ArcDiagram />`) |
+| Isometric YAML | `@hudsonkit/arc-iso` |
 
 v0 targets the **authoring loop**: validate → layout → preview → open in studio. `diff_diagram` covers the review loop: base vs head → render the delta.
 
@@ -119,7 +119,7 @@ v0 targets the **authoring loop**: validate → layout → preview → open in s
 - MCP SDK + zod are devDependencies, bundled into the bin (zero runtime deps)
 - The schema, skill markdown, and `llm.txt` resources are inlined as text imports at bundle time
 
-## Programmatic API (from `@arach/arc`)
+## Programmatic API (from `@hudsonkit/arc`)
 
 ```typescript
 import {
@@ -128,5 +128,5 @@ import {
   toTypeScriptSource,
   autoLayout,
   renderAscii,
-} from '@arach/arc'
+} from '@hudsonkit/arc'
 ```

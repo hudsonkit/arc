@@ -12,7 +12,7 @@ order: 6
 
 **IMPORTANT:** Read these rules before making any changes:
 
-- Arc exports four npm packages: @arach/arc (full editor), @arach/arc-viewer (lightweight viewer), @arach/arc-iso (isometric renderer), and @arach/arc-mcp (MCP server)
+- Arc exports four npm packages: @hudsonkit/arc (full editor), @hudsonkit/arc-viewer (lightweight viewer), @hudsonkit/arc-iso (isometric renderer), and @hudsonkit/arc-mcp (MCP server)
 - Diagrams are stored as declarative JSON/TypeScript configs, not binary files
 - The editor uses useReducer + Context for state management (EditorProvider)
 - Never modify diagram configs without understanding the schema in src/types/
@@ -41,15 +41,15 @@ order: 6
 
 ## MCP Support
 
-**Shipped** as the `arc-mcp` bin on `@arach/arc-mcp` (`packages/mcp/src/server.ts`). See `docs/agent/mcp.agent.md`.
+**Shipped** as the `arc-mcp` bin on `@hudsonkit/arc-mcp` (`packages/mcp/src/server.ts`). See `docs/agent/mcp.agent.md`.
 
 ## Package Decision Tree
 
 | Goal | Use |
 |------|-----|
-| Render 2D diagram in React | `@arach/arc` or `@arach/arc-viewer` |
-| Mermaid sequences | `@arach/arc-viewer` |
-| Isometric renderer | `@arach/arc-iso` |
+| Render 2D diagram in React | `@hudsonkit/arc` or `@hudsonkit/arc-viewer` |
+| Mermaid sequences | `@hudsonkit/arc-viewer` |
+| Isometric renderer | `@hudsonkit/arc-iso` |
 | Full visual studio | Clone repo → `bun run dev` → `/editor` |
 
 Details: `docs/agent/packages.agent.md`
@@ -70,10 +70,10 @@ Architecture diagrams typically live in design tools, disconnected from the code
 
 | Package | Description |
 |---------|-------------|
-| `@arach/arc` | Full editor + renderer |
-| `@arach/arc-viewer` | Lightweight diagram viewer |
-| `@arach/arc-iso` | Isometric diagram renderer |
-| `@arach/arc-mcp` | MCP server — diagram tools for AI agents |
+| `@hudsonkit/arc` | Full editor + renderer |
+| `@hudsonkit/arc-viewer` | Lightweight diagram viewer |
+| `@hudsonkit/arc-iso` | Isometric diagram renderer |
+| `@hudsonkit/arc-mcp` | MCP server — diagram tools for AI agents |
 
 ## Key Features
 
@@ -85,22 +85,22 @@ Architecture diagrams typically live in design tools, disconnected from the code
 ## Links
 
 - [GitHub Repository](https://github.com/hudsonkit/arc)
-- [NPM: @arach/arc](https://www.npmjs.com/package/@arach/arc)
-- [NPM: @arach/arc-mcp](https://www.npmjs.com/package/@arach/arc-mcp)
+- [NPM: @hudsonkit/arc](https://www.npmjs.com/package/@hudsonkit/arc)
+- [NPM: @hudsonkit/arc-mcp](https://www.npmjs.com/package/@hudsonkit/arc-mcp)
 
 ## Quickstart
 
 ### Installation
 
 ```bash
-npm install @arach/arc
+npm install @hudsonkit/arc
 ```
 
 ### Quick Start
 
 ```tsx
-import { ArcDiagram } from '@arach/arc'
-import type { ArcDiagramData } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   layout: { width: 600, height: 300 },
@@ -133,7 +133,7 @@ function App() {
 
 ```html
 <script type="module">
-  import { renderDiagram } from '@arach/arc-iso'
+  import { renderDiagram } from '@hudsonkit/arc-iso'
   renderDiagram(document.getElementById('diagram'), diagramConfig)
 </script>
 ```
@@ -305,7 +305,7 @@ interface DiagramFlow {
 ### Theme API
 
 ```typescript
-import { getTheme, getThemeList, THEMES } from '@arach/arc'
+import { getTheme, getThemeList, THEMES } from '@hudsonkit/arc'
 
 const theme = getTheme('warm')
 const themes = getThemeList()

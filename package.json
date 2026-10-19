@@ -1,6 +1,6 @@
 {
-  "name": "@arach/arc",
-  "version": "0.13.1",
+  "name": "@hudsonkit/arc",
+  "version": "0.13.3",
   "type": "module",
   "packageManager": "bun@1.3.11",
   "workspaces": [

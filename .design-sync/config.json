@@ -1,7 +1,7 @@
 {
   "projectId": "1b3342fc-f88c-4c9e-ba69-ced6260b2e88",
   "shape": "package",
-  "pkg": "@arach/arc",
+  "pkg": "@hudsonkit/arc",
   "globalName": "Arc",
   "buildCmd": "bun run build:lib && bunx @tailwindcss/cli@4 -i src/index.css -o .design-sync/arc-ds.tw.css --minify && cat .design-sync/arc-ds.head.css .design-sync/arc-ds.tw.css src/landing.css > .design-sync/arc-ds.css",
   "extraEntries": [

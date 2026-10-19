@@ -596,7 +596,7 @@ function generateSource(data: ArcDiagramData): string {
     .replace(/"([^"]+)":/g, '$1:')
     .replace(/"/g, "'")
 
-  return `import type { ArcDiagramData } from '@arach/arc'\n\nconst diagram: ArcDiagramData = ${json}\n\nexport default diagram\n`
+  return `import type { ArcDiagramData } from '@hudsonkit/arc'\n\nconst diagram: ArcDiagramData = ${json}\n\nexport default diagram\n`
 }
 
 function ArcSourceView({ source, mode }: {

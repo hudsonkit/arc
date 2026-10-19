@@ -1,7 +1,7 @@
 /**
  * Arc MCP server — stdio tools for diagram authoring.
  * Run locally: `bun packages/mcp/src/server.ts` or `bun run mcp`
- * Published bin: `@arach/arc-mcp` → dist/arc-mcp.mjs (built via `bun run build:mcp`)
+ * Published bin: `@hudsonkit/arc-mcp` → dist/arc-mcp.mjs (built via `bun run build:mcp`)
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'

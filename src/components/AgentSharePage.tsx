@@ -54,17 +54,17 @@ const MCP_CONFIG: SharePageConfig = {
   lead: 'Arc MCP turns architecture work into a tool call: validate a diagram, lay it out, preview it, render production artifacts, and hand the result to the visual studio.',
   metaTitle: 'Arc MCP | Diagram tools for AI agents',
   metaDescription: 'Give AI agents tools to validate, lay out, diff, render, and hand off architecture diagrams.',
-  primaryCode: 'claude mcp add --scope project arc -- npx -y @arach/arc-mcp',
+  primaryCode: 'claude mcp add --scope project arc -- npx -y @hudsonkit/arc-mcp',
   setupOptions: [
     {
       label: 'Claude Code',
       codeLabel: 'terminal',
-      code: 'claude mcp add --scope project arc -- npx -y @arach/arc-mcp',
+      code: 'claude mcp add --scope project arc -- npx -y @hudsonkit/arc-mcp',
     },
     {
       label: 'Devin',
       codeLabel: 'terminal',
-      code: 'devin mcp add arc -- npx -y @arach/arc-mcp',
+      code: 'devin mcp add arc -- npx -y @hudsonkit/arc-mcp',
     },
     {
       label: 'Cursor',
@@ -73,7 +73,7 @@ const MCP_CONFIG: SharePageConfig = {
   "mcpServers": {
     "arc": {
       "command": "npx",
-      "args": ["-y", "@arach/arc-mcp"]
+      "args": ["-y", "@hudsonkit/arc-mcp"]
     }
   }
 }`,
@@ -85,7 +85,7 @@ const MCP_CONFIG: SharePageConfig = {
   "mcpServers": {
     "arc": {
       "command": "npx",
-      "args": ["-y", "@arach/arc-mcp"]
+      "args": ["-y", "@hudsonkit/arc-mcp"]
     }
   }
 }`,

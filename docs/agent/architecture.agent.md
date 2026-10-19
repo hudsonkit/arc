@@ -13,7 +13,7 @@ src/
 │   │   └── ArcEditorInspector.tsx  # Right rail
 │   └── arc-showcase/               # Player harness (/showcase)
 ├── components/
-│   ├── ArcDiagram.tsx              # 2D player (exported as @arach/arc)
+│   ├── ArcDiagram.tsx              # 2D player (exported as @hudsonkit/arc)
 │   ├── editor/
 │   │   ├── DiagramEditor.tsx       # Editor layout (canvas host)
 │   │   ├── DiagramCanvas.tsx       # Pan/zoom, 2D + isometric modes
@@ -33,8 +33,8 @@ src/
 └── iso/                            # Isometric renderer
 
 packages/
-├── viewer/                         # @arach/arc-viewer
-└── iso/                            # @arach/arc-iso
+├── viewer/                         # @hudsonkit/arc-viewer
+└── iso/                            # @hudsonkit/arc-iso
 ```
 
 ## Editor Entry Flow

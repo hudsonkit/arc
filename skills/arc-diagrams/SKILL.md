@@ -278,7 +278,7 @@ When generating a diagram, output:
 For React projects, diagrams can be exported as TypeScript:
 
 ```typescript
-import type { ArcDiagramData } from '@arach/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   // ... config here

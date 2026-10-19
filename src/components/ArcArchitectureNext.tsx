@@ -1,4 +1,4 @@
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 import diagram from './diagrams/architecture-next.diagram'
 
 // Actual source that generates the diagram

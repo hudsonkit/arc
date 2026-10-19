@@ -72,7 +72,7 @@ function componentSource(diagram: ArcDiagramData, options: RenderHtmlOptions): s
   if (theme) props.push(`theme="${theme}"`)
   if (options.interactive !== undefined) props.push(`interactive={${options.interactive}}`)
 
-  return `import { ArcDiagram, type ArcDiagramData } from '@arach/arc'
+  return `import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 
 const ${dataName}: ArcDiagramData = ${JSON.stringify(diagram, null, 2)}
 

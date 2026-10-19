@@ -3,7 +3,7 @@
 > **Legacy format.** This document describes the Talkie `ArchitectureDiagram.jsx` handoff
 > vocabulary (`large`/`normal`/`small`, Lucide component refs). For new work, use
 > **`ArcDiagramData`** from `src/types/diagram.ts` with sizes `xs`/`s`/`m`/`l` and
-> icon string names. The Arc editor and `@arach/arc` player use the modern format.
+> icon string names. The Arc editor and `@hudsonkit/arc` player use the modern format.
 
 When you've finalized a diagram design, export it in this format so it can be dropped into the Talkie docs.
 

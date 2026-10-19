@@ -9,9 +9,9 @@ Build interactive maps, playable sequences, and spatial views with a visual
 studio and developer tools. Start with Arc data or supported Mermaid source.
 Embed the result, or export **PNG, SVG, GIF, and MP4**.
 
-[![npm version](https://img.shields.io/npm/v/@arach/arc.svg?color=6d5efc&label=%40arach%2Farc)](https://www.npmjs.com/package/@arach/arc)
-[![license](https://img.shields.io/npm/l/@arach/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
-[![types](https://img.shields.io/npm/types/@arach/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
+[![npm version](https://img.shields.io/npm/v/@hudsonkit/arc.svg?color=6d5efc&label=%40hudsonkit%2Farc)](https://www.npmjs.com/package/@hudsonkit/arc)
+[![license](https://img.shields.io/npm/l/@hudsonkit/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
+[![types](https://img.shields.io/npm/types/@hudsonkit/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
 
 [Explore Arc](https://arc.jdi.sh/) · [Browse 16 examples](https://arc.jdi.sh/examples/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md)
 
@@ -30,8 +30,8 @@ repository so the diagram can be reviewed and updated in the same pull request.
 | Start with | What Arc supports |
 | --- | --- |
 | **Arc JSON / TypeScript** | Architecture diagrams, guided views, animated flow routes, and isometric views. |
-| **Mermaid flowcharts and state diagrams** | Import into editable Arc architecture data with `importMermaid()` from `@arach/arc-viewer`. |
-| **Mermaid sequence diagrams** | Native rendering and step-by-step playback with `ArcMermaidPlayer` from `@arach/arc-viewer`. |
+| **Mermaid flowcharts and state diagrams** | Import into editable Arc architecture data with `importMermaid()` from `@hudsonkit/arc-viewer`. |
+| **Mermaid sequence diagrams** | Native rendering and step-by-step playback with `ArcMermaidPlayer` from `@hudsonkit/arc-viewer`. |
 | **Mermaid source used with Pele or Beautiful Mermaid** | Reuse the supported flowchart, state, and sequence syntax through those same Arc APIs. |
 
 [Pele](https://pele.run/) and [Beautiful Mermaid](https://github.com/lukilabs/beautiful-mermaid)
@@ -191,7 +191,7 @@ Review structural changes on the diagram itself: highlight additions, ghost
 removed elements, and show where components moved.
 
 ```tsx
-import { ArcDiagram, diffDiagram } from '@arach/arc'
+import { ArcDiagram, diffDiagram } from '@hudsonkit/arc'
 
 <ArcDiagram data={head} delta={diffDiagram(base, head)} />
 ```
@@ -227,7 +227,7 @@ in that browser.
 **Build with React:** install the main package in a React 18 or 19 project.
 
 ```bash
-npm install @arach/arc
+npm install @hudsonkit/arc
 ```
 
 Import the stylesheet once and give the diagram a container with a height.
@@ -235,8 +235,8 @@ This complete example renders a request traveling from an app through an API
 to a database:
 
 ```tsx
-import { ArcDiagram, type ArcDiagramData } from '@arach/arc'
-import '@arach/arc/arc.css'
+import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
+import '@hudsonkit/arc/arc.css'
 
 const diagram: ArcDiagramData = {
   layout: { width: 640, height: 240 },
@@ -277,14 +277,14 @@ and `showViews` to turn the diagram into a guided walkthrough.
 
 ### Start with a Mermaid sequence
 
-Install `@arach/arc-viewer` for the native sequence player:
+Install `@hudsonkit/arc-viewer` for the native sequence player:
 
 ```bash
-npm install @arach/arc-viewer
+npm install @hudsonkit/arc-viewer
 ```
 
 ```tsx
-import { ArcMermaidPlayer } from '@arach/arc-viewer'
+import { ArcMermaidPlayer } from '@hudsonkit/arc-viewer'
 
 const source = `sequenceDiagram
   participant App
@@ -306,7 +306,7 @@ Add the MCP server to a client that supports stdio:
   "mcpServers": {
     "arc": {
       "command": "npx",
-      "args": ["-y", "@arach/arc-mcp"]
+      "args": ["-y", "@hudsonkit/arc-mcp"]
     }
   }
 }
@@ -323,7 +323,7 @@ server from this checkout, or `bun run mcp:http` for self-hosted HTTP transport.
 ### Use the terminal
 
 The CLI requires Node.js 22 or newer. Run these commands in a project with
-`@arach/arc` installed:
+`@hudsonkit/arc` installed:
 
 ```bash
 npx arc check diagram.json --json --strict
@@ -343,10 +343,10 @@ Use `ARC_CHROME` and `ARC_FFMPEG` to select executables.
 
 | Package | What it provides |
 | --- | --- |
-| [`@arach/arc`](https://www.npmjs.com/package/@arach/arc) | Main React renderer and editor components, themes, layout, validation, structural diffs, flow helpers, ASCII rendering, and the `arc` CLI. |
-| [`@arach/arc-viewer`](https://www.npmjs.com/package/@arach/arc-viewer) | Lightweight architecture viewer, native Mermaid sequence renderer/player, and Mermaid import. |
-| [`@arach/arc-iso`](https://www.npmjs.com/package/@arach/arc-iso) | Tiered isometric rendering with React and vanilla JavaScript/static SVG APIs. |
-| [`@arach/arc-mcp`](https://www.npmjs.com/package/@arach/arc-mcp) | Diagram tools and resources for MCP clients. |
+| [`@hudsonkit/arc`](https://www.npmjs.com/package/@hudsonkit/arc) | Main React renderer and editor components, themes, layout, validation, structural diffs, flow helpers, ASCII rendering, and the `arc` CLI. |
+| [`@hudsonkit/arc-viewer`](https://www.npmjs.com/package/@hudsonkit/arc-viewer) | Lightweight architecture viewer, native Mermaid sequence renderer/player, and Mermaid import. |
+| [`@hudsonkit/arc-iso`](https://www.npmjs.com/package/@hudsonkit/arc-iso) | Tiered isometric rendering with React and vanilla JavaScript/static SVG APIs. |
+| [`@hudsonkit/arc-mcp`](https://www.npmjs.com/package/@hudsonkit/arc-mcp) | Diagram tools and resources for MCP clients. |
 
 Architecture uses `ArcDiagramData`; native sequences use `ArcSequenceDocument`;
 tiered isometric scenes use `DiagramConfig`. Each model preserves the structure
@@ -442,7 +442,7 @@ bun run visual       # compare the SVG fixtures
 bun run build:site   # build the library, site, and documentation pages
 ```
 
-The site resolves the latest published `@arach/arc` version from npm during
+The site resolves the latest published `@hudsonkit/arc` version from npm during
 Vite startup and build. `dist/version.json` records the resolved release. For a
 reproducible or offline build, set `ARC_SITE_VERSION` to a verified release,
 for example `ARC_SITE_VERSION=0.12.1 bun run build:site`. A failed registry

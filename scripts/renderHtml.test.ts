@@ -32,7 +32,7 @@ describe('renderDiagramHtml', () => {
       interactive: false,
     })
     expect(rendered.mimeType).toBe('text/tsx')
-    expect(rendered.code).toContain("import { ArcDiagram, type ArcDiagramData } from '@arach/arc'")
+    expect(rendered.code).toContain("import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'")
     expect(rendered.code).toContain('const serviceMap: ArcDiagramData = {')
     expect(rendered.code).toContain('export function ServiceMap()')
     expect(rendered.code).toContain('<ArcDiagram data={serviceMap} mode="dark" theme="command" interactive={false} />')

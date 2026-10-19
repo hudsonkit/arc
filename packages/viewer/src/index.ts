@@ -1,4 +1,4 @@
-// @arach/arc - Declarative architecture diagram renderer
+// @hudsonkit/arc - Declarative architecture diagram renderer
 export { ArcDiagram, default } from './ArcDiagram'
 export type {
   ArcDiagramProps,

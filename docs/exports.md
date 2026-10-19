@@ -19,7 +19,7 @@ routes, not the sequence player's timeline.
 
 ## Export with the CLI
 
-Install `@arach/arc`, then render an Arc JSON file. The output extension selects
+Install `@hudsonkit/arc`, then render an Arc JSON file. The output extension selects
 the format:
 
 ```bash
@@ -44,7 +44,7 @@ The same config as a typed `ArcDiagramData` object — drop it into a React app 
 render with the component:
 
 ```tsx
-import { ArcDiagram, type ArcDiagramData } from '@arach/arc'
+import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = { /* … */ }
 <ArcDiagram data={diagram} theme="cool" mode="light" />
@@ -87,7 +87,7 @@ A Unicode/ASCII box-drawing render via `renderAscii()` — for terminals, code
 comments, and plain-text READMEs.
 
 ```ts
-import { renderAscii } from '@arach/arc'
+import { renderAscii } from '@hudsonkit/arc'
 
 console.log(renderAscii(diagram))
 ```

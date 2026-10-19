@@ -414,7 +414,7 @@ export function toTypeScriptSource(diagram: ArcDiagram, name: string = 'diagram'
     .replace(/"([^"]+)":/g, '$1:') // Remove quotes from keys
     .replace(/"/g, "'") // Use single quotes
 
-  return `import type { ArcDiagramData } from '@arach/arc'
+  return `import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const ${name}: ArcDiagramData = ${json}
 

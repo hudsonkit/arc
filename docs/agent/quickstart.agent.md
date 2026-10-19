@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-npm install @arach/arc          # or: bun add @arach/arc
+npm install @hudsonkit/arc          # or: bun add @hudsonkit/arc
 # Visual studio (not an npm one-liner for full shell):
 git clone https://github.com/hudsonkit/arc && cd arc && bun install && bun run dev
 ```
@@ -11,8 +11,8 @@ git clone https://github.com/hudsonkit/arc && cd arc && bun install && bun run d
 ## Minimal Example
 
 ```tsx
-import { ArcDiagram } from '@arach/arc'
-import type { ArcDiagramData } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   layout: { width: 600, height: 300 },
@@ -44,7 +44,7 @@ function App() {
 ## Auto-layout (skip hand-positioning)
 
 ```typescript
-import { autoLayout } from '@arach/arc'
+import { autoLayout } from '@hudsonkit/arc'
 
 const diagram = autoLayout({
   nodeData: {

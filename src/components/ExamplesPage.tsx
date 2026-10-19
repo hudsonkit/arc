@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 import { ArcMermaidPlayer } from '../../packages/viewer/src/mermaid'
 import { importMermaid } from '../../packages/viewer/src/importMermaid'
 import { examples, exampleSource, type ExampleCategory } from '../content/examples'

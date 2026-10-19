@@ -40,10 +40,10 @@ Arc publishes four npm packages:
 
 | Package | Description |
 |---------|-------------|
-| `@arach/arc` | Full editor + renderer |
-| `@arach/arc-viewer` | Lightweight diagram viewer |
-| `@arach/arc-iso` | Isometric diagram renderer |
-| `@arach/arc-mcp` | Diagram tools for AI agents |
+| `@hudsonkit/arc` | Full editor + renderer |
+| `@hudsonkit/arc-viewer` | Lightweight diagram viewer |
+| `@hudsonkit/arc-iso` | Isometric diagram renderer |
+| `@hudsonkit/arc-mcp` | Diagram tools for AI agents |
 
 ## Next Steps
 

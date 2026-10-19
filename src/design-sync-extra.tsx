@@ -8,7 +8,7 @@
 //
 // Wired in via `extraEntries` in .design-sync/config.json.
 import { MemoryRouter } from 'react-router-dom'
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 import LandingPageImpl from './components/LandingPage'
 import DiagramEditorImpl from './components/editor/DiagramEditor'
 import architectureDiagram from './components/diagrams/architecture.diagram'

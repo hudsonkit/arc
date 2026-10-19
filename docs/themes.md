@@ -55,7 +55,7 @@ every export, so the rendered output matches what you designed.
 ## Inherit from the host page
 
 Set `theme="inherit"` to style a diagram with semantic CSS custom properties.
-This works in `@arach/arc`, `@arach/arc-viewer`, and the viewer's native sequence
+This works in `@hudsonkit/arc`, `@hudsonkit/arc-viewer`, and the viewer's native sequence
 renderer. Existing presets keep their own palettes.
 
 ```tsx

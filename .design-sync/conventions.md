@@ -1,6 +1,6 @@
 # Arc — usage conventions
 
-Arc renders **architecture diagrams** from data. Two components, both imported from `@arach/arc`
+Arc renders **architecture diagrams** from data. Two components, both imported from `@hudsonkit/arc`
 (available at runtime as `window.Arc.*`): `ArcDiagram` (2D flow) and `ArcDiagramIsometric` (3D stacked tiers).
 
 ## Setup — no provider needed
@@ -9,7 +9,7 @@ and pass a config object. For styling to apply, the host must load the design sy
 (it pulls in the compiled Tailwind utilities + `@theme` tokens the components render with, plus the brand fonts).
 
 ```tsx
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 
 const data = {
   layout: { width: 860, height: 400 },

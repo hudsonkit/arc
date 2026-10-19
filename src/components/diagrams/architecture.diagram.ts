@@ -1,4 +1,4 @@
-import type { ArcDiagramData } from '@arach/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   id: 'ARC.ARCH.001',

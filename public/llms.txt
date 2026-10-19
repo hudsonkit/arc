@@ -13,9 +13,9 @@ bun install && bun run dev    # → http://localhost:5188/editor
 
 | Need | Package |
 |------|---------|
-| Render 2D diagram | `@arach/arc` or `@arach/arc-viewer` |
-| Mermaid sequences | `@arach/arc-viewer` |
-| Isometric | `@arach/arc-iso` |
+| Render 2D diagram | `@hudsonkit/arc` or `@hudsonkit/arc-viewer` |
+| Mermaid sequences | `@hudsonkit/arc-viewer` |
+| Isometric | `@hudsonkit/arc-iso` |
 | Full studio | This repo |
 
 ## Diagram schema (canonical)
@@ -41,7 +41,7 @@ bun install && bun run dev    # → http://localhost:5188/editor
 
 ## CLI + MCP
 
-`arc` on `@arach/arc` — `arc check`, `arc diff`, `arc render`, `arc bench`, `arc schema` (`bun run build:cli` for the published bin).
-`arc-mcp` on `@arach/arc-mcp` — `bun run mcp` locally, `bun run build:mcp` for the published bin.
+`arc` on `@hudsonkit/arc` — `arc check`, `arc diff`, `arc render`, `arc bench`, `arc schema` (`bun run build:cli` for the published bin).
+`arc-mcp` on `@hudsonkit/arc-mcp` — `bun run mcp` locally, `bun run build:mcp` for the published bin.
 Tools include validate/diff/layout plus ASCII, SVG, component/iframe/HTML, and optional Chrome-backed PNG rendering.
 See docs/agent/mcp.agent.md.

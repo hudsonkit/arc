@@ -1,6 +1,6 @@
 {
-  "name": "@arach/arc-iso",
-  "version": "0.13.1",
+  "name": "@hudsonkit/arc-iso",
+  "version": "0.13.3",
   "type": "module",
   "publishConfig": {
     "access": "public",

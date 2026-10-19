@@ -28,7 +28,7 @@ function buildMarkupSource(data: ArcDiagramData, isoStyle: IsoPlateId): string {
 }
 
 function buildPlayerSource(isoStyle: IsoPlateId): string {
-  return `import { ArcDiagram } from '@arach/arc'
+  return `import { ArcDiagram } from '@hudsonkit/arc'
 import diagram from './arc.arch.001.json'
 
 export function ArchitecturePlate() {

@@ -1,4 +1,4 @@
-# @arach/arc-editor
+# @hudsonkit/arc-editor
 
 Visual editor for creating Arc architecture diagrams.
 
@@ -7,7 +7,7 @@ Visual editor for creating Arc architecture diagrams.
 Run the editor locally:
 
 ```bash
-npx @arach/arc-editor
+npx @hudsonkit/arc-editor
 ```
 
 This opens a browser with the Arc visual editor where you can:
@@ -27,14 +27,14 @@ This opens a browser with the Arc visual editor where you can:
 
 ## Workflow
 
-1. Run `npx @arach/arc-editor` to open the editor
+1. Run `npx @hudsonkit/arc-editor` to open the editor
 2. Design your architecture diagram visually
 3. Export the diagram config
-4. Use `@arach/arc` to render the diagram in your React app
+4. Use `@hudsonkit/arc` to render the diagram in your React app
 
 ## Related
 
-- [@arach/arc](https://www.npmjs.com/package/@arach/arc) - The renderer component for embedding diagrams
+- [@hudsonkit/arc](https://www.npmjs.com/package/@hudsonkit/arc) - The renderer component for embedding diagrams
 
 ## License
 

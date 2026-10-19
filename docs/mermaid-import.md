@@ -5,7 +5,7 @@ render through `ArcDiagram`. The adapter returns positioned `ArcDiagramData`
 and reports syntax that the projection cannot preserve.
 
 ```ts
-import { importMermaid } from '@arach/arc-viewer'
+import { importMermaid } from '@hudsonkit/arc-viewer'
 
 const source = `flowchart LR
   APP[Web app] -->|HTTPS| API[API]

@@ -15,7 +15,7 @@ import {
   type PageNode,
   type PromptParam,
 } from '@arach/dewey'
-import { ArcDiagram, type ArcDiagramData } from '@arach/arc'
+import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { SITE_URL } from '../../utils/site'
 import RenderShowcase from './RenderShowcase'
 import Showcase from './Showcase'
@@ -769,12 +769,12 @@ I need:
 3. A starter config for my diagram`,
       examples: `// setup-examples.md
 // INSTALLATION (choose your package manager)
-npm install @arach/arc
-pnpm add @arach/arc
-yarn add @arach/arc
+npm install @hudsonkit/arc
+pnpm add @hudsonkit/arc
+yarn add @hudsonkit/arc
 
 // BASIC USAGE - React component
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 
 const config = {
   layout: { width: 600, height: 300 },
@@ -798,7 +798,7 @@ export default function Page() {
 // NEXT.JS APP ROUTER - app/architecture/page.tsx
 // WHY: Use 'use client' because Arc uses browser APIs
 'use client'
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 // ... rest of component
 
 // STORING CONFIGS - recommended pattern

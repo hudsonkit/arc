@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { resolveSiteVersion } from './site-version.js'
 
 test('site uses the npm release rather than the checkout version', async () => {
-  const result = await resolveSiteVersion({ fetchRelease: async () => new Response(JSON.stringify({ name: '@arach/arc', version: '0.12.1' })) })
+  const result = await resolveSiteVersion({ fetchRelease: async () => new Response(JSON.stringify({ name: '@hudsonkit/arc', version: '0.12.1' })) })
   assert.deepEqual(result, { version: '0.12.1', source: 'npm' })
 })
 test('explicit release makes offline builds reproducible', async () => {

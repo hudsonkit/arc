@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react'
-import { ArcDiagram, type ArcDiagramData } from '@arach/arc'
+import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { siteVersion as version } from '../utils/siteVersion'
 import { useMeta } from '../hooks/useMeta'
 import ArcMark from './ArcMark'
@@ -478,9 +478,9 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               The same component renders in your app, your docs, or your README —
               one typed config, zero runtime deps.
             </p>
-            <pre className="tl-embed-code" aria-label="Embedding Arc in a React app"><code>{`npm i @arach/arc
+            <pre className="tl-embed-code" aria-label="Embedding Arc in a React app"><code>{`npm i @hudsonkit/arc
 
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 
 <ArcDiagram data={diagram} theme="cool" />`}</code></pre>
           </div>
@@ -645,7 +645,7 @@ import { ArcDiagram } from '@arach/arc'
             <dl className="tl-specs">
               <div className="tl-specs-h">SPECS</div>
               <div><dt>version</dt><dd>v{version}</dd></div>
-              <div><dt>install</dt><dd>npm i @arach/arc</dd></div>
+              <div><dt>install</dt><dd>npm i @hudsonkit/arc</dd></div>
               <div><dt>source</dt><dd>TypeScript / JSON</dd></div>
               <div><dt>render</dt><dd>SSR · client</dd></div>
               <div><dt>agents</dt><dd>MCP server · skills</dd></div>

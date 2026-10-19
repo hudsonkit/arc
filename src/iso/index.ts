@@ -2,7 +2,7 @@
  * Arc Isometric - Embeddable isometric diagram renderer
  *
  * Usage:
- *   import { ArcDiagram } from '@arach/arc-iso'
+ *   import { ArcDiagram } from '@hudsonkit/arc-iso'
  *
  *   <ArcDiagram config={diagramConfig} />
  */

@@ -98,6 +98,6 @@ Prefer editing the JSON and calling `diagram/replace` or saving a file.
 For generation without the editor:
 
 ```typescript
-import { autoLayout } from '@arach/arc'
+import { autoLayout } from '@hudsonkit/arc'
 import { validateDiagramShape } from './src/utils/diagramValidation' // repo only
 ```

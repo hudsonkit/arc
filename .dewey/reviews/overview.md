@@ -77,7 +77,7 @@ Areas for improvement:
 ## Specific Issues
 
 1. **No visual representation** - An overview page for a visual tool should show what it produces
-2. **Packages section lacks install instructions** - Even a simple `npm install @arach/arc` would help
+2. **Packages section lacks install instructions** - Even a simple `npm install @hudsonkit/arc` would help
 3. **Templates and Themes sections are abstract** - No concrete examples of what these look like
 4. **Next Steps links use relative URLs** - May break in some rendering contexts
 

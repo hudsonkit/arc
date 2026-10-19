@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mark.svg" alt="Arc" width="52" height="52" />
 
-# @arach/arc-mcp
+# @hudsonkit/arc-mcp
 
 ### MCP server for architecture diagrams as code.
 
@@ -10,8 +10,8 @@ Gives AI agents the full Arc toolchain over the Model Context Protocol —
 author, validate, lay out, render, and diff architecture diagrams from any
 MCP client.
 
-[![npm version](https://img.shields.io/npm/v/@arach/arc-mcp.svg?color=6d5efc&label=%40arach%2Farc-mcp)](https://www.npmjs.com/package/@arach/arc-mcp)
-[![license](https://img.shields.io/npm/l/@arach/arc-mcp.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@hudsonkit/arc-mcp.svg?color=6d5efc&label=%40hudsonkit%2Farc-mcp)](https://www.npmjs.com/package/@hudsonkit/arc-mcp)
+[![license](https://img.shields.io/npm/l/@hudsonkit/arc-mcp.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
 
 </div>
 
@@ -20,8 +20,8 @@ MCP client.
 No install needed — the server runs over stdio:
 
 ```bash
-npx -y @arach/arc-mcp
-# or: bunx @arach/arc-mcp
+npx -y @hudsonkit/arc-mcp
+# or: bunx @hudsonkit/arc-mcp
 ```
 
 ## Client setup
@@ -29,13 +29,13 @@ npx -y @arach/arc-mcp
 **Claude Code:**
 
 ```bash
-claude mcp add --scope project arc -- npx -y @arach/arc-mcp
+claude mcp add --scope project arc -- npx -y @hudsonkit/arc-mcp
 ```
 
 **Devin:**
 
 ```bash
-devin mcp add arc -- npx -y @arach/arc-mcp
+devin mcp add arc -- npx -y @hudsonkit/arc-mcp
 ```
 
 **Any MCP client (JSON config):**
@@ -45,7 +45,7 @@ devin mcp add arc -- npx -y @arach/arc-mcp
   "mcpServers": {
     "arc": {
       "command": "npx",
-      "args": ["-y", "@arach/arc-mcp"]
+      "args": ["-y", "@hudsonkit/arc-mcp"]
     }
   }
 }
@@ -98,9 +98,9 @@ at [github.com/hudsonkit/arc](https://github.com/hudsonkit/arc/issues).
 
 ## Related packages
 
-- [`@arach/arc`](https://www.npmjs.com/package/@arach/arc) — React renderer, visual studio, `arc` CLI, ASCII renderer
-- [`@arach/arc-viewer`](https://www.npmjs.com/package/@arach/arc-viewer) — native Mermaid sequence diagrams + Mermaid import
-- [`@arach/arc-iso`](https://www.npmjs.com/package/@arach/arc-iso) — isometric renderer for vanilla JS and the browser
+- [`@hudsonkit/arc`](https://www.npmjs.com/package/@hudsonkit/arc) — React renderer, visual studio, `arc` CLI, ASCII renderer
+- [`@hudsonkit/arc-viewer`](https://www.npmjs.com/package/@hudsonkit/arc-viewer) — native Mermaid sequence diagrams + Mermaid import
+- [`@hudsonkit/arc-iso`](https://www.npmjs.com/package/@hudsonkit/arc-iso) — isometric renderer for vanilla JS and the browser
 
 Studio + docs: [arc.jdi.sh](https://arc.jdi.sh) · Source: [github.com/hudsonkit/arc](https://github.com/hudsonkit/arc)
 

@@ -12,21 +12,21 @@
 - **Stack**: React 19, Vite 7, TailwindCSS 4, Hudson shell (editor chrome)
 - **Package manager**: bun (`bun install`, `bun run dev`)
 - **CLI**: `arc` bin — `schema`, `check`, `diff`, `render`, `bench`
-- **MCP**: `arc-mcp` bin on `@arach/arc-mcp` — see `docs/agent/mcp.agent.md`
+- **MCP**: `arc-mcp` bin on `@hudsonkit/arc-mcp` — see `docs/agent/mcp.agent.md`
 
 ## Which Package?
 
 | Goal | Package / path |
 |------|----------------|
-| Render a 2D diagram in React | `@arach/arc` or `@arach/arc-viewer` |
-| Mermaid sequence diagrams | `@arach/arc-viewer` (`ArcMermaidPlayer`) |
-| Isometric / YAML tier diagrams | `@arach/arc-iso` |
-| AI agent tooling (MCP) | `@arach/arc-mcp` |
+| Render a 2D diagram in React | `@hudsonkit/arc` or `@hudsonkit/arc-viewer` |
+| Mermaid sequence diagrams | `@hudsonkit/arc-viewer` (`ArcMermaidPlayer`) |
+| Isometric / YAML tier diagrams | `@hudsonkit/arc-iso` |
+| AI agent tooling (MCP) | `@hudsonkit/arc-mcp` |
 | Full visual studio | Clone repo → `bun run dev` → `/editor` |
 | Contribute to editor | This repo — see CLAUDE.md |
 
-`@arach/arc` is the main publish surface (player + editor components + utilities).
-`@arach/arc-viewer` is a slimmer install when you only need read-only rendering.
+`@hudsonkit/arc` is the main publish surface (player + editor components + utilities).
+`@hudsonkit/arc-viewer` is a slimmer install when you only need read-only rendering.
 
 ## Commands
 
@@ -139,8 +139,8 @@ in the right direction, size bounds, and a successful render.
 ## Minimal Example
 
 ```tsx
-import { ArcDiagram } from '@arach/arc'
-import type { ArcDiagramData } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   layout: { width: 600, height: 300 },
@@ -166,7 +166,7 @@ const diagram: ArcDiagramData = {
 ## Auto-layout (prefer over hand-positioning)
 
 ```typescript
-import { autoLayout } from '@arach/arc'
+import { autoLayout } from '@hudsonkit/arc'
 
 const laidOut = autoLayout({
   nodeData: { /* ... */ },
@@ -186,7 +186,7 @@ src/
 │   ├── arc-editor/                 # Hudson shell wrapper (canonical editor UX)
 │   └── arc-showcase/               # Player harness with inspector controls
 ├── components/
-│   ├── ArcDiagram.tsx              # 2D player (also exported as @arach/arc)
+│   ├── ArcDiagram.tsx              # 2D player (also exported as @hudsonkit/arc)
 │   ├── editor/                     # Canvas, reducer, nodes, connectors
 │   │   ├── editorReducer.ts        # All state transitions
 │   │   ├── DiagramCanvas.tsx
@@ -199,8 +199,8 @@ src/
 └── iso/                            # Isometric renderer
 
 packages/
-├── viewer/                         # @arach/arc-viewer (+ Mermaid)
-└── iso/                            # @arach/arc-iso
+├── viewer/                         # @hudsonkit/arc-viewer (+ Mermaid)
+└── iso/                            # @hudsonkit/arc-iso
 ```
 
 **Editor entry flow**: `/editor` → `createArcEditorApp()` (Hudson) → `ArcEditorContent` → `DiagramEditor` / `DiagramCanvas`.
@@ -250,9 +250,9 @@ curl "http://localhost:5188/capture/my-session" > out.png
 
 ## MCP
 
-`arc` bin on `@arach/arc` (`bun run build:cli` for publish) exposes `schema`, `check`, `diff`, `render`, and `bench`.
+`arc` bin on `@hudsonkit/arc` (`bun run build:cli` for publish) exposes `schema`, `check`, `diff`, `render`, and `bench`.
 `arc render` accepts `--format svg|png|gif|mp4`; GIF/MP4 require Chrome plus ffmpeg (`ARC_CHROME`/`ARC_FFMPEG` override lookup) and honor `--duration`, `--fps`, and `--scale`.
-`arc-mcp` bin on `@arach/arc-mcp` (`bun run mcp` in dev, `bun run build:mcp` → `packages/mcp/dist/arc-mcp.mjs` for publish).
+`arc-mcp` bin on `@hudsonkit/arc-mcp` (`bun run mcp` in dev, `bun run build:mcp` → `packages/mcp/dist/arc-mcp.mjs` for publish).
 Tools: validate_diagram, diff_diagram, auto_layout, render_ascii, render_svg, render_png, render_animation, render_html, diagram_to_typescript, editor_handoff.
 `render_svg`/`render_png`/`render_html`/`render_animation` accept `theme` and `mode`; omitted modes use the theme default. `render_png` and `render_animation` use an installed Chrome/Chromium binary (`ARC_CHROME` overrides lookup); `render_html` emits component/iframe/html text. `render_svg` also accepts `flowTime` and `animateFlows`; `render_animation` writes a GIF or MP4 artifact to `output` and returns its metadata.
 See docs/agent/mcp.agent.md for remaining coverage gaps (Mermaid stays elsewhere).

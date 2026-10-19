@@ -150,7 +150,7 @@ interface DiagramView {
 ## Utilities
 
 ```typescript
-import { ArcDiagram, autoLayout, renderAscii, validateDiagramShape, isDiagramShape, toTypeScriptSource, getTheme, getThemeList } from '@arach/arc'
+import { ArcDiagram, autoLayout, renderAscii, validateDiagramShape, isDiagramShape, toTypeScriptSource, getTheme, getThemeList } from '@hudsonkit/arc'
 
 const err = validateDiagramShape(json)  // null = valid, else error string
 const ascii = renderAscii(diagram)
@@ -161,7 +161,7 @@ const ts = toTypeScriptSource(diagram, 'myDiagram')
 ## Theme API
 
 ```typescript
-import { getTheme, getThemeList, THEMES } from '@arach/arc'
+import { getTheme, getThemeList, THEMES } from '@hudsonkit/arc'
 
 const theme = getTheme('engineering')
 const palette = theme.light.palette.violet

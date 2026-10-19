@@ -168,7 +168,7 @@ Arc includes 11 built-in themes:
 ### Theme API
 
 ```typescript
-import { getTheme, getThemeList, THEMES } from '@arach/arc'
+import { getTheme, getThemeList, THEMES } from '@hudsonkit/arc'
 
 // Get a specific theme
 const theme = getTheme('warm')

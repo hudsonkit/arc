@@ -7,7 +7,7 @@ needs visual confirmation.
 
 ```typescript
 import { validateDiagramShape } from 'src/utils/diagramValidation'
-import { renderAscii, autoLayout } from '@arach/arc'
+import { renderAscii, autoLayout } from '@hudsonkit/arc'
 
 const err = validateDiagramShape(diagram)
 if (err) throw new Error(err)

@@ -10,10 +10,10 @@ Install the Arc package from npm. `react`, `react-dom`, and `lucide-react` are p
 
 ```bash
 # Install the Arc player
-npm install @arach/arc
+npm install @hudsonkit/arc
 
 # Or use the visual editor
-npx @arach/arc-editor
+npx @hudsonkit/arc-editor
 ```
 
 ## Create a Diagram
@@ -22,7 +22,7 @@ Create a new file for your diagram configuration:
 
 ```typescript
 // src/diagrams/my-system.diagram.ts
-import type { ArcDiagramData } from '@arach/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 const diagram: ArcDiagramData = {
   id: 'MY.SYSTEM.001',
@@ -60,7 +60,7 @@ Import and render your diagram using the ArcDiagram component:
 
 ```tsx
 // src/pages/ArchitecturePage.tsx
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 import mySystemDiagram from '../diagrams/my-system.diagram'
 
 function ArchitecturePage() {

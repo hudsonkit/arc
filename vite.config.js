@@ -49,7 +49,7 @@ export default defineConfig(async ({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@arach/arc': useBuiltLib ? libPath : resolve(__dirname, 'src/index.ts'),
+        '@hudsonkit/arc': useBuiltLib ? libPath : resolve(__dirname, 'src/index.ts'),
       },
     },
     server: {

@@ -11,7 +11,7 @@ order: 37
 two versions of a diagram.
 
 ```ts
-import { diffDiagram } from '@arach/arc'
+import { diffDiagram } from '@hudsonkit/arc'
 
 const delta = diffDiagram(baseDoc, headDoc)
 ```

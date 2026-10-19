@@ -1,5 +1,5 @@
 {
-  "name": "@arach/arc-editor",
+  "name": "@hudsonkit/arc-editor",
   "version": "0.1.0",
   "description": "Visual editor for creating Arc architecture diagrams",
   "type": "module",

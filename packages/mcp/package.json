@@ -1,6 +1,6 @@
 {
-  "name": "@arach/arc-mcp",
-  "version": "0.13.1",
+  "name": "@hudsonkit/arc-mcp",
+  "version": "0.13.3",
   "type": "module",
   "description": "MCP server for Arc — AI agents author, validate, render, and diff architecture diagrams as code",
   "author": "Arach Tchoupani",

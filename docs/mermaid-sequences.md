@@ -29,7 +29,7 @@ fragments have different semantics from architecture nodes and connectors.
 import {
   ArcMermaidPlayer,
   classifyNoteAccent,
-} from '@arach/arc-viewer'
+} from '@hudsonkit/arc-viewer'
 import source from './interaction.sequence.mmd?raw'
 
 export function InteractionModel() {

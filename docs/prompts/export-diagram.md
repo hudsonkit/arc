@@ -20,7 +20,7 @@ Export this diagram as a TypeScript file with proper typing:
 
 Expected output:
 ```typescript
-import type { ArcDiagramData } from '@arach/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 export const myDiagram: ArcDiagramData = {
   // ... typed config

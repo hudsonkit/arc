@@ -11,7 +11,7 @@
 - State: `useReducer` + Context in `EditorProvider`
 - Best doc: `CLAUDE.md` (repo root)
 - CLI: `arc` bin — `arc check`, `arc diff`, `arc render`, `arc bench`, `arc schema`
-- MCP: `arc-mcp` bin on `@arach/arc-mcp` — see `docs/agent/mcp.agent.md`
+- MCP: `arc-mcp` bin on `@hudsonkit/arc-mcp` — see `docs/agent/mcp.agent.md`
 
 ## Which Package?
 
@@ -19,9 +19,9 @@ See `docs/agent/packages.agent.md`. Short version:
 
 | Need | Package |
 |------|---------|
-| Render 2D diagram | `@arach/arc` or `@arach/arc-viewer` |
-| Mermaid sequences | `@arach/arc-viewer` |
-| Isometric | `@arach/arc-iso` |
+| Render 2D diagram | `@hudsonkit/arc` or `@hudsonkit/arc-viewer` |
+| Mermaid sequences | `@hudsonkit/arc-viewer` |
+| Isometric | `@hudsonkit/arc-iso` |
 | Visual studio | Clone repo → `bun run dev` → `/editor` |
 
 ## Key Concepts
@@ -37,7 +37,7 @@ See `docs/agent/packages.agent.md`. Short version:
 ## Quick Start
 
 ```tsx
-import { ArcDiagram } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
 
 <ArcDiagram data={diagramConfig} mode="light" theme="engineering" defaultZoom="fit" />
 ```

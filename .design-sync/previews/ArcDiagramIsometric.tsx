@@ -1,4 +1,4 @@
-import { ArcDiagramIsometric } from '@arach/arc'
+import { ArcDiagramIsometric } from '@hudsonkit/arc'
 
 // Ported from src/components/IsometricExamples.tsx (DESIGN_SYSTEM). Three stacked
 // tiers of an isometric architecture. animate:false so the card renders statically.

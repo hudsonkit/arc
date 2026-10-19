@@ -1,5 +1,5 @@
-import { ArcDiagram } from '@arach/arc'
-import type { ArcDiagramData } from '@arach/arc'
+import { ArcDiagram } from '@hudsonkit/arc'
+import type { ArcDiagramData } from '@hudsonkit/arc'
 
 // Canonical Arc architecture diagram (ported from src/components/diagrams/architecture.diagram.ts)
 const architecture: ArcDiagramData = {

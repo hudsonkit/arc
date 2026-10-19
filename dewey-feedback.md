@@ -324,7 +324,7 @@ export default defineConfig({
   agent: {
     outputPath: './docs',    // Where to output AGENTS.md, llms.txt, docs.json
     criticalContext: [
-      'Arc exports @arach/arc, @arach/arc-viewer, and @arach/arc-iso npm packages',
+      'Arc exports @hudsonkit/arc, @hudsonkit/arc-viewer, and @hudsonkit/arc-iso npm packages',
       'Diagrams are declarative JSON configs',
     ],
     entryPoints: {

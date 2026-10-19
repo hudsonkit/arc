@@ -1,7 +1,7 @@
 /**
  * Arc - Visual diagram editor for creating architecture diagrams
  *
- * @package @arach/arc
+ * @package @hudsonkit/arc
  */
 
 // =============================================================================
