@@ -1,6 +1,8 @@
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { createRequire } from 'node:module'
+import { pathToFileURL } from 'node:url'
 import path from 'node:path'
 
 const repository = process.cwd()
@@ -15,8 +17,10 @@ try {
   mkdirSync(extracted, { recursive: true })
   execFileSync('tar', ['-xzf', path.join(temporary, pack.filename), '--strip-components=1', '-C', extracted])
   if (pkg.name === '@hudsonkit/arc-mcp') {
-    const { Client } = await import('@modelcontextprotocol/sdk/client/index.js')
-    const { StdioClientTransport } = await import('@modelcontextprotocol/sdk/client/stdio.js')
+    // The SDK is declared by the MCP workspace, not by the repository root.
+    const workspaceRequire = createRequire(path.join(root, 'package.json'))
+    const { Client } = await import(pathToFileURL(workspaceRequire.resolve('@modelcontextprotocol/sdk/client/index.js')).href)
+    const { StdioClientTransport } = await import(pathToFileURL(workspaceRequire.resolve('@modelcontextprotocol/sdk/client/stdio.js')).href)
     const assert = await import('node:assert/strict')
     const client = new Client({ name: 'release-check', version: '1.0.0' })
     try {
