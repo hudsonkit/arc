@@ -33,14 +33,13 @@ const entrypoints = [packageJson.main, packageJson.module, packageJson.types]
   .filter(Boolean)
   .map((file) => file.replace(/^\.\//, ''))
 
-for (const target of Object.values(packageJson.exports ?? {})) {
+function collectEntrypoints(target) {
   if (typeof target === 'string') entrypoints.push(target.replace(/^\.\//, ''))
   else if (target && typeof target === 'object') {
-    for (const file of Object.values(target)) {
-      if (typeof file === 'string') entrypoints.push(file.replace(/^\.\//, ''))
-    }
+    for (const condition of Object.values(target)) collectEntrypoints(condition)
   }
 }
+collectEntrypoints(packageJson.exports)
 
 const missing = new Set(entrypoints.filter((file) => !packedFiles.has(file)))
 const relativeSpecifier = /(?:from\s*|import\s*\(|require\s*\()\s*['"](\.{1,2}\/[^'"]+)['"]/g

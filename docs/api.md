@@ -213,3 +213,152 @@ The Arc Editor and CLI can export diagrams as:
 - **SVG**: Vector graphic (light or dark; flow animations are SMIL)
 - **PNG**: Raster image sampled at `flowTime`
 - **GIF / MP4**: Flow animations rendered from deterministic frames
+
+## Native exploded views
+
+`ArcExploded` renders a typed assembly with separate assembled and exploded positions. Open the [exploded examples](/exploded) to inspect the AI stack and phone, change separation, or download their source.
+
+```tsx
+import { ArcExploded, phoneExploded, renderExplodedSvg } from '@hudsonkit/arc'
+
+<ArcExploded
+  document={phoneExploded}
+  progress={1}
+  mode="light"
+  style={{ width: '100%', height: 700 }}
+/>
+
+const svg = renderExplodedSvg(phoneExploded) // Fully exploded, standalone SVG
+const assembledSvg = renderExplodedSvg(phoneExploded, { progress: 0, mode: 'dark' })
+```
+
+The component is controlled. `progress` defaults to `1` (exploded); `0` means assembled. Intermediate values move parts along the vertical world axis. The caller controls animation timing. The example page respects reduced motion and provides a keyboard-accessible slider.
+
+| Property | Default | Behavior |
+| --- | --- | --- |
+| `document` | Required | An `ExplodedDocument` with `kind: 'exploded'` and `version: 1` |
+| `progress` | `1` | A finite number from 0 to 1 |
+| `mode` | `'light'` | `'light'` or `'dark'` |
+| `labels` | `true` | Labels and horizontal leaders at full separation |
+| `guides` | `true` | Dashed assembly guides behind parts |
+| `className`, `style` | Unset | React container styling; set its height to fit the embedding surface |
+
+`renderExplodedSvg(document, options)` accepts the same render options. It uses the same scene geometry as React. Exports contain their colors and geometry, with system-font fallbacks and no external assets. The exporter has no DOM dependency.
+
+### Assembly document
+
+An assembly contains 1–100 parts. All distances use the same world unit. The fixed 2:1 dimetric projection maps `(x, y, z)` to `(x - y, (x + y) / 2 - z)`.
+
+Each part has a stable `id`, `label`, world footprint (`x`, `y`, `width`, `depth`, optional `radius`), positive `height`, `assembledZ`, and integer `level`. Optional `description` supplies the label's second line. `tone` is `surface`, `muted`, `dark`, or `accent`.
+
+- `assembledZ` is the absolute elevation of the part's bottom face. It is never inferred from separation order.
+- `level` orders separation from bottom to top. Parts on one level move together and preserve their relative assembled elevations. Level numbers can be sparse.
+- `gap` is an optional minimum air gap. Layout derives a gap from projected footprints and solid thickness, then increases it to clear labels and horizontal leaders.
+- `housing: { wall, floor }` creates an open tray. A child's `containerId` references that housing. Children must fit its rounded cavity in the assembled state and have a higher separation level. Coordinates remain absolute.
+- `details` contains local footprints on a part's top face. A detail's optional `height` creates a raised solid; omitting it creates a flat mark. Details use the same `tone` values. Housing contents use separate parts instead.
+
+`layoutExploded(document, labels?)` returns part elevations, leader anchors, the chosen gap, and stable bounds covering both assembly states. `validateExplodedDocument(unknown)` validates JSON and throws a field-specific error. Rendering calls validation automatically. Invalid dimensions, duplicate IDs, containment cycles, and contents outside a housing are rejected.
+
+If labels conflict within the same level, layout reports the part IDs. Reposition those parts or set `labels={false}` and provide a separate legend. The label-free layout can use a smaller gap. Both examples provide such a legend on narrow screens.
+
+### Current integration boundary
+
+This document family is exported from `@hudsonkit/arc`. Use `ArcExploded` for these documents. The graph editor, graph CLI/MCP exporters, `@hudsonkit/arc-viewer`, and `@hudsonkit/arc-iso` do not accept this family yet. Existing graph schemas and the legacy 30-degree isometric projection remain separate.
+
+The initial renderer supports rounded slabs, open housings, and top-face details. It does not perform general CAD collision detection or render arbitrary meshes, transparency, or intersecting solids. Author non-intersecting assemblies and use `containerId` for cavity contents.
+
+The geometry and example direction were informed by [Cathryn Lavery's Diagram Design](https://github.com/cathrynlavery/diagram-design). Arc implements the model, layout, renderer, and exports natively.
+
+## Panel cubes
+
+`ArcPanelCube` renders a conceptual shell with three named front faces and three
+quiet rear panels. The plates separate outward along their normals. Graphite
+gradients, edge highlights, a soft shadow, and fine callouts are included in both
+React and static SVG output. See the [interactive example](/panel-cube).
+
+```tsx
+import { useState } from 'react'
+import { ArcPanelCube, fieldRecorderCube, renderPanelCubeSvg } from '@hudsonkit/arc'
+
+function RecorderCube() {
+  const [rotation, setRotation] = useState({ yaw: 0, pitch: 0 })
+
+  return (
+    <ArcPanelCube
+      data={fieldRecorderCube}
+      progress={1}
+      rotation={rotation}
+      onRotationChange={setRotation}
+      rotationHandles
+      activeFace="capture"
+      style={{ width: '100%', height: 480 }}
+    />
+  )
+}
+
+const svg = renderPanelCubeSvg(fieldRecorderCube, {
+  progress: 1,
+  rotation: { yaw: 30, pitch: 15 },
+})
+```
+
+| Property | Default | Behavior |
+| --- | --- | --- |
+| `data` | Required | A `PanelCubeDocument` with `kind: 'panel-cube'`, `version: 1`, `id`, `title`, optional `description`, and `faces` |
+| `progress` | `1` | Separation from 0 (closed) to 1 (open), with a fixed viewport |
+| `rotation` | `{ yaw: 0, pitch: 0 }` | A `PanelCubeRotation` in degrees, relative to the initial view |
+| `onRotationChange` | Unset | Enables pointer drag and keyboard rotation; receives the next `{ yaw, pitch }` for the host to store |
+| `rotationHandles` | `false` | Adds interactive **Turn** and **Tilt** rings around the object when `onRotationChange` is supplied |
+| `onRotateStart` | Unset | Called when free dragging crosses its threshold, a ring is grabbed, or a rotation key is used; use it to stop host-controlled auto-spin |
+| `activeFace` | `null` | The ID of the emphasized face |
+| `labels` | `true` | Callouts around the object; provide external labels when disabling them |
+| `onFaceChange` | Unset | Transient hover/focus callback with a face ID or `null` |
+| `onFaceSelect` | Unset | Face activation by click, Enter, or Space |
+| `className`, `style` | Unset | Container styling; give the illustration a height |
+
+Each face has a unique `id`, `label`, optional `description`, and `side` of
+`'top'`, `'left'`, or `'right'`. Include each side exactly once. The renderer
+validates the document. Keep labels short; the example places descriptions below
+the object on all screen sizes.
+
+With `onRotationChange`, drag the object with a mouse, pen, or touch. Focus it
+and use the arrow keys to rotate, or Home to reset the view. Interactive pitch
+is limited to -75–75 degrees; yaw can turn freely. Rotation changes the projected
+3D geometry. The renderer accepts any finite yaw and pitch for authored stills.
+
+Set `rotationHandles` to add **Turn** and **Tilt** rings with draggable grips
+around the cube. Turn changes only `rotation.yaw`; Tilt changes only
+`rotation.pitch`. Each ring supports mouse, pen, touch, and keyboard input.
+Focus a ring and use the arrow keys to adjust its axis, or Home to reset only
+that axis. Free dragging on the cube continues to adjust both axes.
+The rings fade in on hover or keyboard focus and stay visible during a drag.
+They fade out when interaction ends; retained mouse focus does not keep them
+visible. Touch layouts keep the rings visible, and reduced motion removes the fade.
+
+The host controls animation and selection. Optional **Auto-spin**, **Stop spin**,
+and **Reset view** controls accompany manual rotation. The example starts closed;
+only **Open cube** and **Close cube** change expansion. Hover, focus, rotation,
+and face selection preserve that choice. Auto-spin turns at 12
+degrees per second and stops when dragging, keyboard rotation, or a ring handle
+is used. It is unavailable under `prefers-reduced-motion: reduce`; opening and
+closing also change directly to the target under that preference. Visible part
+buttons support touch and keyboard selection.
+
+This is a conceptual illustration of three aspects of a whole, not a dimensional
+model. Its transparent canvas and graphite material are intended for a light
+surface.
+
+`layoutPanelCube(data, progress, rotation?)` returns the projected geometry for
+that view. `renderPanelCubeSvg(data, { progress, rotation, activeFace, labels })`
+captures one static state using the same scene as React. Pass the current
+`rotation` to preserve the view the reader chose. Interactive rotation rings are
+React controls and are excluded from static SVG. The SVG contains its gradients
+and shadow, has no DOM dependency, and is deterministic. React instances have
+separate SVG IDs. When embedding identical exported SVG strings inline, isolate
+them (for example, with an `<img>`); their deterministic IDs are identical.
+Review each rotation axis independently and check that leaders stay short,
+uncluttered, and attached to the intended panel across views.
+
+This API is exported by `@hudsonkit/arc`. The architecture editor, graph CLI/MCP
+tools, `@hudsonkit/arc-viewer`, and `@hudsonkit/arc-iso` do not accept this document
+family.

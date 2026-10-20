@@ -1,0 +1,157 @@
+{
+  "layout": {
+    "width": 430,
+    "height": 280
+  },
+  "nodes": {
+    "client": {
+      "x": 20,
+      "y": 35,
+      "size": "l",
+      "width": 90,
+      "height": 60
+    },
+    "api": {
+      "x": 165,
+      "y": 35,
+      "size": "l",
+      "width": 90,
+      "height": 60
+    },
+    "db": {
+      "x": 310,
+      "y": 35,
+      "size": "l",
+      "width": 90,
+      "height": 60
+    },
+    "queue": {
+      "x": 165,
+      "y": 190,
+      "size": "l",
+      "width": 90,
+      "height": 60
+    },
+    "worker": {
+      "x": 310,
+      "y": 190,
+      "size": "l",
+      "width": 90,
+      "height": 60
+    }
+  },
+  "nodeData": {
+    "client": {
+      "name": "Client",
+      "kind": "frontend",
+      "color": "blue"
+    },
+    "api": {
+      "name": "API",
+      "kind": "backend",
+      "color": "blue"
+    },
+    "db": {
+      "name": "Storage",
+      "kind": "database",
+      "color": "blue"
+    },
+    "queue": {
+      "name": "Queue",
+      "kind": "queue",
+      "color": "zinc"
+    },
+    "worker": {
+      "name": "Worker",
+      "kind": "service",
+      "color": "zinc"
+    }
+  },
+  "connectors": [
+    {
+      "id": "request",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "client",
+      "to": "api",
+      "style": "primary",
+      "label": "request"
+    },
+    {
+      "id": "write",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "api",
+      "to": "db",
+      "style": "primary",
+      "label": "write"
+    },
+    {
+      "id": "enqueue",
+      "fromAnchor": "bottom",
+      "toAnchor": "top",
+      "from": "api",
+      "to": "queue",
+      "style": "secondary",
+      "label": "enqueue"
+    },
+    {
+      "id": "consume",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "queue",
+      "to": "worker",
+      "style": "secondary",
+      "label": "consume"
+    }
+  ],
+  "connectorStyles": {
+    "primary": {
+      "color": "blue",
+      "strokeWidth": 2
+    },
+    "secondary": {
+      "color": "zinc",
+      "strokeWidth": 1.5,
+      "dashed": true
+    }
+  },
+  "views": [
+    {
+      "id": "request",
+      "title": "Handle the request",
+      "nodes": [
+        "client",
+        "api",
+        "db"
+      ],
+      "connectors": [
+        {
+          "id": "request"
+        },
+        {
+          "id": "write"
+        }
+      ],
+      "caption": "The API receives the request and writes to storage."
+    },
+    {
+      "id": "background",
+      "title": "Defer background work",
+      "nodes": [
+        "api",
+        "queue",
+        "worker"
+      ],
+      "connectors": [
+        {
+          "id": "enqueue"
+        },
+        {
+          "id": "consume"
+        }
+      ],
+      "caption": "A separate queue carries work to a worker."
+    }
+  ]
+}

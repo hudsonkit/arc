@@ -1,6 +1,6 @@
 {
   "name": "@hudsonkit/arc-iso",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "type": "module",
   "publishConfig": {
     "access": "public",
@@ -33,19 +33,29 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/arc-iso.umd.js",
+  "main": "./dist/arc-iso.cjs",
   "module": "./dist/arc-iso.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/arc-iso.es.js",
-      "require": "./dist/arc-iso.umd.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/arc-iso.es.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/arc-iso.cjs"
+      }
     },
     "./slim": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/arc-iso-slim.es.js",
-      "require": "./dist/arc-iso-slim.umd.js"
+      "import": {
+        "types": "./dist/index.slim.d.ts",
+        "default": "./dist/arc-iso-slim.es.js"
+      },
+      "require": {
+        "types": "./dist/index.slim.d.cts",
+        "default": "./dist/arc-iso-slim.cjs"
+      }
     }
   },
   "sideEffects": false,
@@ -59,6 +69,13 @@
     },
     "react-dom": {
       "optional": true
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "slim": [
+        "./dist/index.slim.d.ts"
+      ]
     }
   }
 }

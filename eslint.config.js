@@ -10,7 +10,9 @@ export default defineConfig([
   // of "errors" in minified code and drowns anything real.
   globalIgnores([
     'dist',
-    'dist-iso',
+    'dist-*',
+    'ext',
+    'bin/arc.mjs',
     'lib',
     'packages',
     'ds-bundle',

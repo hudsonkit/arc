@@ -1,12 +1,12 @@
 {
-  "layout": { "width": 700, "height": 400 },
+  "layout": { "width": 940, "height": 520 },
   "nodes": {
-    "ios":       { "x": 50,  "y": 50,  "size": "l" },
-    "android":   { "x": 50,  "y": 200, "size": "l" },
-    "api":       { "x": 300, "y": 125, "size": "l" },
-    "push":      { "x": 300, "y": 280, "size": "s" },
-    "storage":   { "x": 520, "y": 50,  "size": "m" },
-    "database":  { "x": 520, "y": 180, "size": "m" }
+    "ios":       { "x": 70,  "y": 60,  "size": "m" },
+    "android":   { "x": 70,  "y": 360, "size": "m" },
+    "api":       { "x": 390, "y": 200, "size": "m" },
+    "push":      { "x": 70,  "y": 210, "size": "m" },
+    "storage":   { "x": 730, "y": 110,  "size": "m" },
+    "database":  { "x": 730, "y": 300, "size": "m" }
   },
   "nodeData": {
     "ios":      { "icon": "Smartphone", "name": "iOS App",     "subtitle": "Swift",    "color": "violet" },
@@ -21,9 +21,9 @@
     { "from": "android", "to": "api",      "fromAnchor": "right",  "toAnchor": "left", "style": "rest" },
     { "from": "api",     "to": "storage",  "fromAnchor": "right",  "toAnchor": "left", "style": "s3" },
     { "from": "api",     "to": "database", "fromAnchor": "right",  "toAnchor": "left", "style": "mongo" },
-    { "from": "api",     "to": "push",     "fromAnchor": "bottom", "toAnchor": "top",  "style": "fcm" },
-    { "from": "push",    "to": "ios",      "fromAnchor": "left",   "toAnchor": "bottom", "style": "push", "curve": "natural" },
-    { "from": "push",    "to": "android",  "fromAnchor": "left",   "toAnchor": "bottom", "style": "push", "curve": "natural" }
+    { "from": "api",     "to": "push",     "fromAnchor": "left",   "toAnchor": "right", "style": "fcm" },
+    { "from": "push",    "to": "ios",      "fromAnchor": "top",    "toAnchor": "bottom", "style": "push", "curve": "direct" },
+    { "from": "push",    "to": "android",  "fromAnchor": "bottom", "toAnchor": "top", "style": "push", "curve": "direct" }
   ],
   "connectorStyles": {
     "rest":  { "color": "blue",    "strokeWidth": 2, "label": "REST" },

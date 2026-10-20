@@ -351,10 +351,11 @@ export function generateSVG(diagram: any, options: any = {}) {
     // Label placement mirrors the player: vertical runs (the delta-Y-dominant
     // ones) carry it beside the midpoint stem on the labelAlign side;
     // horizontal runs carry it above the midpoint.
-    if (style.label) {
+    const connectorLabel = connector.label ?? style.label
+    if (connectorLabel) {
       const midX = (fromPos.x + toPos.x) / 2
       const midY = (fromPos.y + toPos.y) / 2
-      const label = brand?.upperLabels ? style.label.toUpperCase() : style.label
+      const label = brand?.upperLabels ? connectorLabel.toUpperCase() : connectorLabel
       const isVertical = Math.abs(toPos.y - fromPos.y) > Math.abs(toPos.x - fromPos.x)
       let lx = midX, ly = midY - 8, anchor = 'middle'
       if (isVertical) {

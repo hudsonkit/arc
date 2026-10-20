@@ -15,7 +15,7 @@
     "auth":      { "icon": "Shield",   "name": "Auth Service",   "subtitle": "JWT",       "color": "amber" },
     "users":     { "icon": "Users",    "name": "User Service",   "subtitle": "REST",      "color": "emerald" },
     "orders":    { "icon": "Package",  "name": "Order Service",  "subtitle": "REST",      "color": "blue" },
-    "queue":     { "icon": "Repeat",   "name": "Message Queue",  "subtitle": "RabbitMQ",  "color": "zinc" },
+    "queue":     { "icon": "Repeat",   "name": "Queue",  "subtitle": "RabbitMQ",  "color": "zinc" },
     "userDb":    { "icon": "Database", "name": "Users DB",       "subtitle": "Postgres",  "color": "emerald" },
     "orderDb":   { "icon": "Database", "name": "Orders DB",      "subtitle": "Postgres",  "color": "blue" },
     "analytics": { "icon": "BarChart", "name": "Analytics",      "subtitle": "ClickHouse","color": "sky" }

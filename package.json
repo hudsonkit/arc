@@ -1,12 +1,12 @@
 {
   "name": "@hudsonkit/arc",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "type": "module",
   "packageManager": "bun@1.3.11",
   "workspaces": [
     "packages/*"
   ],
-  "description": "A visual explanation toolkit for software systems — interactive diagrams, guided stories, animated flows, visual editing, and CLI + MCP tools",
+  "description": "Illustrations and interactive diagrams made with AI agents, defined in JSON or TypeScript, with visual editing, React viewers, and CLI + MCP tools",
   "author": "Arach Tchoupani",
   "license": "MIT",
   "repository": {
@@ -63,23 +63,30 @@
   },
   "files": [
     "lib/*.js",
+    "lib/*.cjs",
     "lib/*.d.ts",
+    "lib/*.d.cts",
     "lib/*.css",
     "bin/arc.mjs",
     "bin/arc-ascii.mjs",
     "docs/llm.txt",
     "schemas/arc-diagram.schema.json",
-    "skills/arc-diagrams/SKILL.md",
+    "skills/arc-diagrams/",
     "src/types/diagram.ts"
   ],
-  "main": "./lib/arc.umd.js",
+  "main": "./lib/arc.cjs",
   "module": "./lib/arc.es.js",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/arc.es.js",
-      "require": "./lib/arc.umd.js"
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/arc.es.js"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/arc.cjs"
+      }
     },
     "./arc.css": "./lib/arc.css",
     "./style.css": "./lib/arc.css"
@@ -103,7 +110,7 @@
     "visual:update": "bun scripts/visualCheck.ts --update",
     "generate:schema": "bun scripts/generate-schema.ts",
     "generate-og": "node scripts/generate-og.js",
-    "check:dist": "attw --pack . --ignore-rules cjs-resolves-to-esm unexpected-module-syntax --exclude-entrypoints ./arc.css ./style.css && publint && node scripts/check-packlist.mjs",
+    "check:dist": "attw --pack . --exclude-entrypoints ./arc.css ./style.css && publint && node scripts/check-packlist.mjs && node scripts/check-package-runtime.mjs",
     "prepublishOnly": "bun run build:lib && bun run build:cli && bun run check:dist",
     "build:site": "bun run build:lib && bun run build"
   },

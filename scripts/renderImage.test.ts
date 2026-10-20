@@ -28,6 +28,18 @@ const PNG_BYTES = Buffer.concat([
 ])
 
 describe('renderDiagramSvg', () => {
+  test('exports connection labels with style fallback and explicit suppression', () => {
+    const renderLabel = (label: string | undefined, theme?: string) => renderDiagramSvg({
+      ...diagram,
+      connectors: [{ ...diagram.connectors[0], label }],
+    }, { theme }).svg
+    expect(renderLabel(undefined)).toContain('>SQL</text>')
+    expect(renderLabel('write & persist')).toContain('>write &amp; persist</text>')
+    expect(renderLabel('write & persist')).not.toContain('>SQL</text>')
+    expect(renderLabel('')).not.toContain('>SQL</text>')
+    expect(renderLabel('write', 'engineering')).toContain('>WRITE</text>')
+  })
+
   test('returns deterministic SVG with export dimensions', () => {
     const first = renderDiagramSvg(diagram, { padding: 10 })
     const second = renderDiagramSvg(diagram, { padding: 10 })

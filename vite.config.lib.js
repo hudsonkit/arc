@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import dts from 'vite-plugin-dts'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
+import { copyFileSync } from 'node:fs'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -16,14 +17,18 @@ export default defineConfig({
       include: ['src'],
       outDir: 'lib',
       rollupTypes: true,
+      afterBuild() {
+        copyFileSync(resolve(__dirname, 'lib/index.d.ts'), resolve(__dirname, 'lib/index.d.cts'))
+      },
     }),
   ],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'Arc',
-      formats: ['es', 'umd'],
-      fileName: (format) => `arc.${format}.js`,
+      // CJS keeps optional editor imports lazy; UMD inlines and eagerly runs them.
+      formats: ['es', 'cjs'],
+      fileName: (format) => format === 'cjs' ? 'arc.cjs' : `arc.${format}.js`,
     },
     rollupOptions: {
       // Externalize React - users provide their own

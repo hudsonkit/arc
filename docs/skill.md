@@ -6,11 +6,13 @@
 
 ### arc-diagrams
 
-Create and modify Arc architecture diagrams.
+Create and refine Arc diagrams and structured illustrations for products,
+processes, concepts, and software.
 
 **Location**: `skills/arc-diagrams/SKILL.md`
 
-**Trigger**: When user asks to create, edit, or work with architecture diagrams
+**Trigger**: When a user asks for a diagram or illustration that explains a
+structure, process, mechanism, or relationship with editable source.
 
 **Capabilities**:
 - Generate `ArcDiagramData` from natural language descriptions
@@ -18,6 +20,15 @@ Create and modify Arc architecture diagrams.
 - Apply themes and styling
 - Use `autoLayout` to avoid hand-positioning
 - Convert between JSON and TypeScript formats
+- Choose composition patterns for request paths, boundaries, comparisons, and layered cutaways
+- Adapt bundled, editable examples in `skills/arc-diagrams/examples/`
+- Render and visually review the result at its intended reading size
+- Use the separate tiered isometric format when spatial layers explain the system
+- Compose a graphite panel cube when three faces explain aspects of one idea
+
+The skill includes focused authoring references and a bounded render-and-review
+loop. Validation checks the source; visual inspection checks readability, routing,
+occlusion, and export quality. Both are part of the handoff.
 
 **Context to provide**:
 ```

@@ -49,131 +49,73 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build library
-        run: bun run build:lib
+      - name: Set release versions before building
+        env:
+          RELEASE_INPUT: ${{ inputs.version }}
+          PACKAGE_SCOPE: ${{ inputs.package || 'all' }}
+        run: |
+          version="$RELEASE_INPUT"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          node scripts/set-release-version.mjs "$version" "$PACKAGE_SCOPE"
+
+      - name: Verify source
+        run: |
+          bun test
+          bun run typecheck
+          bun run lint
+
+      - name: Build library and CLI
+        run: |
+          bun run build:lib
+          bun run build:cli
+          bun run check:dist
 
       - name: Build viewer
-        if: github.event_name != 'workflow_dispatch' || inputs.package != 'arc'
+        if: inputs.package != 'arc'
         run: bun run --filter '@hudsonkit/arc-viewer' build
 
       - name: Build isometric
-        if: github.event_name != 'workflow_dispatch' || inputs.package != 'arc'
+        if: inputs.package != 'arc'
         run: |
           bun run build:iso
           mkdir -p packages/iso/dist
-          cp dist-iso/*.js packages/iso/dist/
-          cp dist-iso/*.d.ts packages/iso/dist/ 2>/dev/null || true
+          cp dist-iso/*.js dist-iso/*.cjs dist-iso/*.d.ts dist-iso/*.d.cts packages/iso/dist/
 
       - name: Build MCP server
-        if: github.event_name != 'workflow_dispatch' || inputs.package != 'arc'
-        run: bun run --filter '@hudsonkit/arc-mcp' build
+        if: inputs.package != 'arc'
+        run: bun run build:mcp
 
-      - name: Publish helper
-        # A release re-run must be able to finish what an earlier run started:
-        # publishing a version npm already has is an error, so skip it.
+      - name: Verify viewer and isometric packages
+        if: inputs.package != 'arc'
         run: |
-          cat > "$RUNNER_TEMP/publish.sh" <<'SH'
+          for package in viewer iso; do
+            bunx attw --pack "packages/$package"
+            bunx publint "packages/$package"
+            node scripts/check-package-runtime.mjs "packages/$package"
+          done
+          node scripts/check-package-runtime.mjs packages/mcp
+
+      - name: Pack or publish release packages
+        env:
+          PACKAGE_SCOPE: ${{ inputs.package || 'all' }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        run: |
           publish() {
             name=$(node -p "require('./package.json').name")
             version=$(node -p "require('./package.json').version")
-            if npm view "$name@$version" version >/dev/null 2>&1; then
+            if [ "$DRY_RUN" = "true" ]; then
+              npm pack --dry-run --ignore-scripts --workspaces=false
+            elif npm view "$name@$version" version >/dev/null 2>&1; then
               echo "$name@$version is already on npm; skipping"
             else
-              npm publish --provenance --access public "$@"
+              npm publish --provenance --access public --workspaces=false
             fi
           }
-          SH
-
-      - name: Get version from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        id: tag_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Set version (from tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version
-
-      - name: Set version (manual)
-        if: github.event_name == 'workflow_dispatch'
-        run: npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
-
-      - name: Publish @hudsonkit/arc (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          . "$RUNNER_TEMP/publish.sh"
           publish
-
-      - name: Publish @hudsonkit/arc-viewer (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        working-directory: packages/viewer
-        run: |
-          npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          . "$RUNNER_TEMP/publish.sh"
-          publish --workspaces=false
-
-      - name: Publish @hudsonkit/arc-iso (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        working-directory: packages/iso
-        run: |
-          npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          . "$RUNNER_TEMP/publish.sh"
-          publish --workspaces=false
-
-      - name: Publish @hudsonkit/arc-mcp (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        working-directory: packages/mcp
-        run: |
-          npm version ${{ steps.tag_version.outputs.VERSION }} --no-git-tag-version --allow-same-version --workspaces=false
-          . "$RUNNER_TEMP/publish.sh"
-          publish --workspaces=false
-
-      - name: Publish @hudsonkit/arc (manual)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "DRY RUN: Would publish @hudsonkit/arc"
-            bun run check:dist
-            npm pack --dry-run --ignore-scripts
-          else
-            . "$RUNNER_TEMP/publish.sh"
-            publish
-          fi
-
-      - name: Publish @hudsonkit/arc-viewer (manual)
-        if: github.event_name == 'workflow_dispatch' && inputs.package != 'arc'
-        working-directory: packages/viewer
-        run: |
-          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version --workspaces=false
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "DRY RUN: Would publish @hudsonkit/arc-viewer"
-            npm pack --dry-run --ignore-scripts --workspaces=false
-          else
-            . "$RUNNER_TEMP/publish.sh"
-            publish --workspaces=false
-          fi
-
-      - name: Publish @hudsonkit/arc-iso (manual)
-        if: github.event_name == 'workflow_dispatch' && inputs.package != 'arc'
-        working-directory: packages/iso
-        run: |
-          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version --workspaces=false
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "DRY RUN: Would publish @hudsonkit/arc-iso"
-            npm pack --dry-run --ignore-scripts --workspaces=false
-          else
-            . "$RUNNER_TEMP/publish.sh"
-            publish --workspaces=false
-          fi
-
-      - name: Publish @hudsonkit/arc-mcp (manual)
-        if: github.event_name == 'workflow_dispatch' && inputs.package != 'arc'
-        working-directory: packages/mcp
-        run: |
-          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version --workspaces=false
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "DRY RUN: Would publish @hudsonkit/arc-mcp"
-            npm pack --dry-run --ignore-scripts --workspaces=false
-          else
-            . "$RUNNER_TEMP/publish.sh"
-            publish --workspaces=false
+          if [ "$PACKAGE_SCOPE" = "all" ]; then
+            for package in viewer iso mcp; do
+              (cd "packages/$package" && publish)
+            done
           fi

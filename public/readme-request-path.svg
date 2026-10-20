@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="478" height="328" viewBox="-24 -24 478 328">
+  <style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap");</style>
+  <rect x="-24" y="-24" width="478" height="328" fill="#f6f7f9"/>
+  <defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="rgba(95, 107, 124, 0.18)"/></pattern></defs><g opacity="0.4"><rect x="-24" y="-24" width="478" height="328" fill="url(#grid)"/></g>
+  <path d="M 110 65 C 137.5 65, 137.5 65, 165 65" fill="none" stroke="#2d72d2" stroke-width="2"/>
+  <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#2d72d2" fill-opacity="0.88" transform="translate(165 65) rotate(0)"/>
+  <text x="137.5" y="57" text-anchor="middle" fill="#2d72d2" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">request</text>
+  <path d="M 255 65 C 282.5 65, 282.5 65, 310 65" fill="none" stroke="#2d72d2" stroke-width="2"/>
+  <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#2d72d2" fill-opacity="0.88" transform="translate(310 65) rotate(0)"/>
+  <text x="282.5" y="57" text-anchor="middle" fill="#2d72d2" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">write</text>
+  <path d="M 210 95 C 210 142.5, 210 142.5, 210 190" fill="none" stroke="#5f6b7c" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#5f6b7c" fill-opacity="0.88" transform="translate(210 190) rotate(90)"/>
+  <text x="218" y="146.5" text-anchor="start" fill="#5f6b7c" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">enqueue</text>
+  <path d="M 255 220 C 282.5 220, 282.5 220, 310 220" fill="none" stroke="#5f6b7c" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#5f6b7c" fill-opacity="0.88" transform="translate(310 220) rotate(0)"/>
+  <text x="282.5" y="212" text-anchor="middle" fill="#5f6b7c" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">consume</text>
+  <g opacity="1">
+    <rect x="20" y="35" width="90" height="60" rx="3" fill="#2d72d214" stroke="#2d72d2" stroke-width="1" stroke-opacity="1"/>
+    <defs><clipPath id="clip-client"><rect width="90" height="60" rx="3"/></clipPath></defs>
+    <g transform="translate(20 35)" clip-path="url(#clip-client)"><line x1="20" y1="40.6" x2="70" y2="40.6" stroke="#2d72d2" stroke-width="1" opacity="0.2"/></g>
+    <g transform="translate(20 35)" clip-path="url(#clip-client)">
+    <text x="45" y="33.6" text-anchor="middle" fill="#1c2127" font-size="12" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Client</text>
+    </g>
+  </g>
+  <g opacity="1">
+    <rect x="165" y="35" width="90" height="60" rx="3" fill="#2d72d214" stroke="#2d72d2" stroke-width="1" stroke-opacity="1"/>
+    <defs><clipPath id="clip-api"><rect width="90" height="60" rx="3"/></clipPath></defs>
+    <g transform="translate(165 35)" clip-path="url(#clip-api)"><line x1="20" y1="40.6" x2="70" y2="40.6" stroke="#2d72d2" stroke-width="1" opacity="0.2"/></g>
+    <g transform="translate(165 35)" clip-path="url(#clip-api)">
+    <text x="45" y="33.6" text-anchor="middle" fill="#1c2127" font-size="12" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">API</text>
+    </g>
+  </g>
+  <g opacity="1">
+    <rect x="310" y="35" width="90" height="60" rx="3" fill="#2d72d214" stroke="#2d72d2" stroke-width="1" stroke-opacity="1"/>
+    <defs><clipPath id="clip-db"><rect width="90" height="60" rx="3"/></clipPath></defs>
+    <g transform="translate(310 35)" clip-path="url(#clip-db)"><line x1="20" y1="40.6" x2="70" y2="40.6" stroke="#2d72d2" stroke-width="1" opacity="0.2"/></g>
+    <g transform="translate(310 35)" clip-path="url(#clip-db)">
+    <text x="45" y="33.6" text-anchor="middle" fill="#1c2127" font-size="12" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Storage</text>
+    </g>
+  </g>
+  <g opacity="1">
+    <rect x="165" y="190" width="90" height="60" rx="3" fill="#5f6b7c14" stroke="#5f6b7c" stroke-width="1" stroke-opacity="1"/>
+    <defs><clipPath id="clip-queue"><rect width="90" height="60" rx="3"/></clipPath></defs>
+    <g transform="translate(165 190)" clip-path="url(#clip-queue)"><line x1="20" y1="40.6" x2="70" y2="40.6" stroke="#5f6b7c" stroke-width="1" opacity="0.2"/></g>
+    <g transform="translate(165 190)" clip-path="url(#clip-queue)">
+    <text x="45" y="33.6" text-anchor="middle" fill="#1c2127" font-size="12" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Queue</text>
+    </g>
+  </g>
+  <g opacity="1">
+    <rect x="310" y="190" width="90" height="60" rx="3" fill="#5f6b7c14" stroke="#5f6b7c" stroke-width="1" stroke-opacity="1"/>
+    <defs><clipPath id="clip-worker"><rect width="90" height="60" rx="3"/></clipPath></defs>
+    <g transform="translate(310 190)" clip-path="url(#clip-worker)"><line x1="20" y1="40.6" x2="70" y2="40.6" stroke="#5f6b7c" stroke-width="1" opacity="0.2"/></g>
+    <g transform="translate(310 190)" clip-path="url(#clip-worker)">
+    <text x="45" y="33.6" text-anchor="middle" fill="#1c2127" font-size="12" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Worker</text>
+    </g>
+  </g>
+  <rect x="-23.5" y="-23.5" width="477" height="327" stroke="#5f6b7c" stroke-width="1" fill="none" />
+</svg>

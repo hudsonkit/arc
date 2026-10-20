@@ -1,0 +1,73 @@
+{
+  "title": "Layers of a service",
+  "description": "Illustrative stack: interface above services above runtime.",
+  "theme": "light",
+  "canvas": {
+    "width": 900,
+    "height": 740
+  },
+  "origin": {
+    "x": 455,
+    "y": 640
+  },
+  "floorSize": {
+    "width": 300,
+    "depth": 230
+  },
+  "tiers": [
+    {
+      "name": "Runtime",
+      "elevation": 0
+    },
+    {
+      "name": "Services",
+      "elevation": 150
+    },
+    {
+      "name": "Interface",
+      "elevation": 300
+    }
+  ],
+  "nodes": [
+    {
+      "tier": 0,
+      "x": 35,
+      "y": 30,
+      "width": 230,
+      "depth": 165,
+      "height": 24,
+      "color": "slate",
+      "label": "RUNTIME"
+    },
+    {
+      "tier": 1,
+      "x": 35,
+      "y": 30,
+      "width": 110,
+      "depth": 165,
+      "height": 32,
+      "color": "blue",
+      "label": "API"
+    },
+    {
+      "tier": 1,
+      "x": 165,
+      "y": 30,
+      "width": 100,
+      "depth": 165,
+      "height": 32,
+      "color": "emerald",
+      "label": "DATA"
+    },
+    {
+      "tier": 2,
+      "x": 35,
+      "y": 30,
+      "width": 230,
+      "depth": 165,
+      "height": 24,
+      "color": "blue",
+      "label": "CLIENT"
+    }
+  ]
+}

@@ -21,6 +21,8 @@ const PlayerShowcase = lazy(() => import('./components/PlayerShowcase'))
 const NativeMermaidSequencesPost = lazy(() => import('./components/blog/NativeMermaidSequencesPost'))
 const ConnectionPoolExplainer = lazy(() => import('./components/explainers/ConnectionPoolExplainer'))
 const ExamplesPage = lazy(() => import('./components/ExamplesPage'))
+const ExplodedShowcase = lazy(() => import('./components/ExplodedShowcase'))
+const PanelCubeShowcase = lazy(() => import('./components/PanelCubeShowcase'))
 
 interface HashPayload {
   diagram: any
@@ -469,6 +471,8 @@ function App() {
         <Route path="/blog/native-mermaid-sequences" element={<NativeMermaidSequencesPost />} />
         <Route path="/iso-demo" element={<IsometricDemo />} />
         <Route path="/iso-examples" element={<IsometricExamples />} />
+        <Route path="/exploded" element={<ExplodedShowcase />} />
+        <Route path="/panel-cube" element={<PanelCubeShowcase />} />
         <Route path="/showcase" element={<PlayerShowcase />} />
         <Route path="/examples" element={<ExamplesPage />} />
         <Route path="/examples/:exampleId" element={<ExamplesPage />} />

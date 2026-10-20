@@ -125,3 +125,24 @@ const eventDriven: ArcDiagramData = {
   },
 }
 ```
+
+## Panel cube
+
+For a conceptual object that opens outward, try the [panel cube](/panel-cube).
+Its graphite shell, fine leaders, and three named faces come from a
+`PanelCubeDocument`; use it to explain aspects of a product, process, or idea.
+The example supports hover, keyboard, and touch, with JSON and static SVG downloads.
+See [Panel cubes](/docs/api#panel-cubes) for the React and export APIs.
+
+## Exploded assemblies
+
+Open the [native exploded examples](/exploded) to explore the AI stack and phone. Both examples support assembled and exploded states, a separation slider, light and dark appearances, and JSON/SVG downloads.
+
+```tsx
+import { ArcExploded, aiStackExploded, phoneExploded } from '@hudsonkit/arc'
+
+<ArcExploded document={aiStackExploded} style={{ height: 650 }} />
+<ArcExploded document={phoneExploded} progress={0} style={{ height: 650 }} />
+```
+
+These illustrative assemblies use the new `ExplodedDocument` family. The phone demonstrates a housing with two contained parts on one separation level. See [Native exploded views](/docs/diagram-format#native-exploded-views) for the model and current integration boundary.

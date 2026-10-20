@@ -11,14 +11,9 @@ type ArcMarkProps = SVGProps<SVGSVGElement> & {
 }
 
 /**
- * Arc's identity mark: one routed edge — a true circular arc — springing from a
- * square origin node and landing on a round terminal. It reads as an arch, as
- * the letter's namesake curve, and as the thing Arc draws all day: two system
- * endpoints and the route between them.
- *
- * Geometry is on a 32-unit grid: centre (16, 21), radius 9, so the feet sit on
- * x = 7 and x = 25 and the crown at y = 12. Every part carries its own paint,
- * so the mark renders correctly on pages that never load the landing CSS.
+ * An upward-open smile (∪) joining two hollow, softly rounded rectangular eyes.
+ * The curve meets the bottom of each eye, leaving their interiors transparent.
+ * Keep geometry in sync with public/arc-mark.svg.
  */
 export default function ArcMark({ title, variant = 'glyph', className = '', ...props }: ArcMarkProps) {
   const isDecorative = !title
@@ -37,17 +32,23 @@ export default function ArcMark({ title, variant = 'glyph', className = '', ...p
       {tile && <rect className="arc-mark__tile" width="32" height="32" rx="8" fill="#0d1726" />}
       <path
         className="arc-mark__route"
-        d="M7 21A9 9 0 0 1 25 21"
+        d="M7 13.5A9 7 0 0 0 25 13.5"
         stroke={tile ? '#f3efe6' : 'currentColor'}
-        strokeWidth="3.25"
+        strokeWidth="2"
         strokeLinecap="butt"
       />
       <rect
         className="arc-mark__origin"
-        x="4" y="19" width="6" height="6" rx="1"
-        fill={tile ? '#f3efe6' : 'currentColor'}
+        x="3.5" y="7.5" width="7" height="6" rx="1.5"
+        stroke={tile ? '#f3efe6' : 'currentColor'}
+        strokeWidth="1.5"
       />
-      <circle className="arc-mark__terminal" cx="25" cy="22" r="3.25" fill="#ff6a3d" />
+      <rect
+        className="arc-mark__terminal"
+        x="21.5" y="7.5" width="7" height="6" rx="1.5"
+        stroke="#ff6a3d"
+        strokeWidth="1.5"
+      />
     </svg>
   )
 }

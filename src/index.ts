@@ -103,3 +103,9 @@ export type { DiagramDelta, RemovedNode, MovedNode, ChangedNode, ConnectorDelta,
 export { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession, listDiagramSessions, deleteDiagramSession } from './utils/sessionStorage'
 export type { DiagramSession } from './utils/sessionStorage'
 export type { DiagramConfig, DiagramNode, TierConfig } from './iso/types'
+
+// Native exploded assemblies (independent of graph and legacy isometric documents).
+export * from './exploded'
+
+// Floating shell panels with a controlled reveal and standalone SVG export.
+export * from './panel-cube'

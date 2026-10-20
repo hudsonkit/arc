@@ -1,29 +1,35 @@
-<div align="center">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-readme-header.png" alt="Arc — illustrations, made with agents. Two hollow rounded rectangular eyes and an upward-open smile sit beside the wordmark." width="800" />
+</p>
 
-<h1><img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mark.svg" alt="" width="40" height="40" /> Arc</h1>
+**Arc helps you make illustrations and interactive diagrams with AI agents.**
+Explain a product, map a process, explore a concept, or show how software works.
+Embed the result in your app, or export a figure for your docs.
 
-### Build explanations people can explore.
+Define the elements and their relationships in declarative JSON or TypeScript.
+Give an agent the Arc skill to compose, render, and refine the illustration,
+or author the source yourself. Keep the editable source to review and reuse.
+Architecture diagrams also have a visual studio, CLI, and MCP tools.
 
-**A visual explanation toolkit for software systems.**<br />
-Build interactive maps, playable sequences, and spatial views with a visual
-studio and developer tools. Start with Arc data or supported Mermaid source.
-Embed the result, or export **PNG, SVG, GIF, and MP4**.
+Supported Mermaid source can also become an Arc diagram or a playable sequence.
 
-[![npm version](https://img.shields.io/npm/v/@hudsonkit/arc.svg?color=6d5efc&label=%40hudsonkit%2Farc)](https://www.npmjs.com/package/@hudsonkit/arc)
+[Get started](#get-started) · [Examples](https://arc.jdi.sh/examples/) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md) · [Open the studio](https://arc.jdi.sh/editor)
+
+[![npm version](https://img.shields.io/npm/v/@hudsonkit/arc.svg?color=2e5fa5&label=%40hudsonkit%2Farc)](https://www.npmjs.com/package/@hudsonkit/arc)
 [![license](https://img.shields.io/npm/l/@hudsonkit/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
 [![types](https://img.shields.io/npm/types/@hudsonkit/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
 
-[Explore Arc](https://arc.jdi.sh/) · [Browse 16 examples](https://arc.jdi.sh/examples/) · [Try a live explainer](https://arc.jdi.sh/examples/connection-pool/) · [Start building](#get-started) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md)
+[![An illustrative request path: Client calls API, API writes to Storage, and a separate Queue sends background work to a Worker.](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-request-path.png)](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-request-path.png)
 
-</div>
+*A request path with a separate lane for background work. Rendered from
+[editable Arc data](https://github.com/hudsonkit/arc/blob/main/skills/arc-diagrams/examples/request-path.arc.json).*
 
-Trace a request, play an exchange between services, or open up the layers of
-an architecture. Build an onboarding walkthrough, interactive article, or
-design review that lets people explore how the system works. Author on the
-canvas, in code, or with an agent, and keep the source alongside your software.
-
-A diagram in Figma can drift as the system changes. Keep its source in the
-repository so the diagram can be reviewed and updated in the same pull request.
+- **Explain the structure.** Use components, connections, groups, and spatial
+  layers to show how a system fits together.
+- **Explain the behavior.** Add guided chapters, animate a request, or step
+  through a Mermaid sequence one message at a time.
+- **Use the result.** Embed a React viewer, edit in the studio, or export an image
+  or flow animation. Keep the source for the next change.
 
 ## Bring your source. Choose your output.
 
@@ -185,6 +191,14 @@ overlaps, and invalid routes, with suggested fixes an agent can act on.
 Together, the CLI and MCP server provide validation, automatic layout, rendering, diffs,
 and a handoff into the visual studio. A person can inspect the result and
 refine the drawing directly.
+
+The `arc-diagrams` skill adds composition patterns for request paths, boundaries,
+comparisons, and layered illustrations, with editable examples and a render-and-review
+loop that checks the result at its intended reading size.
+
+```sh
+npx skills add hudsonkit/arc --skill arc-diagrams
+```
 
 Attach repository paths, line ranges, and commits to the nodes they describe.
 Review structural changes on the diagram itself: highlight additions, ghost

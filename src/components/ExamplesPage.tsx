@@ -39,7 +39,7 @@ export default function ExamplesPage() {
       <div className="eg-shell">
         <header className="eg-header">
           <Link to="/" className="eg-brand" aria-label="Arc home"><ArcMark width={32} height={32} /><strong>Arc</strong><span>v{siteVersion}</span></Link>
-          <nav aria-label="Main navigation"><Link to="/">Overview</Link><Link to="/docs/examples">Docs</Link><Link to="/editor">Open editor ↗</Link></nav>
+          <nav aria-label="Main navigation"><Link to="/">Overview</Link><Link to="/exploded">Exploded views</Link><Link to="/panel-cube">Panel cube</Link><Link to="/docs/examples">Docs</Link><Link to="/editor">Open editor ↗</Link></nav>
         </header>
         <main>
           <div className="eg-intro"><p className="eg-eyebrow">THE EXAMPLE LIBRARY · {examples.length} WORKING DIAGRAMS</p><h1>Start with a system<br />you know.</h1><p>A cache miss. A payment retry. A release going live. Explore the diagram, read its source, and make it your own.</p></div>

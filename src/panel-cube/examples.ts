@@ -1,0 +1,15 @@
+import type { PanelCubeDocument } from './types'
+
+/** Conceptual functions of a field recorder, not a physical teardown. */
+export const fieldRecorderCube: PanelCubeDocument = {
+  kind: 'panel-cube',
+  version: 1,
+  id: 'field-recorder',
+  title: 'A field recorder',
+  description: 'Three parts of making a recording: capture a moment, keep it, and hear it again.',
+  faces: [
+    { id: 'capture', side: 'top', label: 'Capture', description: 'Microphones turn sound into a signal.' },
+    { id: 'storage', side: 'left', label: 'Storage', description: 'Keep each take ready for later.' },
+    { id: 'playback', side: 'right', label: 'Playback', description: 'Listen back and find the moment.' },
+  ],
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arc diagrams & illustrations"
+  short_description: "Compose and review diagrams and illustrations"
+  default_prompt: "Use $arc-diagrams to create an illustration with editable source, then render and visually review it."

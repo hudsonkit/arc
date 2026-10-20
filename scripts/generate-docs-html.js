@@ -137,6 +137,8 @@ const softwareJsonLd = JSON.stringify({
 
 const exampleCatalog = JSON.parse(readFileSync(path.join(__dirname, '..', 'src/content/exampleCatalog.json'), 'utf-8'))
 const examplePages = [
+  { path: 'panel-cube', title: 'Panel cube | Arc', description: 'Rotate and unfold a field recorder with native Arc panel diagrams.', image: 'og-landing.png' },
+  { path: 'exploded', title: 'Exploded views | Arc', description: 'Explore a mechanical keyboard and an AI stack as native Arc diagrams.', image: 'og-landing.png' },
   { path: 'examples/connection-pool', title: 'Connection pool | Arc', description: 'Adjust demand and explore borrowing, waiting, and connection reuse.', image: 'readme-connection-pool.png' },
   { path: 'examples', title: 'Diagram examples | Arc', description: 'Explore architecture, sequence, flowchart, and state diagrams with downloadable source.', image: 'og-landing.png' },
   ...exampleCatalog.map(example => ({ path: `examples/${example.id}`, title: `${example.title} | Arc examples`, description: example.description, image: 'og-landing.png' })),

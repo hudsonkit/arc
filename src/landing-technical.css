@@ -178,7 +178,7 @@
 }
 .tl-hero-band .arc-mark { color: var(--tl-sheet-ink); }
 .tl-brand-mark { width: 22px; height: 22px; }
-.tl-brand-mark .arc-mark__terminal { transition: transform 260ms cubic-bezier(.3, 1.6, .5, 1); transform-origin: 25px 22px; }
+.tl-brand-mark .arc-mark__terminal { transition: transform 260ms cubic-bezier(.3, 1.6, .5, 1); transform-box: fill-box; transform-origin: center; }
 .tl-brand:hover .tl-brand-mark .arc-mark__terminal { transform: scale(1.25); }
 .tl-brand-lockup { display: grid; line-height: 1; gap: 3px; }
 .tl-brand-name { font-weight: 500; font-size: 15px; letter-spacing: -0.02em; }

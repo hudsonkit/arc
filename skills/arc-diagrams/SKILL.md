@@ -1,288 +1,116 @@
 ---
 name: arc-diagrams
-description: Create architecture diagrams using Arc's JSON format. Use when asked to "create an architecture diagram", "draw a system diagram", "visualize the architecture", or "make a diagram of".
+description: Create and refine Arc diagrams and structured illustrations for products, processes, concepts, and software. Compose architecture maps, request paths, layered cutaways, panel cubes, comparisons, and visual explanations with editable source and a render-and-review loop.
 ---
 
-# Arc Diagrams
+# Arc diagrams and illustrations
 
-Arc is a visual diagram editor for creating architecture diagrams. This skill enables you to generate Arc-compatible diagram configs that can be rendered in React applications.
+Make the reader understand a product, process, system, or relationship. Deliver an
+editable source and a rendered visual whose labels survive the intended display
+size. Arc can carry a technical illustration beyond a boxes-and-arrows inventory;
+choose the representation from the explanation.
 
-## When to Use
+## Establish the explanation
 
-Activate this skill when the user asks to:
-- "Create an architecture diagram"
-- "Draw a system diagram"
-- "Visualize the architecture"
-- "Make a diagram showing..."
-- "Design a flow diagram"
+Infer the audience, destination, and one question the image must answer from the
+request. Ask only when a missing fact would change the result. For example:
+“Where does a request wait when all connections are busy?” is a useful brief.
+“Show everything in the backend” needs a selected path or several views.
 
-## Diagram Format
+For a real system, inspect its code or supplied evidence before drawing ownership,
+direction, timing, or trust boundaries. Label hypothetical examples as illustrative.
+Keep measurements and scale honest; do not invent throughput, latency, or capacity.
 
-Arc diagrams are JSON objects with this structure:
+## Select the representation
 
-```typescript
-interface ArcDiagramData {
-  layout: { width: number; height: number }
-  nodes: Record<string, NodePosition>
-  nodeData: Record<string, NodeData>
-  connectors: Connector[]
-  connectorStyles: Record<string, ConnectorStyle>
-  flows?: DiagramFlow[]
-}
-```
+- **Architecture, boundaries, request paths, comparisons:** Arc architecture
+  JSON (`ArcDiagramData`). Read [diagram authoring](references/diagram-authoring.md).
+- **Layers, physical containment, spatial hierarchy:** tiered isometric
+  `DiagramConfig`. Read [spatial illustrations](references/spatial-illustrations.md).
+  This is a separate format; do not send it to `arc check` or `arc render`.
+- **A concept revealed through three faces:** a graphite panel cube with outward
+  separation and fine callouts. Read [panel cubes](references/panel-cubes.md).
+  Use `ArcPanelCube` or `renderPanelCubeSvg`; this family has its own renderer.
+- **Ordered exchanges:** the native Mermaid sequence player when the reader
+  needs message order. Check the installed viewer API and supported syntax.
+- **Cause and effect:** a small deterministic state model plus an Arc projection.
+  Counts, highlights, and motion must derive from the same model. A static figure
+  can show selected states without building an application.
 
-## Creating a Diagram
+Read [composition patterns](references/composition-patterns.md) when choosing a
+layout or improving an illustration. It maps each pattern to a working example.
+Use custom SVG/HTML framing for titles, captions, leaders, and insets when useful;
+keep the technical drawing and its source editable. Photographs and freeform
+pictorial art need another medium; do not force them into Arc nodes.
 
-### 1. Define Layout
+## Compose deliberately
 
-Set canvas dimensions (default 1600x900 for editor, smaller for exports):
+Use one dominant reading direction and one focal relationship. Place secondary
+systems on a quieter lane. Group by ownership or function, not arbitrary proximity.
+Use the same color for the same role across panels; combine color with labels,
+stroke patterns, or shapes. Depth must encode a layer or containment relationship.
 
-```json
-"layout": { "width": 860, "height": 400 }
-```
+Aim for at most 12 nodes in a flat view. Split larger stories into regions or
+chapters. Use automatic layout for dense graphs; hand placement is appropriate
+when spatial arrangement carries meaning. Arc's standard node sizes are
+`xs` 80×36, `s` 110×48, `m` 160×75, `l` 220×90. Compute pitch from the actual node
+width plus a clear connector channel, typically 60–100px. Long labels need more
+room or a subtitle, not smaller type.
 
-### 2. Position Nodes
+Give referenced connectors stable IDs. Use `views` for chapters and `flows` for
+message travel. Inspect the installed schema before adding fields. Arc architecture
+JSON and tiered isometric JSON have different shapes and rendering entry points.
 
-Each node needs an `x`, `y` position and `size`:
+## Render and review
 
-```json
-"nodes": {
-  "frontend": { "x": 50,  "y": 100, "size": "l" },
-  "api":      { "x": 300, "y": 100, "size": "m" },
-  "database": { "x": 550, "y": 100, "size": "m" }
-}
-```
+A valid document is not evidence of a good illustration. Complete this loop:
 
-**Size options** (canonical — use these):
-| Size | Key | Dimensions (px) |
-|------|-----|-----------------|
-| Extra Small | `xs` | 80 × 36 |
-| Small | `s` | 110 × 48 |
-| Medium | `m` | 160 × 75 |
-| Large | `l` | 220 × 90 |
+1. **Validate the source.** For architecture JSON, run `arc check figure.arc.json`
+   or MCP `validate_diagram`. Resolve errors first; explain intentional warnings.
+   In the source checkout, use `bun scripts/arc-cli.ts` in place of `arc`.
+2. **Render the artifact.** For example:
+   ```sh
+   arc render figure.arc.json --out figure.svg --theme engineering --mode light
+   arc render figure.arc.json --out figure.png --theme engineering --mode light --scale 2
+   ```
+   MCP equivalents are `render_svg` and `render_png`. PNG uses Chrome/Chromium;
+   `ARC_CHROME` selects it. For tiered isometric or panel cube output use the
+   corresponding SVG renderer described in the references.
+3. **Open the render.** Inspect the actual PNG or browser-rendered SVG, at its
+   intended display width and a reduced width. For a README, check roughly
+   720px and 360px. Inspect the intended light/dark surfaces where relevant.
+   Source inspection, successful rendering, and ASCII previews do not establish
+   visual quality. If visual inspection is unavailable, report that limitation.
+4. **Review together:**
+   - Can a reader identify the subject and main path without the prose?
+   - Are labels legible, unclipped, and clearly attached to their objects?
+   - Are crossings, tangencies, overlaps, and accidental visual groupings absent?
+   - Do arrows, boundaries, layers, and comparison states tell the truth?
+   - Is emphasis reserved for the mechanism being explained?
+   - Does the export preserve the crop, fonts, contrast, and whitespace?
+5. **Repair causes.** Shorten labels, widen lanes, split panels, or change the
+   composition. Do not shrink the whole figure to hide a crowded layout. Make
+   one batched correction pass, render again, and confirm it. Stop after that
+   confirmation unless a concrete unresolved defect or user feedback requires
+   further work; name any remaining limitation.
 
-Source: `src/utils/constants.ts` → `NODE_SIZES`. Do **not** use `large`/`normal`/`small`.
+For authored animation, inspect start, a meaningful transition, and end at fixed
+`flowTime` values. Use motion to explain order or causality; provide a readable
+still when the destination cannot play it. GIF/MP4 need Chrome and ffmpeg.
+For a panel cube, inspect `progress` at 0, 0.5, and 1; confirm that the faces stay
+attached to their callouts. Test hover, keyboard activation, touch controls, and
+reduced motion when delivering an interactive view.
 
-### 3. Define Node Data
+## Deliver
 
-Each node needs an icon, name, and color:
+Return the rendered artifact, its editable source, and a short caption explaining
+what the reader should notice. Include alt text for embedded images. State what
+was validated and visually inspected; do not call an unviewed render approved.
+Use the requested destination and format. A new illustration does not authorize
+publishing a site or releasing a package.
 
-```json
-"nodeData": {
-  "frontend": {
-    "icon": "Monitor",
-    "name": "Frontend",
-    "subtitle": "React",
-    "description": "User interface",
-    "color": "violet"
-  },
-  "api": {
-    "icon": "Server",
-    "name": "API",
-    "subtitle": "Node.js",
-    "description": "REST endpoints",
-    "color": "emerald"
-  },
-  "database": {
-    "icon": "Database",
-    "name": "PostgreSQL",
-    "subtitle": "Storage",
-    "description": "Persistent data",
-    "color": "blue"
-  }
-}
-```
-
-**Available icons (from Lucide):**
-- **Devices:** Monitor, Server, Smartphone, Watch, Cloud, Cpu, Database, HardDrive
-- **Network:** Wifi, Globe
-- **Users:** User, Users
-- **Security:** Lock, Key, Shield
-- **Media:** Mic, Camera, Speaker, Headphones
-- **Code:** Code, Terminal, FileCode, Folder
-- **Data:** Zap, Activity, BarChart, PieChart
-- **Flow:** ArrowRight, ArrowDown, RefreshCw, Repeat
-- **Structure:** Box, Package, Layers, Grid
-- **UI:** Settings, Bell, Mail, MessageSquare, Search, Filter
-- **Actions:** Download, Upload, Play, Pause, Square, Circle
-
-**Available colors:**
-`violet` | `emerald` | `blue` | `amber` | `sky` | `zinc` | `rose` | `orange`
-
-### 4. Connect Nodes
-
-Define connections between nodes:
-
-```json
-"connectors": [
-  {
-    "from": "frontend",
-    "to": "api",
-    "fromAnchor": "right",
-    "toAnchor": "left",
-    "style": "http"
-  },
-  {
-    "from": "api",
-    "to": "database",
-    "fromAnchor": "right",
-    "toAnchor": "left",
-    "style": "sql"
-  }
-]
-```
-
-**Anchor positions:**
-`top` | `bottom` | `left` | `right` | `bottomLeft` | `bottomRight` | `topLeft` | `topRight`
-
-**Optional:** Add `"curve": "natural"` or `"curve": "step"` for curved connectors.
-
-**Stable identity:** Give a connector an `id` when it may be referenced by a focus story or guided view, reviewed in a diff, or when another connector shares the same `from`/`to` pair. Without an `id`, a connector is only addressable by endpoint pair or array index.
-
-**Guided views:** when the diagram explains a flow a reader should follow in order, add `views[]` — `{id, title, node?, nodes?, connectors?, mode?, caption?, steps?}` per chapter. The player draws a chapter rail (`showViews`) and `/player/<session>?view=<id>` deep-links a chapter. A view anchored on `node` inherits that node's `focusTargets` story; declare `nodes`/`connectors`/`mode` to override it.
-
-### 5. Animate message flows
-
-Add `flows[]` when a message or packet should travel the diagram rather than a connector merely having motion styling:
-
-```json
-"flows": [
-  {
-    "id": "request",
-    "label": "Request",
-    "legs": [
-      { "id": "client-api" },
-      { "id": "api-db", "pause": 0.4 }
-    ],
-    "duration": 3,
-    "delay": 0.2,
-    "hold": 0.6,
-    "repeat": "indefinite",
-    "easing": "ease-in-out",
-    "marker": "packet",
-    "color": "emerald",
-    "size": 11,
-    "trail": "wake"
-  }
-]
-```
-
-- Each leg references a connector by stable `id` (preferred) or endpoint `{ "from": "...", "to": "..." }`; add `direction: "reverse"` to run a leg backwards and `pause` to dwell between hops.
-- Timing is deterministic: `speed` is px/s (default 160), `duration` is total route seconds including pauses and overrides `speed`, `delay`/`hold` are seconds, and `repeat` is a count or `"indefinite"`.
-- `marker` is `dot` (default), `packet`, `pulse`, or `arrow`; `trail` is `none`, `fade`, or `wake`; `color`/`size` tune the marker.
-- Standalone SVG animates via SMIL, `render_svg`/`render_png` can sample a still at `flowTime`, and `arc render --format gif|mp4` or MCP `render_animation` captures deterministic frames through Chrome and encodes with ffmpeg.
-
-### 6. Style Connectors
-
-Define appearance for each connector style:
-
-```json
-"connectorStyles": {
-  "http": { "color": "amber", "strokeWidth": 2, "label": "HTTP" },
-  "sql": { "color": "blue", "strokeWidth": 2, "label": "SQL" },
-  "async": { "color": "zinc", "strokeWidth": 1.5, "dashed": true }
-}
-```
-
-## Complete Example
-
-Here's a full diagram for a typical web application:
-
-```json
-{
-  "layout": { "width": 700, "height": 300 },
-  "nodes": {
-    "client":   { "x": 50,  "y": 100, "size": "l" },
-    "api":      { "x": 300, "y": 100, "size": "m" },
-    "cache":    { "x": 300, "y": 220, "size": "s" },
-    "database": { "x": 520, "y": 100, "size": "m" }
-  },
-  "nodeData": {
-    "client":   { "icon": "Monitor",  "name": "Client",   "subtitle": "React",    "color": "violet" },
-    "api":      { "icon": "Server",   "name": "API",      "subtitle": "Express",  "color": "emerald" },
-    "cache":    { "icon": "Zap",      "name": "Cache",    "subtitle": "Redis",    "color": "amber" },
-    "database": { "icon": "Database", "name": "Database", "subtitle": "Postgres", "color": "blue" }
-  },
-  "connectors": [
-    { "from": "client", "to": "api",      "fromAnchor": "right",  "toAnchor": "left", "style": "http" },
-    { "from": "api",    "to": "database", "fromAnchor": "right",  "toAnchor": "left", "style": "sql" },
-    { "from": "api",    "to": "cache",    "fromAnchor": "bottom", "toAnchor": "top",  "style": "cache" }
-  ],
-  "connectorStyles": {
-    "http":  { "color": "amber",   "strokeWidth": 2, "label": "HTTP" },
-    "sql":   { "color": "blue",    "strokeWidth": 2, "label": "SQL" },
-    "cache": { "color": "emerald", "strokeWidth": 2, "label": "cache" }
-  }
-}
-```
-
-## Layout judgment
-
-The contract past "does it validate": a good Arc diagram reads top-to-bottom or left-to-right in one glance. These are the composition rules `validateDiagram` partially enforces (`composition/*` warnings) and the rest is on you.
-
-**Budget.** ≤12 nodes per flat view. Past ~16 without `groups`/`layoutHints`/`views`, `composition/too-dense` warns — the fix is chaptering, not a bigger canvas: split into `groups` + `layoutHints` for regions, or `views[]` for a walkthrough.
-
-**One spine.** Pick one dominant flow direction and hold it: left→right for request/data paths, top→bottom for stacks and pipelines. Everything not on the spine (replicas, sidecars, observability taps) sits on a parallel lane — above/below for a horizontal spine — and reads as secondary: `zinc` color, `dashed`, thinner `strokeWidth`.
-
-**Spacing math.** `NODE_SIZES` are xs 80×36, s 110×48, m 160×75, l 220×90. Budget ~150–200px of horizontal pitch between connected nodes (edge gap ≈ 40–80px of clear channel for the stroke + label), ~60–100px vertically. Keep sibling nodes on one baseline and aligned to a ~50px grid when hand-placing.
-
-**When to autoLayout.** Call `autoLayout()` (or the editor's auto-layout) when node count exceeds ~8, when groups own their members via `layoutHints`, or when the graph is dense and any hand order will cross edges. Hand-place only when the shape itself carries meaning (a ring, a hub-and-spoke) and the node count is small.
-
-**Labels.** The name row is what scans. Budget by size: xs ~5, s ~9, m ~17, l ~26 chars (`composition/label-overflow` warns past it, and suggests the next size up). Prefer `subtitle` for the qualifier instead of a long name — "API" + subtitle "Express" beats "Express API Server".
-
-**Routing.** Anchors take the direction of travel: `right→left` on a horizontal spine, `bottom→top` on a vertical one. Never route a connector through an unrelated node (`geometry/connector-through-node` is an error). Diagonal corner anchors (`bottomRight` etc.) are for fan-out, not the spine. Give an `id` to any connector a focus story or view will reference, and to parallel edges sharing `from`/`to`.
-
-## Validation and repair
-
-Always validate before handing off JSON.
-
-- In the repo, call `validateDiagram(value)` from `src/utils/diagramDiagnostics.ts`.
-- Through MCP, call `validate_diagram`; it returns `{ ok, diagnostics }`.
-- `validateDiagramShape()` remains the low-level shape gate; `validateDiagram` wraps it and adds repairable diagnostics.
-
-Each diagnostic has a stable `code`, `severity`, `subject`, human `message`, optional `evidence`, and `supportedFixes`.
-
-Repair loop:
-
-1. Read `diagnostics`; fix `severity: "error"` before warnings.
-2. Apply one `supportedFixes` entry when offered, or make the direct correction it names.
-3. Re-validate the edited document.
-4. Repeat until no error-severity diagnostics remain; leave warnings only when intentional.
-
-Common codes:
-
-- `shape/*` — malformed document or entries; fix these before anything else.
-- `semantic/dangling-connector-endpoint` — retarget `from`/`to` or remove the connector.
-- `semantic/unknown-*` and `semantic/duplicate-connector-id` — use the suggested valid value or unique connector `id`.
-- `geometry/node-overlap`, `geometry/connector-through-node`, `geometry/node-outside-layout` — move nodes or run `autoLayout()`.
-- `composition/too-dense`, `composition/label-overflow` — advisory budget warnings: chapter the diagram, or resize the node.
-
-## Preview and export
-
-- `render_ascii` previews a diagram in plain text without external dependencies.
-- `render_svg` returns deterministic SVG markup; authored `flows` animate via SMIL by default, `flowTime` samples a deterministic still, and `animateFlows: false` disables them.
-- `render_png` returns MCP image content when Chrome/Chromium is installed; set `ARC_CHROME` when it is not on `PATH`, and use `flowTime` to choose a deterministic animation frame. If it returns `render/chrome-unavailable`, continue with ASCII/SVG or ask the user to install Chrome/Chromium.
-- `render_animation` writes a GIF or MP4 for diagrams with `flows`; set `output` to a `.gif`/`.mp4` path, optionally `duration`, `fps`, `scale`, `theme`, and `mode`. It needs Chrome/Chromium plus ffmpeg (`ARC_CHROME`/`ARC_FFMPEG`).
-- `render_html` emits paste-ready output: `format=component` for a React TSX component, `format=iframe` for a studio embed tag, or `format=html` for a standalone SVG page.
-- The CLI equivalent is `arc render diagram.json --out artifact.gif --duration 4 --fps 12`.
-
-## Output
-
-When generating a diagram, output:
-1. The complete JSON config
-2. Brief explanation of the architecture shown
-3. Suggest the user save it as a `.arc.json` file or paste into the Arc editor
-
-## TypeScript Export
-
-For React projects, diagrams can be exported as TypeScript:
-
-```typescript
-import type { ArcDiagramData } from '@hudsonkit/arc'
-
-const diagram: ArcDiagramData = {
-  // ... config here
-}
-
-export default diagram
-```
+The installed folder includes references and examples. If reading only the MCP
+`arc://skill/diagrams` resource, relative files may not be exposed: retrieve them
+from the matching package's `skills/arc-diagrams/` folder or the repository's
+[skill directory](https://github.com/hudsonkit/arc/tree/main/skills/arc-diagrams),
+and check version compatibility before using a newer API.

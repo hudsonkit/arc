@@ -15,15 +15,8 @@ if (!existsSync(publicDir)) {
 // Technical landing brand — Space Grotesk + JetBrains Mono, cool paper,
 // engineering blue, blueprint grid. Shared by every OG card so GitHub, Slack,
 // and docs previews match https://arc.jdi.sh.
-const MARK = `
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-  <path d="M4 10V4h6M22 4h6v6M28 22v6h-6M10 28H4v-6" stroke="#2e5fa5" stroke-opacity=".24"/>
-  <path d="M7 24C7 14.6 14.6 7 24 7" stroke="#2e5fa5" stroke-width="2.25"/>
-  <path d="M7 18v6h6M18 7h6v6" stroke="#101518" stroke-opacity=".34"/>
-  <rect x="4.5" y="21.5" width="5" height="5" fill="#101518"/>
-  <rect x="21.5" y="4.5" width="5" height="5" fill="#d95d39"/>
-</svg>
-`
+const MARK = readFileSync(path.join(publicDir, 'arc-mark.svg'), 'utf8')
+  .replace('<svg ', '<svg width="32" height="32" aria-hidden="true" ')
 
 const FONTS = `
   <link rel="preconnect" href="https://fonts.googleapis.com">

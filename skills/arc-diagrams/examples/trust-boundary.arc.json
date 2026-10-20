@@ -1,0 +1,89 @@
+{
+  "layout": {
+    "width": 1000,
+    "height": 300
+  },
+  "nodes": {
+    "client": {
+      "x": 60,
+      "y": 125,
+      "size": "m"
+    },
+    "gateway": {
+      "x": 400,
+      "y": 125,
+      "size": "m"
+    },
+    "api": {
+      "x": 760,
+      "y": 125,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "client": {
+      "name": "Browser",
+      "kind": "frontend",
+      "color": "zinc"
+    },
+    "gateway": {
+      "name": "Gateway",
+      "kind": "gateway",
+      "color": "blue"
+    },
+    "api": {
+      "name": "Service",
+      "kind": "service",
+      "color": "blue"
+    }
+  },
+  "connectors": [
+    {
+      "id": "https",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "client",
+      "to": "gateway",
+      "style": "primary",
+      "label": "HTTPS"
+    },
+    {
+      "id": "forward",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "gateway",
+      "to": "api",
+      "style": "primary",
+      "label": "authenticated request"
+    }
+  ],
+  "connectorStyles": {
+    "primary": {
+      "color": "blue",
+      "strokeWidth": 2
+    }
+  },
+  "groups": [
+    {
+      "id": "device",
+      "x": 20,
+      "y": 30,
+      "width": 240,
+      "height": 240,
+      "type": "rect",
+      "color": "zinc",
+      "label": "USER DEVICE"
+    },
+    {
+      "id": "private",
+      "x": 360,
+      "y": 30,
+      "width": 610,
+      "height": 240,
+      "type": "rect",
+      "color": "blue",
+      "label": "SERVICE NETWORK",
+      "dashed": true
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "layout": {
+    "width": 1160,
+    "height": 450
+  },
+  "nodes": {
+    "sync-client": {
+      "x": 40,
+      "y": 90,
+      "size": "m"
+    },
+    "sync-api": {
+      "x": 340,
+      "y": 90,
+      "size": "m"
+    },
+    "sync-work": {
+      "x": 640,
+      "y": 90,
+      "size": "m"
+    },
+    "sync-result": {
+      "x": 940,
+      "y": 90,
+      "size": "m"
+    },
+    "async-client": {
+      "x": 40,
+      "y": 310,
+      "size": "m"
+    },
+    "async-api": {
+      "x": 340,
+      "y": 310,
+      "size": "m"
+    },
+    "async-work": {
+      "x": 640,
+      "y": 310,
+      "size": "m"
+    },
+    "async-result": {
+      "x": 940,
+      "y": 310,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "sync-client": {
+      "name": "Client",
+      "kind": "frontend",
+      "color": "zinc"
+    },
+    "sync-api": {
+      "name": "API",
+      "kind": "backend",
+      "color": "blue"
+    },
+    "sync-work": {
+      "name": "Worker",
+      "kind": "service",
+      "color": "blue"
+    },
+    "sync-result": {
+      "name": "Result",
+      "kind": "storage",
+      "color": "zinc"
+    },
+    "async-client": {
+      "name": "Client",
+      "kind": "frontend",
+      "color": "zinc"
+    },
+    "async-api": {
+      "name": "API",
+      "kind": "backend",
+      "color": "blue"
+    },
+    "async-work": {
+      "name": "Queue",
+      "kind": "queue",
+      "color": "blue"
+    },
+    "async-result": {
+      "name": "Worker",
+      "kind": "service",
+      "color": "zinc"
+    }
+  },
+  "connectors": [
+    {
+      "id": "sync-client-api",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "sync-client",
+      "to": "sync-api",
+      "style": "primary",
+      "label": "request"
+    },
+    {
+      "id": "sync-api-work",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "sync-api",
+      "to": "sync-work",
+      "style": "primary",
+      "label": "wait for work"
+    },
+    {
+      "id": "sync-work-result",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "sync-work",
+      "to": "sync-result",
+      "style": "primary",
+      "label": "complete"
+    },
+    {
+      "id": "async-client-api",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "async-client",
+      "to": "async-api",
+      "style": "primary",
+      "label": "request"
+    },
+    {
+      "id": "async-api-work",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "async-api",
+      "to": "async-work",
+      "style": "primary",
+      "label": "enqueue"
+    },
+    {
+      "id": "async-work-result",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "from": "async-work",
+      "to": "async-result",
+      "style": "secondary",
+      "label": "consume later"
+    }
+  ],
+  "connectorStyles": {
+    "primary": {
+      "color": "blue",
+      "strokeWidth": 2
+    },
+    "secondary": {
+      "color": "zinc",
+      "strokeWidth": 1.5,
+      "dashed": true
+    }
+  },
+  "groups": [
+    {
+      "id": "sync",
+      "x": 15,
+      "y": 20,
+      "width": 1130,
+      "height": 175,
+      "type": "rect",
+      "color": "zinc",
+      "label": "SYNCHRONOUS \u00b7 completion stays on the request path"
+    },
+    {
+      "id": "async",
+      "x": 15,
+      "y": 240,
+      "width": 1130,
+      "height": 175,
+      "type": "rect",
+      "color": "zinc",
+      "label": "QUEUED \u00b7 completion happens after enqueueing"
+    }
+  ]
+}
