@@ -173,7 +173,27 @@ jobs:
             200) echo 'This server version is already in the MCP Registry; skipping' ;;
             404)
               mcp-publisher login github-oidc --registry "$MCP_REGISTRY_URL"
-              mcp-publisher publish server.json
+              npm_name=$(node -p "require('./package.json').name")
+              npm_version=$(node -p "require('./package.json').version")
+              propagation_error="NPM package '$npm_name' exists, but version '$npm_version' was not found (status: 404). A newly published release can take a moment to appear on the registry."
+              publish_log="$RUNNER_TEMP/mcp-publish.log"
+              # npm's version metadata can lag a successful publish. Retry only that diagnostic.
+              for attempt in $(seq 1 12); do
+                if mcp-publisher publish server.json > "$publish_log" 2>&1; then
+                  cat "$publish_log"
+                  break
+                else
+                  publish_status=$?
+                  cat "$publish_log"
+                fi
+                if [ "$attempt" -eq 12 ] || \
+                  ! grep -Fq 'server returned status 400:' "$publish_log" || \
+                  ! grep -Fq "$propagation_error" "$publish_log"; then
+                  exit "$publish_status"
+                fi
+                echo "MCP publish attempt $attempt/12 reached npm before the version was available; retrying in 15 seconds"
+                sleep 15
+              done
               ;;
             *)
               echo "MCP Registry lookup failed with HTTP $status"
