@@ -1,6 +1,7 @@
 {
   "name": "@hudsonkit/arc-mcp",
-  "version": "0.14.0",
+  "version": "0.14.1",
+  "mcpName": "io.github.hudsonkit/arc",
   "type": "module",
   "description": "MCP server for Arc — AI agents author, validate, render, and diff architecture diagrams as code",
   "author": "Arach Tchoupani",
@@ -10,7 +11,7 @@
     "url": "https://github.com/hudsonkit/arc.git",
     "directory": "packages/mcp"
   },
-  "homepage": "https://arc.jdi.sh",
+  "homepage": "https://hudsonkit.com/arc",
   "bugs": {
     "url": "https://github.com/hudsonkit/arc/issues"
   },
@@ -45,7 +46,8 @@
     "arc-mcp": "./dist/arc-mcp.mjs"
   },
   "files": [
-    "dist/arc-mcp.mjs"
+    "dist/arc-mcp.mjs",
+    "server.json"
   ],
   "scripts": {
     "build": "bun build.mjs",

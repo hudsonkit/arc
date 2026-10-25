@@ -17,6 +17,7 @@ on:
         options:
           - all
           - arc
+          - mcp
         default: all
       dry_run:
         description: 'Dry run (no actual publish)'
@@ -67,17 +68,18 @@ jobs:
           bun run lint
 
       - name: Build library and CLI
+        if: inputs.package != 'mcp'
         run: |
           bun run build:lib
           bun run build:cli
           bun run check:dist
 
       - name: Build viewer
-        if: inputs.package != 'arc'
+        if: inputs.package != 'arc' && inputs.package != 'mcp'
         run: bun run --filter '@hudsonkit/arc-viewer' build
 
       - name: Build isometric
-        if: inputs.package != 'arc'
+        if: inputs.package != 'arc' && inputs.package != 'mcp'
         run: |
           bun run build:iso
           mkdir -p packages/iso/dist
@@ -88,14 +90,44 @@ jobs:
         run: bun run build:mcp
 
       - name: Verify viewer and isometric packages
-        if: inputs.package != 'arc'
+        if: inputs.package != 'arc' && inputs.package != 'mcp'
         run: |
           for package in viewer iso; do
             bunx attw --pack "packages/$package"
             bunx publint "packages/$package"
             node scripts/check-package-runtime.mjs "packages/$package"
           done
-          node scripts/check-package-runtime.mjs packages/mcp
+
+      - name: Verify MCP package
+        if: inputs.package != 'arc'
+        run: node scripts/check-package-runtime.mjs packages/mcp
+
+      - name: Install cosign
+        if: inputs.package != 'arc'
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Install verified MCP publisher
+        if: inputs.package != 'arc'
+        env:
+          MCP_PUBLISHER_VERSION: v1.8.4
+          MCP_PUBLISHER_REPOSITORY: https://github.com/modelcontextprotocol/registry
+        run: |
+          publisher_dir="$RUNNER_TEMP/mcp-publisher"
+          mkdir -p "$publisher_dir"
+          archive="$publisher_dir/mcp-publisher_linux_amd64.tar.gz"
+          release_url="$MCP_PUBLISHER_REPOSITORY/releases/download/$MCP_PUBLISHER_VERSION"
+          curl --fail --location --silent --show-error "$release_url/$(basename "$archive")" --output "$archive"
+          curl --fail --location --silent --show-error "$release_url/$(basename "$archive").sigstore.json" --output "$archive.sigstore.json"
+          cosign verify-blob "$archive" \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "$MCP_PUBLISHER_REPOSITORY/.github/workflows/release.yml@refs/tags/$MCP_PUBLISHER_VERSION" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          tar -xzf "$archive" -C "$publisher_dir" mcp-publisher
+          echo "$publisher_dir" >> "$GITHUB_PATH"
+
+      - name: Validate MCP Registry manifest
+        if: inputs.package != 'arc'
+        run: mcp-publisher validate packages/mcp/server.json
 
       - name: Pack or publish release packages
         env:
@@ -113,9 +145,39 @@ jobs:
               npm publish --provenance --access public --workspaces=false
             fi
           }
-          publish
+          if [ "$PACKAGE_SCOPE" = "mcp" ]; then
+            (cd packages/mcp && publish)
+          else
+            publish
+          fi
           if [ "$PACKAGE_SCOPE" = "all" ]; then
             for package in viewer iso mcp; do
               (cd "packages/$package" && publish)
             done
           fi
+
+      - name: Publish to MCP Registry
+        if: inputs.package != 'arc' && !inputs.dry_run
+        working-directory: packages/mcp
+        env:
+          MCP_REGISTRY_URL: https://registry.modelcontextprotocol.io
+        run: |
+          version_url=$(node --input-type=module <<'NODE'
+            import { readFileSync } from "node:fs";
+            const server = JSON.parse(readFileSync("server.json", "utf8"));
+            console.log(new URL(`/v0.1/servers/${encodeURIComponent(server.name)}/versions/${encodeURIComponent(server.version)}`, process.env.MCP_REGISTRY_URL).href);
+          NODE
+          )
+          status=$(curl --silent --show-error --retry 3 --output "$RUNNER_TEMP/mcp-registry-version.json" --write-out '%{http_code}' "$version_url")
+          case "$status" in
+            200) echo 'This server version is already in the MCP Registry; skipping' ;;
+            404)
+              mcp-publisher login github-oidc --registry "$MCP_REGISTRY_URL"
+              mcp-publisher publish server.json
+              ;;
+            *)
+              echo "MCP Registry lookup failed with HTTP $status"
+              cat "$RUNNER_TEMP/mcp-registry-version.json"
+              exit 1
+              ;;
+          esac

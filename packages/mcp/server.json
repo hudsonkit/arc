@@ -1,0 +1,32 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.hudsonkit/arc",
+  "title": "Arc",
+  "description": "Author, validate, lay out, render, and diff architecture diagrams as code.",
+  "version": "0.14.1",
+  "websiteUrl": "https://hudsonkit.com/arc",
+  "repository": {
+    "url": "https://github.com/hudsonkit/arc",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mark.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@hudsonkit/arc-mcp",
+      "version": "0.14.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
