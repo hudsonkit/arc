@@ -5,6 +5,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
@@ -22,6 +23,9 @@ import { renderDiagramAnimation } from '../../../scripts/renderAnimation.ts'
 import { renderDiagramPng, renderDiagramSvg, RenderError } from '../../../scripts/renderImage.ts'
 import { toTypeScriptSource } from '../../../src/types/diagram.ts'
 import type { ArcDiagram, ArcDiagramData } from '../../../src/types/diagram.ts'
+import type { LiveDiagramActor } from '../../../src/types/live.ts'
+import { liveViewerBase, startLocalLiveService } from './live.ts'
+import type { LiveDiagramService } from './live.ts'
 import pkg from '../package.json'
 // Inlined by `bun run build:mcp` so the published arc-mcp bin serves these
 // without depending on the package's on-disk layout.
@@ -30,6 +34,28 @@ import skillMarkdown from '../../../skills/arc-diagrams/SKILL.md' with { type: '
 import llmBriefing from '../../../docs/llm.txt' with { type: 'text' }
 
 const diagramSchema = z.record(z.unknown())
+const agentLabel = z.string().trim().min(1).max(80).regex(/^[^\u0000-\u001f\u007f]+$/, 'Agent labels must be single-line text without control characters')
+const liveAgentSchema = z.object({
+  harness: agentLabel.describe('Caller-declared harness label, for example Codex; not inferred or verified by Arc'),
+  name: agentLabel.optional().describe('Optional caller-declared agent display name'),
+}).strict()
+const liveWorkScopeSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('canvas') }).strict(),
+  z.object({ type: z.literal('nodes'), nodeIds: z.array(z.string().min(1).max(200)).min(1).max(200) }).strict(),
+  z.object({
+    type: z.literal('region'),
+    x: z.number().finite().min(-100_000).max(100_000),
+    y: z.number().finite().min(-100_000).max(100_000),
+    width: z.number().finite().positive().max(100_000),
+    height: z.number().finite().positive().max(100_000),
+  }).strict(),
+])
+const reviewRepositorySchema = z.object({ name: z.string().min(1).max(200), url: z.string().url().optional(), revision: z.string().min(1).max(200).optional() })
+const reviewFindingSchema = z.object({
+  id: z.string().min(1).max(200), title: z.string().min(1).max(500), detail: z.string().min(1).max(16000),
+  severity: z.enum(['info', 'low', 'medium', 'high']), nodeIds: z.array(z.string().min(1).max(200)).max(200).optional(),
+  sources: z.array(z.object({ path: z.string().min(1).max(2000), line: z.number().int().positive().optional(), revision: z.string().min(1).max(200).optional(), url: z.string().url().optional() })).max(50),
+})
 const themeDescription = 'Arc theme id: default, warm, cool, mono, engineering, workbench, tactical, command, spacex, claude, codex, or inherit'
 
 function parseDiagram(value: unknown, label = 'diagram'): ArcDiagramData {
@@ -49,11 +75,201 @@ function renderToolError(err: unknown) {
   }
 }
 
-export function createArcMcpServer(): McpServer {
+export function createArcMcpServer(options: { live?: LiveDiagramService; editorUrl?: string; connectionId?: string; reviewDir?: string } = {}): McpServer {
   const server = new McpServer({
     name: 'arc',
     version: pkg.version,
   })
+
+  const connectionId = options.connectionId ?? randomUUID()
+  let localService: ReturnType<typeof startLocalLiveService> | undefined
+  const liveService = () => options.live
+    ? Promise.resolve(options.live)
+    : (localService ??= startLocalLiveService({ reviewDir: options.reviewDir }).catch(error => {
+      localService = undefined
+      throw error
+    }))
+  const actor = (): LiveDiagramActor => {
+    const client = server.server.getClientVersion()
+    if (!client) throw new Error('Initialize the MCP connection before opening a live diagram')
+    return { name: client.name, version: client.version, id: connectionId }
+  }
+  server.server.onclose = () => {
+    options.live?.hub.disconnect(connectionId)
+    void localService?.then(service => { service.hub.disconnect(connectionId); service.close() }, () => {})
+  }
+  const liveResult = (value: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] })
+  const liveError = (error: unknown) => ({ ...liveResult({ ok: false, error: error instanceof Error ? error.message : String(error) }), isError: true as const })
+
+  server.tool(
+    'open_live_diagram',
+    'Open an idle architecture view in the Hudson Kit Arc studio. Open the returned liveUrl once; use begin_live_diagram_work before doing diagram work, update_live_diagram for full revisions, and finish_live_diagram_work when that work ends. Keep stable node IDs for continuous motion. Connection identity comes from MCP initialization; optional agent labels are caller-declared.',
+    {
+      diagram: diagramSchema.describe('Valid ArcDiagramData JSON'),
+      title: z.string().max(200).optional().describe('Human-readable title for the live architecture'),
+      baseUrl: z.string().url().optional().describe('Studio base URL (default: ARC_EDITOR_URL or http://localhost:5188)'),
+      agent: liveAgentSchema.optional().describe('Optional display identity for this session; preserves the actual MCP client name, version, and connection ID'),
+    },
+    async ({ diagram, title, baseUrl, agent }) => {
+      try {
+        const viewerBase = baseUrl ?? options.editorUrl
+        liveViewerBase(viewerBase)
+        const identity: LiveDiagramActor = {
+          ...actor(),
+          ...(agent ? { harness: agent.harness, ...(agent.name ? { displayName: agent.name } : {}) } : {}),
+        }
+        const service = await liveService()
+        const snapshot = service.hub.open(diagram, identity, { title, baseUrl: viewerBase })
+        return liveResult({
+          ok: true, sessionId: snapshot.sessionId, revision: snapshot.revision, status: snapshot.status, actor: snapshot.actor,
+          liveUrl: service.hub.viewerUrl(snapshot.sessionId, connectionId, service.baseUrl, viewerBase),
+          streamUrl: service.hub.streamUrl(snapshot.sessionId, connectionId, service.baseUrl),
+        })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'open_architecture_review',
+    'Open a saved architecture review with a baseline diagram and a concrete review question. The liveUrl is a read capability; keep the returned resumeToken private so a later MCP connection can resume after disconnect or restart. Revisions, findings, decisions, and open questions persist atomically in ARC_REVIEW_DIR. Use begin_live_diagram_work, update_live_diagram, and finish_live_diagram_work for declared work; use update_architecture_review for evidence. Requires configured durable storage.',
+    {
+      diagram: diagramSchema.describe('Initial baseline ArcDiagramData JSON'), title: z.string().trim().min(1).max(200),
+      question: z.string().min(1).max(4000).describe('The concrete architecture question this review will answer'),
+      repository: reviewRepositorySchema.optional(), agent: liveAgentSchema.optional(), baseUrl: z.string().url().optional(),
+    },
+    async ({ diagram, title, question, repository, agent, baseUrl }) => {
+      try {
+        const viewerBase = baseUrl ?? options.editorUrl
+        const identity: LiveDiagramActor = { ...actor(), ...(agent ? { harness: agent.harness, ...(agent.name ? { displayName: agent.name } : {}) } : {}) }
+        const service = await liveService()
+        const { snapshot, resumeToken } = service.hub.openReview(diagram, identity, { title, question, repository, baseUrl: viewerBase })
+        return liveResult({ ok: true, sessionId: snapshot.sessionId, revision: snapshot.revision, status: snapshot.status, actor: snapshot.actor, resumeToken,
+          liveUrl: service.hub.viewerUrl(snapshot.sessionId, connectionId, service.baseUrl, viewerBase),
+          streamUrl: service.hub.streamUrl(snapshot.sessionId, connectionId, service.baseUrl),
+        })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'update_architecture_review',
+    'Publish review evidence. Only supplied fields are replaced; omitted fields are preserved. Findings must have stable unique IDs, a severity, and source references (use an empty sources array when evidence is not yet available). Arrays replace their previous contents, and an empty summary clears it. During declared work this renews its five-minute lease. Saved completed reviews are read-only.',
+    {
+      sessionId: z.string(), summary: z.string().max(16000).optional(), findings: z.array(reviewFindingSchema).max(200).optional(),
+      decisions: z.array(z.string().min(1).max(4000)).max(200).optional(), openQuestions: z.array(z.string().min(1).max(4000)).max(200).optional(),
+    },
+    async ({ sessionId, ...patch }) => {
+      try {
+        const service = await liveService()
+        const snapshot = service.hub.updateReview(sessionId, connectionId, patch)
+        return liveResult({ ok: true, sessionId, revision: snapshot.revision, status: snapshot.status, review: snapshot.review })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'resume_architecture_review',
+    'Resume a saved review using its private author capability after the previous MCP owner disconnects. A live owner cannot be displaced. Restored in-progress work is interrupted; declare new work explicitly. Completed reviews remain read-only and can be reopened for viewing. This connection supplies its actual MCP identity; optional agent labels are caller-declared, as when opening a review. Omit agent to use only the new connection identity. Completed artifacts keep their final author unchanged. A new relay may return a new liveUrl.',
+    {
+      sessionId: z.string(), resumeToken: z.string().min(1).max(200), baseUrl: z.string().url().optional(),
+      agent: liveAgentSchema.optional().describe('Optional caller-declared display identity for the resumed author; preserves actual MCP client name, version, and connection ID'),
+    },
+    async ({ sessionId, resumeToken, baseUrl, agent }) => {
+      try {
+        const viewerBase = baseUrl ?? options.editorUrl
+        const service = await liveService()
+        const identity: LiveDiagramActor = { ...actor(), ...(agent ? { harness: agent.harness, ...(agent.name ? { displayName: agent.name } : {}) } : {}) }
+        const snapshot = service.hub.resumeReview(sessionId, resumeToken, identity, { baseUrl: viewerBase })
+        return liveResult({ ok: true, sessionId, revision: snapshot.revision, status: snapshot.status, actor: snapshot.actor, readOnly: snapshot.status === 'complete',
+          liveUrl: service.hub.viewerUrl(sessionId, connectionId, service.baseUrl, viewerBase), streamUrl: service.hub.streamUrl(sessionId, connectionId, service.baseUrl),
+        })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'revoke_architecture_review_share',
+    'Invalidate the current review viewing link and disconnect its viewers. Returns a replacement liveUrl and streamUrl. This rotates only the read capability; the private author resumeToken remains valid. Only the owning MCP connection may revoke a share.',
+    { sessionId: z.string(), baseUrl: z.string().url().optional() },
+    async ({ sessionId, baseUrl }) => {
+      try {
+        const viewerBase = baseUrl ?? options.editorUrl
+        liveViewerBase(viewerBase)
+        const service = await liveService()
+        const snapshot = service.hub.revokeReviewShare(sessionId, connectionId, { baseUrl: viewerBase })
+        return liveResult({ ok: true, sessionId, revision: snapshot.revision, status: snapshot.status,
+          liveUrl: service.hub.viewerUrl(sessionId, connectionId, service.baseUrl, viewerBase), streamUrl: service.hub.streamUrl(sessionId, connectionId, service.baseUrl),
+        })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'begin_live_diagram_work',
+    'Declare diagram work before doing it, with a concise summary and optional scope (default canvas). Target existing node IDs or a canvas region where new boxes will appear. Returns workId; always finish that ID with finish_live_diagram_work when done. Only one work item may be active per session. Valid diagram updates renew its five-minute lease; expiry or disconnect interrupts it instead of claiming success.',
+    {
+      sessionId: z.string().describe('Live diagram or architecture review opened or resumed on this connection'),
+      summary: z.string().trim().min(1).max(500).regex(/^[^\u0000-\u001f\u007f]+$/).describe('What diagram work you are about to perform; concise, honest, and specific'),
+      scope: liveWorkScopeSchema.optional().describe('Canvas, 1–200 unique existing node IDs, or finite canvas coordinates for a planned region'),
+    },
+    async ({ sessionId, summary, scope }) => {
+      try {
+        const service = await liveService()
+        const snapshot = service.hub.beginWork(sessionId, connectionId, summary, scope)
+        return liveResult({ ok: true, sessionId, workId: snapshot.work!.id, revision: snapshot.revision, status: snapshot.status, work: snapshot.work })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'finish_live_diagram_work',
+    'Finish the active declared diagram work using its workId. Leaves the view idle and reusable for the next begin/update/finish cycle. Stale, expired, or already finished work IDs are rejected. Use end_live_diagram only when the entire diagram session is complete.',
+    {
+      sessionId: z.string().describe('Live diagram or architecture review opened or resumed on this connection'),
+      workId: z.string().min(1).max(200).describe('Current workId returned by begin_live_diagram_work'),
+      message: z.string().max(500).optional().describe('Short note describing the actual result'),
+    },
+    async ({ sessionId, workId, message }) => {
+      try {
+        const service = await liveService()
+        const snapshot = service.hub.finishWork(sessionId, connectionId, workId, message)
+        return liveResult({ ok: true, sessionId, workId, revision: snapshot.revision, status: snapshot.status, work: snapshot.work })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'update_live_diagram',
+    'Publish the next full diagram revision. Preserve node IDs for smooth moves and use new IDs for new nodes. During declared work this renews its five-minute lease and preserves its scope; otherwise the view stays idle. Invalid diagrams leave the previous revision intact. Only this MCP connection can update its sessions.',
+    {
+      sessionId: z.string().describe('Live diagram or architecture review opened or resumed on this connection'),
+      diagram: diagramSchema.describe('Next complete ArcDiagramData JSON'),
+      message: z.string().max(500).optional().describe('Short description of the current architecture change'),
+    },
+    async ({ sessionId, diagram, message }) => {
+      try {
+        const service = await liveService()
+        const snapshot = service.hub.update(sessionId, connectionId, diagram, message)
+        return liveResult({ ok: true, sessionId, revision: snapshot.revision, status: snapshot.status })
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.tool(
+    'end_live_diagram',
+    'Mark the entire live architecture session complete, also completing any active declared work. For a reusable idle view use finish_live_diagram_work instead. Ordinary diagrams expire after disconnect; saved architecture reviews remain durable and read-only. Open a new session to continue after ending.',
+    {
+      sessionId: z.string().describe('Live diagram or architecture review opened or resumed on this connection'),
+      message: z.string().max(500).optional().describe('Short completion note'),
+    },
+    async ({ sessionId, message }) => {
+      try {
+        const service = await liveService()
+        const snapshot = service.hub.complete(sessionId, connectionId, message)
+        return liveResult({ ok: true, sessionId, revision: snapshot.revision, status: snapshot.status })
+      } catch (error) { return liveError(error) }
+    },
+  )
 
   server.tool(
     'validate_diagram',
@@ -445,6 +661,20 @@ export function createArcMcpServer(): McpServer {
 export async function runArcMcpServer(): Promise<void> {
   const server = createArcMcpServer()
   const transport = new StdioServerTransport()
+  // The SDK stdio transport does not close on EOF. Once a live relay exists it
+  // would otherwise keep an orphaned MCP process listening after its client exits.
+  let closing = false
+  const close = () => {
+    if (closing) return
+    closing = true
+    process.stdin.off('end', close)
+    process.off('SIGINT', close)
+    process.off('SIGTERM', close)
+    void server.close()
+  }
+  process.stdin.once('end', close)
+  process.once('SIGINT', close)
+  process.once('SIGTERM', close)
   await server.connect(transport)
 }
 

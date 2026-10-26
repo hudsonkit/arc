@@ -21,6 +21,8 @@ export interface FlowSvgOptions {
   flowTime?: number
   /** Set false to omit SMIL and render the flow at `flowTime ?? 0`. */
   animate?: boolean
+  /** Retain hidden still markers so the live viewer can update geometry in place. */
+  geometryBindings?: boolean
 }
 
 type FlowColorName = NonNullable<DiagramFlow['color']>
@@ -142,19 +144,24 @@ function trailSpacing(flow: ResolvedFlow): number {
   return flow.trail === 'wake' ? Math.max(10, flow.size * 1.15) : Math.max(18, flow.size * 2.2)
 }
 
-function flowLabel(flow: ResolvedFlow, color: string, fontFamily: string, backgroundColor?: string): string {
-  if (!flow.flow.label) return ''
+function flowLabelPosition(flow: ResolvedFlow): { x: number; y: number } | null {
   const firstLeg = flow.legs[0]
-  if (!firstLeg) return ''
+  if (!firstLeg) return null
   // Sit early on the first leg and well off the line — connector labels own
   // the midpoint, so the flow caption must not stack on top of them.
   const point = flowPointAtDistance(flow, firstLeg.routeStart + (firstLeg.routeEnd - firstLeg.routeStart) * 0.28)
-  if (!point) return ''
+  if (!point) return null
   const radians = (point.angle * Math.PI) / 180
   const nx = Math.sin(radians)
   const ny = -Math.cos(radians)
-  const x = point.x + nx * 18
-  const y = point.y + ny * 18
+  return { x: point.x + nx * 18, y: point.y + ny * 18 }
+}
+
+function flowLabel(flow: ResolvedFlow, color: string, fontFamily: string, backgroundColor?: string): string {
+  if (!flow.flow.label) return ''
+  const point = flowLabelPosition(flow)
+  if (!point) return ''
+  const { x, y } = point
   const halo = backgroundColor ? ` stroke="${escapeXml(backgroundColor)}" stroke-width="3" paint-order="stroke" stroke-linejoin="round"` : ''
   return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" fill="${color}" opacity="0.85" font-size="8.5" font-family="${escapeXml(fontFamily)}" letter-spacing="0.8"${halo}>${escapeXml(flow.flow.label)}</text>`
 }
@@ -181,9 +188,14 @@ function animatedFlow(flow: ResolvedFlow, data: ArcDiagramData, options: FlowSvg
   return out
 }
 
-function staticMarkerAt(position: FlowPosition, flow: ResolvedFlow, color: string, size: number, opacity: number, pulsePhase = 0): string {
+function staticMarkerTransform(position: FlowPosition, flow: ResolvedFlow): string {
   const rotate = flow.marker === 'arrow' || flow.marker === 'packet' ? ` rotate(${position.angle.toFixed(2)})` : ''
-  return `<g transform="translate(${position.x.toFixed(2)} ${position.y.toFixed(2)})${rotate}" opacity="${opacity}">${markerMarkup(flow.marker, size, color, pulsePhase)}</g>`
+  return `translate(${position.x.toFixed(2)} ${position.y.toFixed(2)})${rotate}`
+}
+
+function staticMarkerAt(position: FlowPosition | null, flow: ResolvedFlow, color: string, size: number, opacity: number, pulsePhase = 0, binding?: number): string {
+  const attrs = binding === undefined ? '' : ` data-arc-flow-static="${binding}"`
+  return `<g${attrs}${position ? ` transform="${staticMarkerTransform(position, flow)}"` : ' display="none"'} opacity="${opacity}">${markerMarkup(flow.marker, size, color, pulsePhase)}</g>`
 }
 
 function staticFlow(flow: ResolvedFlow, data: ArcDiagramData, options: FlowSvgOptions): string {
@@ -191,20 +203,20 @@ function staticFlow(flow: ResolvedFlow, data: ArcDiagramData, options: FlowSvgOp
   const position = flowPositionAt(flow, time)
   const color = resolveFlowColor(flow, data, options.themeColors)
   let out = `<g data-arc-flow="${escapeXml(flow.flow.id)}" pointer-events="none">`
-  if (position) {
+  if (position || options.geometryBindings) {
     const ghosts = flow.trail === 'wake' ? 4 : flow.trail === 'fade' ? 2 : 0
     const spacing = trailSpacing(flow)
     const ghostPositions = flowTrailPositionsAt(flow, time, spacing, ghosts)
-    for (let i = ghostPositions.length - 1; i >= 0; i--) {
+    for (let i = (options.geometryBindings ? ghosts : ghostPositions.length) - 1; i >= 0; i--) {
       const distance = i + 1
       const opacity = flow.trail === 'wake' ? 0.08 + (ghostPositions.length - distance) * 0.055 : 0.1 + (ghostPositions.length - distance) * 0.18
-      out += staticMarkerAt(ghostPositions[i], flow, color, Math.max(1, flow.size * (1 - distance * 0.12)), opacity, time * 1.25)
+      out += staticMarkerAt(ghostPositions[i] ?? null, flow, color, Math.max(1, flow.size * (1 - distance * 0.12)), opacity, time * 1.25, options.geometryBindings ? distance : undefined)
     }
     if (flow.trail === 'wake') {
       const wake = Math.min(0.28, Math.max(0.08, (flow.size * 4) / flow.routeLength))
-      out += `<path d="${escapeXml(flow.routePath)}" pathLength="1" fill="none" stroke="${color}" stroke-width="${Math.max(1.5, flow.size * 0.38)}" stroke-linecap="round" stroke-opacity="0.18" stroke-dasharray="${wake} 1" stroke-dashoffset="${keyNumber(wake - position.progress)}"/>`
+      out += `<path d="${escapeXml(flow.routePath)}" pathLength="1" fill="none" stroke="${color}" stroke-width="${Math.max(1.5, flow.size * 0.38)}" stroke-linecap="round" stroke-opacity="0.18" stroke-dasharray="${wake} 1" stroke-dashoffset="${keyNumber(wake - (position?.progress ?? 0))}"${position ? '' : ' display="none"'}/>`
     }
-    out += staticMarkerAt(position, flow, color, flow.size, 1, time * 1.25)
+    out += staticMarkerAt(position, flow, color, flow.size, 1, time * 1.25, options.geometryBindings ? 0 : undefined)
   }
   out += `${flowLabel(flow, color, options.fontFamily ?? 'ui-sans-serif, system-ui, sans-serif', options.backgroundColor)}</g>`
   return out
@@ -228,6 +240,80 @@ export function renderFlowLayer(data: ArcDiagramData, options: FlowSvgOptions = 
     out += animated ? animatedFlow(flow, data, options) : staticFlow(flow, data, options)
   }
   return `${out}</g>`
+}
+
+/** Bind existing SVG once, then update only geometry attributes. Animated
+ * elements keep their identity and begin time as nodes move. No markup parsing
+ * or animation restarts are needed on a Motion frame. */
+export function bindFlowLayerGeometry(root: Element, options: FlowSvgOptions = {}): (data: ArcDiagramData) => void {
+  const bindings = Array.from(root.querySelectorAll('[data-arc-flow]')).map(group => ({
+    id: group.getAttribute('data-arc-flow')!, group,
+    motions: Array.from(group.querySelectorAll('animateMotion')),
+    gates: Array.from(group.querySelectorAll('animate[values="0;1;0"]')),
+    wake: Array.from(group.children).find(child => child.tagName.toLowerCase() === 'path'),
+    label: Array.from(group.children).find(child => child.tagName.toLowerCase() === 'text'),
+    markers: Array.from(group.querySelectorAll('[data-arc-flow-static]')).map(element => ({
+      element, distance: Number(element.getAttribute('data-arc-flow-static')),
+    })),
+  }))
+  const set = (element: Element, name: string, value: string) => {
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value)
+  }
+  const show = (element: Element, visible: boolean) => {
+    if (visible) element.removeAttribute('display')
+    else set(element, 'display', 'none')
+  }
+  return data => {
+    const sources = new Map((data.flows ?? []).map(source => [source.id, source]))
+    for (const binding of bindings) {
+      const source = sources.get(binding.id)
+      const flow = source && resolveDiagramFlow(data, source)
+      show(binding.group, !!flow)
+      if (!flow) continue
+      const keys = motionKeys(flow)
+      const spacing = trailSpacing(flow)
+      binding.motions.forEach((element, index) => {
+        const offset = (binding.motions.length - index - 1) * spacing / flow.routeLength
+        set(element, 'path', flow.routePath)
+        set(element, 'keyPoints', offset > 0 ? shiftedKeyPoints(flow, offset) : keys.keyPoints)
+        set(element, 'keyTimes', keys.keyTimes)
+        set(element, 'keySplines', keys.keySplines)
+      })
+      // Keep the existing SMIL clock/duration while its route is being edited.
+      // A changed authored timing option rebuilds the structural layer instead.
+      const visibleEnd = keyNumber(flow.duration / flow.cycleDuration)
+      const fadeInEnd = keyNumber(Math.min(0.015, flow.duration / flow.cycleDuration))
+      for (const gate of binding.gates) set(gate, 'keyTimes', `0;${fadeInEnd};${visibleEnd}`)
+      const position = binding.markers.length ? flowPositionAt(flow, options.flowTime ?? 0) : null
+      if (binding.wake) {
+        const wake = Math.min(0.28, Math.max(0.08, (flow.size * 4) / flow.routeLength))
+        set(binding.wake, 'd', flow.routePath)
+        set(binding.wake, 'stroke-dasharray', `${wake} 1`)
+        const animation = binding.wake.firstElementChild
+        if (animation) {
+          set(animation, 'values', keys.keyPoints.split(';').map(point => keyNumber(wake - Number(point))).join(';'))
+          set(animation, 'keyTimes', keys.keyTimes)
+        } else {
+          show(binding.wake, !!position)
+          if (position) set(binding.wake, 'stroke-dashoffset', keyNumber(wake - position.progress))
+        }
+      }
+      const ghosts = flowTrailPositionsAt(flow, options.flowTime ?? 0, spacing, flow.trail === 'wake' ? 4 : flow.trail === 'fade' ? 2 : 0)
+      for (const { element, distance } of binding.markers) {
+        const point = distance === 0 ? position : ghosts[distance - 1]
+        show(element, !!point)
+        if (!point) continue
+        set(element, 'transform', staticMarkerTransform(point, flow))
+        if (distance > 0) set(element, 'opacity', String(flow.trail === 'wake'
+          ? 0.08 + (ghosts.length - distance) * 0.055 : 0.1 + (ghosts.length - distance) * 0.18))
+      }
+      const labelPoint = binding.label && flowLabelPosition(flow)
+      if (binding.label && labelPoint) {
+        set(binding.label, 'x', labelPoint.x.toFixed(2))
+        set(binding.label, 'y', labelPoint.y.toFixed(2))
+      }
+    }
+  }
 }
 
 /** Total seconds needed to show every flow once (or one loop for indefinite flows). */

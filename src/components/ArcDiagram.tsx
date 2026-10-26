@@ -1,6 +1,7 @@
 "use client"
 import { HOST_THEME_CSS, colorAlpha } from '../../packages/viewer/src/theme/host'
 import React, { useState, useCallback, useMemo } from 'react'
+import { motion, useTransform, type MotionStyle, type MotionValue } from 'motion/react'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTheme, resolveNodeRadius, type ThemeId, type Theme, type BrandSpec } from '../utils/themes'
@@ -34,12 +35,23 @@ import type { NodeKind } from '../types/diagram'
 import { resolveNodeColor, resolveNodeIcon } from '../utils/nodeKinds'
 import type { DiagramDelta } from '../utils/diffDiagram'
 import type { ArcDiagramData as CanonicalArcDiagramData, DiagramFlow, DiagramFlowLeg, DiagramSource, FileMeta, FlowDirection, FlowEasing, FlowMarker, FlowTrail, LegendMode } from '../types/diagram'
-import { renderFlowLayer } from '../utils/flowSvg'
+import { LiveFlowLayer } from './LiveFlowLayer'
 import { sourceLabel } from '../utils/sourceRef'
 import { isRtlLocale, isValidLocale } from '../utils/locale'
+import { diagramGeometryKey, followCamera, liveDiagramBounds, type LiveBounds } from '../utils/liveMotion'
+import { useLiveCamera, useLiveDiagramMotion, useReducedDiagramMotion, readCameraMotion, readNodeMotion, type LiveNodeMotion, type LiveCanvasMotion } from '../hooks/useLiveDiagramMotion'
 
 // Keep absent groups stable so content bounds and the fit observer stay memoized.
 const EMPTY_GROUPS: NonNullable<CanonicalArcDiagramData['groups']> = []
+
+// The Lucide module also exports factories and generic components that cannot
+// render without special props. Accept named icons (including their aliases)
+// only, so an authored icon name cannot select one of those utility exports.
+const NAMED_ICONS = new Set<unknown>(Object.values(LucideIcons.icons))
+function diagramIcon(name: string): LucideIcon {
+  const candidate = (LucideIcons as unknown as Record<string, LucideIcon>)[name]
+  return NAMED_ICONS.has(candidate) ? candidate : LucideIcons.Box
+}
 
 // ============================================
 // Types
@@ -429,7 +441,7 @@ function FocusStory({
           }}
         >
           {target.steps.map((step, index) => {
-            const Icon = (LucideIcons as unknown as Record<string, LucideIcon>)[step.icon] || LucideIcons.Box
+            const Icon = diagramIcon(step.icon)
             return (
               <div
                 key={`${step.icon}-${step.label}-${index}`}
@@ -554,60 +566,37 @@ function ViewsRail({
   )
 }
 
-function DiagramGroups({ groups, themeColors }: {
+function DiagramGroup({ group, themeColors, values }: {
+  group: GroupShape
+  themeColors: Theme['light'] | Theme['dark']
+  values?: LiveNodeMotion
+}) {
+  const color = themeColors.palette[group.color] || themeColors.palette.zinc
+  const cx = useTransform(() => (values?.x.get() ?? group.x) + (values?.width.get() ?? group.width) / 2)
+  const cy = useTransform(() => (values?.y.get() ?? group.y) + (values?.height.get() ?? group.height) / 2)
+  const rx = useTransform(() => (values?.width.get() ?? group.width) / 2)
+  const ry = useTransform(() => (values?.height.get() ?? group.height) / 2)
+  const labelX = useTransform(() => (values?.x.get() ?? group.x) + 12)
+  const labelY = useTransform(() => (values?.y.get() ?? group.y) + 19)
+  const common = { fill: color.stroke, fillOpacity: 0.06, stroke: color.stroke,
+    strokeOpacity: 0.55, strokeWidth: 1.5, strokeDasharray: group.dashed ? '8 4' : undefined }
+  return <g>
+    {group.type === 'circle'
+      ? <motion.ellipse cx={cx} cy={cy} rx={rx} ry={ry} {...common} />
+      : <motion.rect x={values?.x ?? group.x} y={values?.y ?? group.y} width={values?.width ?? group.width} height={values?.height ?? group.height} rx={8} {...common} />}
+    {group.label && <motion.text x={labelX} y={labelY} fill={color.stroke} fontSize={11} fontWeight={600} letterSpacing="0.06em">{group.label}</motion.text>}
+  </g>
+}
+
+function DiagramGroups({ groups, themeColors, liveMotion = false, motionGroups }: {
   groups: GroupShape[]
   themeColors: Theme['light'] | Theme['dark']
+  liveMotion?: boolean
+  motionGroups?: Record<string, LiveNodeMotion>
 }) {
-  return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-      {groups.map(group => {
-        const color = themeColors.palette[group.color] || themeColors.palette.zinc
-        const common = {
-          fill: color.stroke,
-          fillOpacity: 0.06,
-          stroke: color.stroke,
-          strokeOpacity: 0.55,
-          strokeWidth: 1.5,
-          strokeDasharray: group.dashed ? '8 4' : undefined,
-        }
-
-        return (
-          <g key={group.id}>
-            {group.type === 'circle' ? (
-              <ellipse
-                cx={group.x + group.width / 2}
-                cy={group.y + group.height / 2}
-                rx={group.width / 2}
-                ry={group.height / 2}
-                {...common}
-              />
-            ) : (
-              <rect
-                x={group.x}
-                y={group.y}
-                width={group.width}
-                height={group.height}
-                rx={8}
-                {...common}
-              />
-            )}
-            {group.label && (
-              <text
-                x={group.x + 12}
-                y={group.y + 19}
-                fill={color.stroke}
-                fontSize={11}
-                fontWeight={600}
-                letterSpacing="0.06em"
-              >
-                {group.label}
-              </text>
-            )}
-          </g>
-        )
-      })}
-    </svg>
-  )
+  return <svg className="absolute inset-0 w-full h-full pointer-events-none" style={liveMotion ? { overflow: 'visible' } : undefined} aria-hidden="true">
+    {groups.map(group => <DiagramGroup key={group.id} group={group} themeColors={themeColors} values={motionGroups?.[group.id]} />)}
+  </svg>
 }
 
 // ============================================
@@ -630,6 +619,7 @@ export { type ThemeId } from '../utils/themes'
 // ============================================
 
 interface NodeProps {
+  nodeId?: string
   node: NodePosition
   data: NodeData
   mode: DiagramMode
@@ -640,6 +630,9 @@ interface NodeProps {
   lift?: boolean
   glow?: boolean
   dimOpacity?: number
+  liveMotion?: boolean
+  motionOpacity?: number
+  motionNode?: LiveNodeMotion
   onMouseEnter?: () => void
   onMouseLeave?: () => void
   onClick?: () => void
@@ -700,10 +693,11 @@ function NodeDecoration({ decor, stroke, cut }: { decor: NodeDecor; stroke: stri
   )
 }
 
-export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, lift = true, glow = true, dimOpacity = 0.45, onMouseEnter, onMouseLeave, onClick }: NodeProps) {
-  const size = NODE_SIZES[node.size]
+export function Node({ nodeId, node, data, mode, themeColors, brand, hovered, dimmed, lift = true, glow = true, dimOpacity = 0.45, liveMotion = false, motionOpacity = 1, motionNode, onMouseEnter, onMouseLeave, onClick }: NodeProps) {
+  const preset = NODE_SIZES[node.size]
+  const size = { width: node.width ?? preset.width, height: node.height ?? preset.height }
   const color = themeColors.palette[resolveNodeColor(data)] || themeColors.palette.zinc
-  const Icon = (LucideIcons as unknown as Record<string, LucideIcon>)[resolveNodeIcon(data)] || LucideIcons.Box
+  const Icon = diagramIcon(resolveNodeIcon(data))
 
   const isLarge = node.size === 'l'
   const isSmall = node.size === 's'
@@ -764,7 +758,7 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
                 fontFamily: brand?.upperLabels ? brand.monoFamily : (brand?.fontFamily || undefined),
                 textTransform: brand?.upperLabels ? 'uppercase' : 'none',
                 letterSpacing: brand?.upperLabels ? '0.06em' : '0.01em',
-                opacity: 0.72,
+                opacity: 'var(--arc-node-subtitle-opacity, 0.72)',
               }}
             >
               {data.subtitle}
@@ -776,7 +770,7 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
         <div
           data-arc-node-description
           className={`mt-1 ${themeColors.text.secondary} ${isLarge ? 'text-[9px]' : 'text-[9px]'}`}
-          style={{ opacity: 0.65, letterSpacing: '0.01em' }}
+          style={{ opacity: 'var(--arc-node-description-opacity, 0.65)', letterSpacing: '0.01em' }}
         >
           {data.description}
         </div>
@@ -789,15 +783,23 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
     brand?.nodeGlass ? 'backdrop-blur-md' : isLight ? '' : 'backdrop-blur-sm'
   }`
 
-  const placement: React.CSSProperties = {
+  const animatedY = useTransform(() => (motionNode?.y.get() ?? node.y) + (hovered && lift ? -2 : 0))
+  const animatedOpacity = useTransform(() => (dimmed ? dimOpacity : shellOpacity) * (motionNode?.opacity.get() ?? motionOpacity))
+  const animatedPointer = useTransform(() => (motionNode?.opacity.get() ?? motionOpacity) < 0.05 ? 'none' as const : 'auto' as const)
+  const animatedOutline = useTransform(() => shapeOutlinePath(shape, motionNode?.width.get() ?? size.width, motionNode?.height.get() ?? size.height, cut))
+  const placement: MotionStyle = {
     left: node.x,
     top: node.y,
     width: size.width,
+    height: node.height,
     fontFamily: brand?.fontFamily,
     transform: hovered && lift ? 'translateY(-2px)' : 'none',
-    opacity: dimmed ? dimOpacity : shellOpacity,
+    opacity: (dimmed ? dimOpacity : shellOpacity) * motionOpacity,
+    transition: liveMotion || motionNode ? 'box-shadow 180ms ease-out, filter 180ms ease-out' : undefined,
+    pointerEvents: motionOpacity < 0.05 ? 'none' : undefined,
     zIndex: hovered ? 10 : undefined,
     cursor: onClick ? 'pointer' : undefined,
+    ...(motionNode ? { left: 0, top: 0, x: motionNode.x, y: animatedY, width: motionNode.width, height: motionNode.height, opacity: animatedOpacity, pointerEvents: animatedPointer, transform: undefined } : {}),
   }
 
   const handlers = { onMouseEnter, onMouseLeave, onClick }
@@ -811,16 +813,16 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
   // clip path. The shell takes the nominal height so the outline matches the
   // geometry connectors already anchor to.
   if (clipPath) {
-    const outline = shapeOutlinePath(shape, size.width, size.height, cut)
     return (
-      <div
+      <motion.div
         className="absolute transition-all duration-200 ease-out"
         style={{
           ...placement,
-          height: size.height,
+          height: motionNode?.height ?? size.height,
           filter: hovered && glow ? `drop-shadow(0 4px 12px ${colorAlpha(color.stroke, '55')})` : undefined,
         }}
         data-arc-node
+        data-arc-node-id={nodeId}
         {...sourceAttr}
         {...handlers}
       >
@@ -830,26 +832,26 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
         >
           {body}
         </div>
-        <svg
+        <motion.svg
           className="absolute inset-0 pointer-events-none"
-          width={size.width}
-          height={size.height}
+          width={motionNode?.width ?? size.width}
+          height={motionNode?.height ?? size.height}
           aria-hidden="true"
         >
-          <path
-            d={outline}
+          <motion.path
+            d={animatedOutline}
             fill="none"
             stroke={color.stroke}
             strokeOpacity={hovered ? 0.95 : isLight ? 0.6 : 0.5}
             strokeWidth={parseFloat(borderWidth) || 1}
           />
-        </svg>
-      </div>
+        </motion.svg>
+      </motion.div>
     )
   }
 
   return (
-    <div
+    <motion.div
       className={`
         absolute border ${color.border} ${surface}
         ${!nodeRadius ? 'rounded-xl' : ''}
@@ -867,17 +869,18 @@ export function Node({ node, data, mode, themeColors, brand, hovered, dimmed, li
         boxShadow: hovered && glow ? `${glowShadow}, ${innerHighlight}` : innerHighlight,
       }}
       data-arc-node
+      data-arc-node-id={nodeId}
       {...sourceAttr}
       {...handlers}
     >
       {body}
-    </div>
+    </motion.div>
   )
 }
 
 function getAnchorPoint(node: NodePosition, position: AnchorPosition): { x: number; y: number } {
   const size = NODE_SIZES[node.size] ?? NODE_SIZES.m
-  return anchorOnNode({ x: node.x, y: node.y, width: size.width, height: size.height }, position)
+  return anchorOnNode({ x: node.x, y: node.y, width: node.width ?? size.width, height: node.height ?? size.height }, position)
 }
 
 // Lines, arrowheads, exports and time-sampled packets share the same route.
@@ -897,6 +900,7 @@ interface ConnectorProps {
   connector: Connector
   connectorIndex: number
   nodes: Record<string, NodePosition>
+  motionNodes?: Record<string, LiveNodeMotion>
   styles: Record<string, ConnectorStyle>
   themeColors: Theme['light'] | Theme['dark']
   brand?: BrandSpec
@@ -905,17 +909,16 @@ interface ConnectorProps {
   dimOpacity?: number
 }
 
-function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, brand, highlighted, dimmed, dimOpacity = 0.25 }: ConnectorProps) {
+function ConnectorPath(props: ConnectorProps) {
+  const { connector, nodes } = props
+  const from = nodes[connector.from], to = nodes[connector.to]
+  if (!from || !to || !NODE_SIZES[from.size] || !NODE_SIZES[to.size]) return null
+  return <ConnectorBody {...props} />
+}
+
+function ConnectorBody({ connector, connectorIndex, nodes, motionNodes, styles, themeColors, brand, highlighted, dimmed, dimOpacity = 0.25 }: ConnectorProps) {
   const fromNode = nodes[connector.from]
   const toNode = nodes[connector.to]
-  if (!fromNode || !toNode) return null
-
-  // Validate node sizes exist
-  if (!NODE_SIZES[fromNode.size] || !NODE_SIZES[toNode.size]) {
-    console.warn(`Invalid node size: ${fromNode.size} or ${toNode.size}`)
-    return null
-  }
-
   const style = styles[connector.style] || { color: 'zinc' as const }
   const strokeWidth = style.strokeWidth ?? 2
   const styleColor = style.color ?? 'zinc'
@@ -923,59 +926,51 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
   const lineStyle = connectorLineStyle(style)
   const labelText = connector.label ?? style.label
 
-  // Safely get anchor points
-  let from: { x: number; y: number }
-  let to: { x: number; y: number }
-  try {
-    from = getAnchorPoint(fromNode, connector.fromAnchor)
-    to = getAnchorPoint(toNode, connector.toAnchor)
-  } catch (e) {
-    console.warn(`Invalid anchor: ${connector.fromAnchor} or ${connector.toAnchor}`)
-    return null
-  }
+  // One geometry derivation reads the same MotionValues as the node shell.
+  // SVG attributes update on Motion's scheduler without a React render.
+  const geometry = useTransform(() => {
+    const from = getAnchorPoint(motionNodes?.[connector.from] ? readNodeMotion(fromNode, motionNodes[connector.from]) : fromNode, connector.fromAnchor)
+    const to = getAnchorPoint(motionNodes?.[connector.to] ? readNodeMotion(toNode, motionNodes[connector.to]) : toNode, connector.toAnchor)
+    const route = connectorPathGeometry(connector, from, to)
+    const vertical = Math.abs(to.y - from.y) > Math.abs(to.x - from.x)
+    const align = style.labelAlign ?? (vertical ? 'right' : 'center')
+    const side = connector.curve !== 'natural' && vertical && align !== 'center'
+    const offset = side ? { x: align === 'right' ? 8 : -8, y: 4 } : { x: 0, y: -8 }
+    const role = (p: { x: number; y: number }, angle: number) => {
+      const a = angle * Math.PI / 180
+      return { x: p.x + Math.cos(a) * 20, y: p.y + Math.sin(a) * 20 + 10 }
+    }
+    return { from, to, path: route.d,
+      fromTransform: `translate(${from.x}px, ${from.y}px) rotate(${route.startAngle + 180}deg)`,
+      toTransform: `translate(${to.x}px, ${to.y}px) rotate(${route.endAngle}deg)`,
+      label: { x: (from.x + to.x) / 2 + offset.x, y: (from.y + to.y) / 2 + offset.y },
+      textAnchor: side ? align === 'right' ? 'start' as const : 'end' as const : 'middle' as const,
+      fromRole: role(from, route.startAngle), toRole: role(to, route.endAngle + 180),
+    }
+  })
+  const path = useTransform(geometry, value => value.path)
+  const fromX = useTransform(geometry, value => value.from.x)
+  const fromY = useTransform(geometry, value => value.from.y)
+  const toX = useTransform(geometry, value => value.to.x)
+  const toY = useTransform(geometry, value => value.to.y)
+  const fromTransform = useTransform(geometry, value => value.fromTransform)
+  const toTransform = useTransform(geometry, value => value.toTransform)
+  const labelX = useTransform(geometry, value => value.label.x)
+  const labelY = useTransform(geometry, value => value.label.y)
+  const textAnchor = useTransform(geometry, value => value.textAnchor)
+  const fromRoleX = useTransform(geometry, value => value.fromRole.x)
+  const fromRoleY = useTransform(geometry, value => value.fromRole.y)
+  const toRoleX = useTransform(geometry, value => value.toRole.x)
+  const toRoleY = useTransform(geometry, value => value.toRole.y)
 
   const color = themeColors.palette[styleColor]?.stroke || themeColors.palette.zinc.stroke
   const gradientId = `connector-gradient-${connectorIndex}`
-
-  const { d: path, startAngle, endAngle } = connectorPathGeometry(connector, from, to)
-  const isVertical = Math.abs(to.y - from.y) > Math.abs(to.x - from.x)
-  const labelAlign = style.labelAlign || (isVertical ? 'right' : 'center')
-
-  // Label positioning
-  let labelPos: { x: number; y: number }
-  let labelOffset = { x: 0, y: 0 }
-  let textAnchor: 'start' | 'middle' | 'end' = 'middle'
-
-  if (connector.curve === 'natural') {
-    labelPos = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
-    labelOffset = { x: 0, y: -8 }
-  } else {
-    labelPos = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
-
-    if (isVertical) {
-      // Vertical connector - position label to left or right of line
-      if (labelAlign === 'right') {
-        labelOffset = { x: 8, y: 4 }
-        textAnchor = 'start'  // Left-aligned text on right side
-      } else if (labelAlign === 'left') {
-        labelOffset = { x: -8, y: 4 }
-        textAnchor = 'end'    // Right-aligned text on left side
-      } else {
-        labelOffset = { x: 0, y: -8 }
-        textAnchor = 'middle'
-      }
-    } else {
-      // Horizontal connector - label above, centered
-      labelOffset = { x: 0, y: -8 }
-      textAnchor = 'middle'
-    }
-  }
 
   // Arrowheads at each end (explicit fromArrow/toArrow win over legacy flags)
   const fromArrow = connectorArrowAt(style, 'from')
   const toArrow = connectorArrowAt(style, 'to')
 
-  const renderEnd = (kind: ArrowHead, x: number, y: number, angle: number, arrowSize: number) => {
+  const renderEnd = (kind: ArrowHead, transform: MotionValue<string>, arrowSize: number) => {
     // 'chevron' brand turns the filled 'arrow' into a dart — a filled
     // swallowtail that reads better than a bare caret at small sizes
     const resolved = kind === 'arrow' && brand?.arrowhead === 'chevron' ? 'dart' : kind
@@ -983,13 +978,13 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
     if (!shape) return null
     if (shape.circle) {
       return (
-        <g transform={`translate(${x}, ${y}) rotate(${angle})`}>
+        <motion.g style={{ transform, transformOrigin: '0 0', transformBox: 'view-box' }}>
           <circle cx={shape.circle.cx} cy={0} r={shape.circle.r} fill={color} />
-        </g>
+        </motion.g>
       )
     }
     return (
-      <g transform={`translate(${x}, ${y}) rotate(${angle})`}>
+      <motion.g style={{ transform, transformOrigin: '0 0', transformBox: 'view-box' }}>
         <path
           d={shape.d!}
           fill={shape.filled ? color : 'none'}
@@ -999,42 +994,36 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
           strokeLinecap="square"
           strokeLinejoin="miter"
         />
-      </g>
+      </motion.g>
     )
-  }
-
-  // Role annotation positions — a short way into the line from each end
-  const rolePos = (p: { x: number; y: number }, angle: number, inward: boolean) => {
-    const a = ((inward ? angle : angle + 180) * Math.PI) / 180
-    return { x: p.x + Math.cos(a) * 20, y: p.y + Math.sin(a) * 20 + 10 }
   }
 
   const dashArray = lineStyle === 'dashed' ? '6 3' : lineStyle === 'dotted' ? '0.1 6' : undefined
 
   return (
-    <g style={{
+    <g data-arc-connector-id={connector.id ?? `${connector.from}-${connector.to}-${connectorIndex}`} data-arc-connector-from={connector.from} data-arc-connector-to={connector.to} style={{
       opacity: (dimmed ? dimOpacity : 1) * styleOpacity,
       transition: 'opacity 200ms ease-out',
     }}>
       {/* Gradient definition - fades at both ends */}
       <defs>
-        <linearGradient
+        <motion.linearGradient
           id={gradientId}
-          x1={from.x}
-          y1={from.y}
-          x2={to.x}
-          y2={to.y}
+          x1={fromX}
+          y1={fromY}
+          x2={toX}
+          y2={toY}
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor={color} stopOpacity={highlighted ? 0.5 : 0.3} />
           <stop offset="15%" stopColor={color} stopOpacity={1} />
           <stop offset="85%" stopColor={color} stopOpacity={1} />
           <stop offset="100%" stopColor={color} stopOpacity={highlighted ? 0.7 : 0.5} />
-        </linearGradient>
+        </motion.linearGradient>
       </defs>
 
       {brand?.connectorGlow && (
-        <path
+        <motion.path
           d={path}
           fill="none"
           stroke={color}
@@ -1046,7 +1035,7 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
       )}
 
       {/* Main path with gradient */}
-      <path
+      <motion.path
         d={path}
         fill="none"
         stroke={`url(#${gradientId})`}
@@ -1057,22 +1046,22 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
       />
 
       {/* End glyphs — arrow/open/dot/diamond/bar at each end */}
-      {renderEnd(fromArrow, from.x, from.y, startAngle + 180, connectorArrowSize(style, 'from'))}
-      {renderEnd(toArrow, to.x, to.y, endAngle, connectorArrowSize(style, 'to'))}
+      {renderEnd(fromArrow, fromTransform, connectorArrowSize(style, 'from'))}
+      {renderEnd(toArrow, toTransform, connectorArrowSize(style, 'to'))}
 
       {/* Endpoint dots (matches the editor's showEndpoints) */}
       {style.showEndpoints === true && (
         <>
-          <circle cx={from.x} cy={from.y} r={2.6} fill={color} fillOpacity={0.75} />
-          <circle cx={to.x} cy={to.y} r={2.6} fill={color} fillOpacity={0.75} />
+          <motion.circle cx={fromX} cy={fromY} r={2.6} fill={color} fillOpacity={0.75} />
+          <motion.circle cx={toX} cy={toY} r={2.6} fill={color} fillOpacity={0.75} />
         </>
       )}
 
       {/* Label */}
       {labelText && (
-        <text
-          x={labelPos.x + labelOffset.x}
-          y={labelPos.y + labelOffset.y}
+        <motion.text
+          x={labelX}
+          y={labelY}
           textAnchor={textAnchor}
           fill={color}
           className="text-[10px] font-mono"
@@ -1082,19 +1071,19 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
             fontSize: brand?.upperLabels ? undefined : '9px',
             textTransform: brand?.upperLabels ? 'uppercase' : 'none',
             letterSpacing: brand?.upperLabels ? '0.08em' : '0.02em',
-            opacity: 0.82,
+            opacity: 'var(--arc-connector-label-opacity, 0.82)',
             transition: 'font-weight 200ms ease-out',
           }}
         >
           {labelText}
-        </text>
+        </motion.text>
       )}
 
       {/* Relationship role annotations near each end */}
       {connector.fromRole && (
-        <text
-          x={rolePos(from, startAngle, true).x}
-          y={rolePos(from, startAngle, true).y}
+        <motion.text
+          x={fromRoleX}
+          y={fromRoleY}
           textAnchor="middle"
           fill={color}
           fontSize="7.5"
@@ -1102,12 +1091,12 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
           opacity={0.6}
         >
           {connector.fromRole}
-        </text>
+        </motion.text>
       )}
       {connector.toRole && (
-        <text
-          x={rolePos(to, endAngle, false).x}
-          y={rolePos(to, endAngle, false).y}
+        <motion.text
+          x={toRoleX}
+          y={toRoleY}
           textAnchor="middle"
           fill={color}
           fontSize="7.5"
@@ -1115,7 +1104,7 @@ function ConnectorPath({ connector, connectorIndex, nodes, styles, themeColors, 
           opacity={0.6}
         >
           {connector.toRole}
-        </text>
+        </motion.text>
       )}
     </g>
   )
@@ -1845,8 +1834,48 @@ function TitleBlock({ info, mode, mono, bottom = 16, right = 16, onHeight }: { i
 
 export type LabelCorner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
+export interface ArcCanvasOverlayNode {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  data: NodeData | undefined
+  opacity: number
+}
+
+export interface ArcCanvasOverlayContext {
+  nodes: ArcCanvasOverlayNode[]
+  zoom: number
+  camera: { x: number; y: number }
+  viewport: { width: number; height: number }
+  /** Live displayed values; derive overlay styles without React frame updates.
+   * Numeric fields above retain authored geometry / target camera. */
+  motion?: LiveCanvasMotion
+}
+
 interface ArcDiagramProps {
   data: ArcDiagramData
+  /** Preserve spatial continuity with interruption-safe springs. False disables
+   *  live motion; omit to retain the static viewer's existing transitions. */
+  animateUpdates?: boolean
+  /** Frame content as it grows; manual camera gestures pause following. Default: false. */
+  followUpdates?: boolean
+  /** Called when a manual pan or zoom pauses following. Set followUpdates=true to resume. */
+  onFollowChange?: (following: boolean) => void
+  /** Fit the whole drawing on geometry changes and viewport resize, in either
+   *  zoom direction. Manual exploration lasts until the next geometry change.
+   *  Takes precedence over followUpdates. Default: false. */
+  autoFrameUpdates?: boolean
+  /** Extend the whole drawing's automatic 2D framing with a canvas-space region,
+   *  for example space reserved for a node that has not arrived yet. Does not
+   *  change authored geometry. Invalid or inverted bounds are ignored. */
+  framingBounds?: LiveBounds
+  /** Draw after the 2D diagram inside its transformed camera (ignored in
+   *  isometric mode). Numeric geometry is authored; optional motion values track
+   *  the displayed frame without React renders. Viewport dimensions are CSS
+   *  pixels; derive inverse zoom from motion.camera for fixed-size chrome. */
+  renderCanvasOverlay?: (context: ArcCanvasOverlayContext) => React.ReactNode
   className?: string
   interactive?: boolean  // Enable zoom/pan controls
   mode?: DiagramMode     // Light/dark appearance
@@ -1918,6 +1947,12 @@ interface ArcDiagramProps {
 
 export default function ArcDiagram({
   data,
+  animateUpdates,
+  followUpdates = false,
+  onFollowChange,
+  autoFrameUpdates = false,
+  framingBounds,
+  renderCanvasOverlay,
   className = '',
   interactive = true,
   mode = 'dark',
@@ -1950,8 +1985,23 @@ export default function ArcDiagram({
   animateFlows = true,
   flowTime,
 }: ArcDiagramProps) {
+  const liveUpdates = animateUpdates !== undefined || autoFrameUpdates
   const isLight = mode === 'light'
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const [overlayViewport, setOverlayViewport] = useState({ width: 0, height: 0 })
+  const hasCanvasOverlay = renderCanvasOverlay !== undefined && defaultViewMode !== 'isometric'
+  React.useLayoutEffect(() => {
+    const element = containerRef.current
+    if (!hasCanvasOverlay || !element) return
+    const measure = () => {
+      const width = element.clientWidth, height = element.clientHeight
+      setOverlayViewport(current => current.width === width && current.height === height ? current : { width, height })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [hasCanvasOverlay])
   const [showArc, setShowArc] = useState(false)
   const [useAutoLayout, setUseAutoLayout] = useState(false)
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
@@ -1983,7 +2033,9 @@ export default function ArcDiagram({
     [data, useAutoLayout],
   )
 
-  const { id, layout, nodes, nodeData, connectors, connectorStyles, groups = EMPTY_GROUPS } = activeData
+  const reducedMotion = useReducedDiagramMotion()
+  const live = useLiveDiagramMotion(activeData, animateUpdates && !reducedMotion)
+  const { id, layout, nodes, nodeData, connectors, connectorStyles, groups = EMPTY_GROUPS } = live.data
   const views = activeData.views
   const focusTargets = activeData.focusTargets
   const activeViewIndex = activeViewId ? (views?.findIndex(v => v.id === activeViewId) ?? -1) : -1
@@ -2015,15 +2067,6 @@ export default function ArcDiagram({
   // Isometric projection — mirrors the editor canvas composition (origin at the
   // layout's bottom-center), but without selection state.
   const isIso = defaultViewMode === 'isometric'
-  const flowLayer = useMemo(() => {
-    if (isIso || !activeData.flows?.length) return ''
-    return renderFlowLayer(activeData as unknown as CanonicalArcDiagramData, {
-      themeColors,
-      fontFamily: brand?.fontFamily,
-      flowTime,
-      animate: animateFlows && flowTime === undefined,
-    })
-  }, [activeData, animateFlows, flowTime, isIso, themeColors, brand?.fontFamily])
   const isoStyle = getIsoStyle(defaultIsoStyle)
   const isoOriginX = layout.width / 2
   const isoOriginY = layout.height - 100
@@ -2042,7 +2085,35 @@ export default function ArcDiagram({
   // layout rect (negative or oversized node coords). Fit and centre the union
   // of the layout rect and the real content bounds so nothing clips at the
   // edges — the iso path above already does this for the projected drawing.
+  const liveBounds = useMemo(() => {
+    if (!liveUpdates) return null
+    const bounds = liveDiagramBounds(activeData, !autoFrameUpdates)
+    if (!autoFrameUpdates || isIso || !framingBounds) return bounds
+    const { minX, minY, maxX, maxY } = framingBounds
+    if (![minX, minY, maxX, maxY].every(Number.isFinite) || maxX <= minX || maxY <= minY) return bounds
+    return {
+      minX: Math.min(bounds.minX, minX), minY: Math.min(bounds.minY, minY),
+      maxX: Math.max(bounds.maxX, maxX), maxY: Math.max(bounds.maxY, maxY),
+    }
+  }, [liveUpdates, autoFrameUpdates, activeData, isIso, framingBounds])
+  const geometryKey = useMemo(() => autoFrameUpdates ? diagramGeometryKey(activeData) : '', [autoFrameUpdates, activeData])
+  // Only a changed effective frame claims the camera. A fresh region object or
+  // one wholly inside the drawing must not interrupt manual exploration.
+  const framingKey = autoFrameUpdates && !isIso && liveBounds
+    ? `${liveBounds.minX},${liveBounds.minY},${liveBounds.maxX},${liveBounds.maxY}` : ''
+  // Automatic framing targets authored geometry once per revision. Interpolated
+  // bounds would move the camera target every animation frame and fight gestures.
+  const autoFrameBounds = useMemo(() => {
+    if (!autoFrameUpdates || !isIso) return liveBounds
+    const originX = activeData.layout.width / 2, originY = activeData.layout.height - 100
+    return isoStyle.technical
+      ? isoPlateBounds(activeData.nodes, activeData.nodeData, originX, originY, activeData.layout)
+      : isoContentBounds(activeData.nodes, activeData.nodeData, originX, originY) ?? liveBounds
+  }, [autoFrameUpdates, isIso, isoStyle.technical, activeData, liveBounds])
+  const autoFrameBoundsRef = React.useRef(autoFrameBounds)
+  React.useLayoutEffect(() => { autoFrameBoundsRef.current = autoFrameBounds }, [autoFrameBounds])
   const contentBounds = useMemo(() => {
+    if (liveBounds) return liveBounds
     const pad = fitPadding === undefined ? 60 : 0
     const content = getContentBounds(nodes, groups)
     return {
@@ -2051,7 +2122,7 @@ export default function ArcDiagram({
       maxX: Math.max(layout.width, (content?.maxX ?? layout.width) + pad),
       maxY: Math.max(layout.height, (content?.maxY ?? layout.height) + pad),
     }
-  }, [nodes, groups, layout.width, layout.height, fitPadding])
+  }, [liveBounds, nodes, groups, layout.width, layout.height, fitPadding])
 
   // Inject the brand font stylesheet once (only for themes that set a fontImport).
   React.useEffect(() => {
@@ -2074,6 +2145,10 @@ export default function ArcDiagram({
     const container = containerRef.current
     const containerWidth = container.clientWidth
     const containerHeight = container.clientHeight
+    if (liveUpdates) {
+      return followCamera(isIso && isoBounds ? isoBounds : contentBounds, containerWidth, containerHeight,
+        { x: 0, y: 0, zoom: 1 }, fitPadding ?? 40, maxFitZoom, true).zoom
+    }
     // Add padding for chrome (zoom controls, label)
     const padding = fitPadding === undefined ? 40 : Math.max(0, fitPadding) * 2
     // Isometric drawings spill outside the 2D layout rect — fit the projected bounds.
@@ -2088,7 +2163,7 @@ export default function ArcDiagram({
     const fitY = (containerHeight - padding) / (contentBounds.maxY - contentBounds.minY)
     // Use the smaller ratio to fit both dimensions, cap at maxFitZoom
     return Math.min(fitX, fitY, maxFitZoom)
-  }, [isIso, isoBounds, contentBounds, maxFitZoom, fitPadding])
+  }, [liveUpdates, isIso, isoBounds, contentBounds, maxFitZoom, fitPadding])
 
   // Determine initial zoom
   const getInitialZoom = useCallback(() => {
@@ -2103,7 +2178,45 @@ export default function ArcDiagram({
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const pointerDownAt = React.useRef({ x: 0, y: 0 })
   const [initialized, setInitialized] = useState(typeof defaultZoom === 'number')
+  const [followPaused, setFollowPaused] = useState(false)
+  const [autoFramePaused, setAutoFramePaused] = useState(false)
+  const following = !autoFrameUpdates && followUpdates && !followPaused
+  const autoFraming = autoFrameUpdates && !autoFramePaused
+  const automaticCamera = following || autoFraming
+  const cameraReady = React.useRef(false)
+  const cameraMotion = useLiveCamera({ x: pan.x, y: pan.y, zoom }, animateUpdates && !reducedMotion && automaticCamera && initialized && cameraReady.current, !automaticCamera)
+  const cameraTarget = React.useRef({ x: pan.x, y: pan.y, zoom })
+  cameraTarget.current = { x: pan.x, y: pan.y, zoom }
+  const camera = { x: pan.x, y: pan.y, zoom }
+  const previousAutomaticCamera = React.useRef(automaticCamera)
+  const manualCameraChange = React.useRef(false)
+  React.useLayoutEffect(() => {
+    // Disabling automatic framing from host chrome owns no new pan/zoom target.
+    // Freeze the displayed frame instead of snapping to the spring destination.
+    if (previousAutomaticCamera.current && !automaticCamera && !manualCameraChange.current) {
+      const displayed = readCameraMotion(cameraMotion)
+      cameraMotion.x.stop(); cameraMotion.y.stop(); cameraMotion.zoom.stop()
+      setZoom(displayed.zoom)
+      setPan({ x: displayed.x, y: displayed.y })
+    }
+    if (!automaticCamera) manualCameraChange.current = false
+    previousAutomaticCamera.current = automaticCamera
+  }, [cameraMotion, automaticCamera])
+  React.useEffect(() => { cameraReady.current = initialized }, [initialized])
+  React.useEffect(() => { if (followUpdates) setFollowPaused(false) }, [followUpdates])
+  const pauseFollowing = useCallback(() => {
+    if (!automaticCamera) return
+    manualCameraChange.current = true
+    if (following) setFollowPaused(true)
+    if (autoFrameUpdates) setAutoFramePaused(true)
+    const displayed = readCameraMotion(cameraMotion)
+    cameraMotion.x.stop(); cameraMotion.y.stop(); cameraMotion.zoom.stop()
+    setZoom(displayed.zoom)
+    setPan({ x: displayed.x, y: displayed.y })
+    if (following) onFollowChange?.(false)
+  }, [automaticCamera, following, autoFrameUpdates, cameraMotion, onFollowChange])
 
   const centreOnBounds = useCallback(
     (b: { minX: number; minY: number; maxX: number; maxY: number }, z: number) => {
@@ -2129,7 +2242,7 @@ export default function ArcDiagram({
   }, [initialized, getInitialZoom, isIso, isoBounds, contentBounds, centreOnBounds])
 
   React.useEffect(() => {
-    if (interactive || defaultZoom !== 'fit' || !containerRef.current) return
+    if (liveUpdates || followUpdates || interactive || defaultZoom !== 'fit' || !containerRef.current) return
     const fit = () => {
       const nextZoom = calculateFitZoom()
       setZoom(nextZoom)
@@ -2139,20 +2252,68 @@ export default function ArcDiagram({
     observer.observe(containerRef.current)
     fit()
     return () => observer.disconnect()
-  }, [interactive, defaultZoom, calculateFitZoom, centreOnBounds, isIso, isoBounds, contentBounds])
+  }, [liveUpdates, followUpdates, interactive, defaultZoom, calculateFitZoom, centreOnBounds, isIso, isoBounds, contentBounds])
 
   // Numeric defaultZoom skips the init effect above, so centre the drawing
   // separately (the iso projection spreads around the bottom-centre origin
   // and 2D content can sit anywhere relative to the layout rect).
+  const numericCentered = React.useRef(false)
   React.useEffect(() => {
     if (typeof defaultZoom !== 'number' || !containerRef.current) return
+    if ((liveUpdates || followUpdates) && numericCentered.current) return
     centreOnBounds(isIso && isoBounds ? isoBounds : contentBounds, defaultZoom)
-  }, [isIso, isoBounds, contentBounds, defaultZoom, centreOnBounds])
+    numericCentered.current = true
+  }, [liveUpdates, followUpdates, isIso, isoBounds, contentBounds, defaultZoom, centreOnBounds])
+
+  const wasFollowing = React.useRef(false)
+  React.useEffect(() => {
+    if (!following || !initialized || !containerRef.current) { wasFollowing.current = false; return }
+    const element = containerRef.current
+    const bounds = isIso && isoBounds ? isoBounds : contentBounds
+    const frame = (force = false) => {
+      const current = cameraTarget.current
+      const next = followCamera(bounds, element.clientWidth, element.clientHeight, current, fitPadding ?? 40, maxFitZoom, force)
+      if (next === current) return
+      setZoom(next.zoom)
+      setPan({ x: next.x, y: next.y })
+    }
+    frame(!wasFollowing.current)
+    wasFollowing.current = true
+    const observer = new ResizeObserver(() => frame())
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [following, initialized, isIso, isoBounds, contentBounds, fitPadding, maxFitZoom])
+
+  React.useEffect(() => {
+    if (!autoFrameUpdates || !initialized || !containerRef.current) return
+    const element = containerRef.current
+    let width = element.clientWidth, height = element.clientHeight
+    const frame = () => {
+      const bounds = autoFrameBoundsRef.current
+      if (!bounds || width <= 0 || height <= 0) return
+      const current = cameraTarget.current
+      const next = followCamera(bounds, width, height, current, fitPadding ?? 40, maxFitZoom, true)
+      setAutoFramePaused(false)
+      setZoom(next.zoom)
+      setPan({ x: next.x, y: next.y })
+    }
+    frame()
+    const observer = new ResizeObserver(() => {
+      const nextWidth = element.clientWidth, nextHeight = element.clientHeight
+      // The initial observation is not a resize and must not undo a gesture.
+      if (nextWidth === width && nextHeight === height) return
+      width = nextWidth
+      height = nextHeight
+      frame()
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [autoFrameUpdates, initialized, geometryKey, framingKey, isIso, isoStyle.technical, fitPadding, maxFitZoom])
 
   // The camera follows the active view: entering one frames its highlight set;
   // leaving restores the default framing. 2D only — iso handles its own pan.
   React.useEffect(() => {
-    if (!initialized || isIso) return
+    if (!initialized || isIso || autoFrameUpdates) return
     const el = containerRef.current
     if (!el) return
 
@@ -2184,39 +2345,51 @@ export default function ArcDiagram({
       x: cw / 2 - ((minX + maxX) / 2) * z,
       y: ch / 2 - ((minY + maxY) / 2) * z,
     })
-  }, [activeView, initialized, isIso, nodes, connectors, focusTargets])
+  }, [activeView, initialized, isIso, autoFrameUpdates, nodes, connectors, focusTargets])
 
   // Sorted zoom levels for consistent navigation
   const sortedZoomLevels = React.useMemo(() => [...zoomLevels].sort((a, b) => a - b), [zoomLevels])
 
   const handleZoomIn = useCallback(() => {
+    pauseFollowing()
     setZoom(z => {
       const idx = sortedZoomLevels.findIndex(l => l >= z)
       return sortedZoomLevels[Math.min(idx + 1, sortedZoomLevels.length - 1)]
     })
-  }, [sortedZoomLevels])
+  }, [sortedZoomLevels, pauseFollowing])
 
   const handleZoomOut = useCallback(() => {
+    pauseFollowing()
     setZoom(z => {
       const idx = sortedZoomLevels.findIndex(l => l >= z)
       return sortedZoomLevels[Math.max(idx - 1, 0)]
     })
-  }, [sortedZoomLevels])
+  }, [sortedZoomLevels, pauseFollowing])
 
   const handleReset = useCallback(() => {
+    pauseFollowing()
     const nextZoom = getInitialZoom()
     setZoom(nextZoom)
     centreOnBounds(isIso && isoBounds ? isoBounds : contentBounds, nextZoom)
-  }, [getInitialZoom, isIso, isoBounds, contentBounds, centreOnBounds])
+  }, [getInitialZoom, isIso, isoBounds, contentBounds, centreOnBounds, pauseFollowing])
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
+  const handleWheel = useCallback((e: WheelEvent) => {
     if (!interactive) return
+    pauseFollowing()
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault()
       if (e.deltaY < 0) handleZoomIn()
       else handleZoomOut()
     }
-  }, [interactive, handleZoomIn, handleZoomOut])
+  }, [interactive, handleZoomIn, handleZoomOut, pauseFollowing])
+  React.useEffect(() => {
+    const element = containerRef.current
+    if (!element || !interactive) return
+    // React delegates wheel listeners as passive; a native listener is needed
+    // to keep a trackpad pinch from also zooming the entire browser page.
+    element.addEventListener('wheel', handleWheel, { passive: false })
+    return () => element.removeEventListener('wheel', handleWheel)
+  }, [interactive, handleWheel])
 
   // Click-to-lock: clicking a node locks the highlight, clicking background or same node unlocks
   const handleNodeClick = useCallback((nodeId: string) => {
@@ -2229,23 +2402,27 @@ export default function ArcDiagram({
   }, [activeView, onNodeHover, setActiveView])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!interactive) return
+    if (!interactive || e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, select, textarea')) return
     // Clicking background clears locked node
     if (lockedNodeId && (e.target as HTMLElement).closest('[data-arc-node]') === null) {
       setLockedNodeId(null)
       onNodeHover?.(null)
     }
     setIsPanning(true)
-    setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
-  }, [interactive, pan, lockedNodeId, onNodeHover])
+    pointerDownAt.current = { x: e.clientX, y: e.clientY }
+    const displayed = readCameraMotion(cameraMotion)
+    setPanStart({ x: e.clientX - displayed.x, y: e.clientY - displayed.y })
+  }, [interactive, cameraMotion, lockedNodeId, onNodeHover])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return
+    if (Math.hypot(e.clientX - pointerDownAt.current.x, e.clientY - pointerDownAt.current.y) < 3) return
+    pauseFollowing()
     setPan({
       x: e.clientX - panStart.x,
       y: e.clientY - panStart.y,
     })
-  }, [isPanning, panStart])
+  }, [isPanning, panStart, pauseFollowing])
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false)
@@ -2286,28 +2463,36 @@ export default function ArcDiagram({
       lang={langAttr}
       dir={dirAttr}
       data-arc-theme={theme}
-      className={`rounded-2xl overflow-hidden relative ${themeColors.background.container} ${className}`}
-      onWheel={handleWheel}
+      // Native focus scrolling must not offset the transform-based camera.
+      className={`${frameVariant === 'none' ? '' : 'rounded-2xl'} overflow-clip relative ${themeColors.background.container} ${className}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      style={{ cursor: interactive ? (isPanning ? 'grabbing' : 'grab') : 'default', fontFamily: brand?.fontFamily, borderRadius: brand?.nodeRadius, borderColor: frameVariant !== 'hairline' && frameVariant !== 'none' ? 'transparent' : undefined }}
+      style={{
+        cursor: interactive ? (isPanning ? 'grabbing' : 'grab') : 'default',
+        fontFamily: brand?.fontFamily,
+        borderRadius: frameVariant === 'none' ? 0 : brand?.nodeRadius,
+        borderWidth: frameVariant === 'none' ? 0 : undefined,
+        boxShadow: frameVariant === 'none' ? 'none' : undefined,
+        borderColor: frameVariant !== 'hairline' && frameVariant !== 'none' ? 'transparent' : undefined,
+      }}
     >
       {theme === 'inherit' && <style>{HOST_THEME_CSS}</style>}
       {/* Paper stock fills the whole surface for the technical isometric styles;
           its graph grid is pinned to the panned/zoomed drawing underneath. */}
       {isIso && isoStyle.technical && (
-        <TechnicalBackdrop style={isoStyle} pan={pan} zoom={zoom} />
+        <TechnicalBackdrop style={isoStyle} pan={{ x: camera.x, y: camera.y }} zoom={camera.zoom} />
       )}
 
-      <div
-        className="relative transition-transform duration-150 ease-out"
+      <motion.div
+        className={liveUpdates || reducedMotion ? 'relative' : 'relative transition-transform duration-150 ease-out'}
+        data-arc-camera
         style={{
           width: layout.width,
           height: layout.height,
           minWidth: layout.width,
-          transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+          x: cameraMotion.x, y: cameraMotion.y, scale: cameraMotion.zoom,
           transformOrigin: 'top left',
         }}
       >
@@ -2391,12 +2576,13 @@ export default function ArcDiagram({
         ) : (
           <>
             {/* Group boundaries sit behind connectors and nodes. */}
-            <DiagramGroups groups={groups} themeColors={themeColors} />
+            <DiagramGroups groups={groups} themeColors={themeColors} liveMotion={liveUpdates} motionGroups={liveUpdates ? live.groups : undefined} />
 
             {/* Connectors */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox={`0 0 ${layout.width} ${layout.height}`}
+              style={liveUpdates ? { overflow: 'visible' } : undefined}
             >
               {connectors.map((conn, i) => {
                 const isConnected = hasFocus && focusState.connectorIndexes.has(i)
@@ -2406,6 +2592,7 @@ export default function ArcDiagram({
                     connector={conn}
                     connectorIndex={i}
                     nodes={nodes}
+                    motionNodes={liveUpdates ? live.nodes : undefined}
                     styles={connectorStyles}
                     themeColors={themeColors}
                     brand={brand}
@@ -2419,15 +2606,12 @@ export default function ArcDiagram({
 
             {/* Flow markers ride above connectors but below node shells, so a
                 marker crossing a node appears to pass through it. */}
-            {flowLayer && (
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                viewBox={`0 0 ${layout.width} ${layout.height}`}
-                data-arc-flow-layer
-              >
-                <g dangerouslySetInnerHTML={{ __html: flowLayer }} />
-              </svg>
-            )}
+            <LiveFlowLayer
+              data={live.data as unknown as CanonicalArcDiagramData}
+              motionNodes={liveUpdates ? live.nodes : undefined}
+              options={{ themeColors, fontFamily: brand?.fontFamily, flowTime, animate: animateFlows && flowTime === undefined && !reducedMotion }}
+              overflowVisible={liveUpdates}
+            />
 
             {/* Nodes */}
             {Object.entries(nodes).map(([nodeId, node]) => {
@@ -2438,6 +2622,7 @@ export default function ArcDiagram({
               return (
                 <Node
                   key={nodeId}
+                  nodeId={nodeId}
                   node={node}
                   data={nd}
                   mode={mode}
@@ -2448,6 +2633,8 @@ export default function ArcDiagram({
                   lift={fx.lift}
                   glow={fx.glow}
                   dimOpacity={fx.dimOpacity}
+                  liveMotion={liveUpdates || reducedMotion}
+                  motionNode={liveUpdates ? live.nodes[nodeId] : undefined}
                   onMouseEnter={() => { if (!lockedNodeId) { setHoveredNodeId(nodeId); onNodeHover?.(nodeId) } }}
                   onMouseLeave={() => { if (!lockedNodeId) { setHoveredNodeId(null); onNodeHover?.(null) } }}
                   onClick={() => handleNodeClick(nodeId)}
@@ -2469,7 +2656,22 @@ export default function ArcDiagram({
             )}
           </>
         )}
-      </div>
+        {!isIso && renderCanvasOverlay?.({
+          nodes: Object.entries(nodes).map(([nodeId, node]) => ({
+            id: nodeId,
+            x: node.x,
+            y: node.y,
+            width: node.width ?? NODE_SIZES[node.size].width,
+            height: node.height ?? NODE_SIZES[node.size].height,
+            data: nodeData[nodeId],
+            opacity: 1,
+          })),
+          zoom: camera.zoom,
+          camera: { x: camera.x, y: camera.y },
+          viewport: overlayViewport,
+          motion: liveUpdates ? { nodes: live.nodes, camera: cameraMotion } : undefined,
+        })}
+      </motion.div>
 
       {/* Viewer chrome - fixed position regardless of zoom/pan */}
 

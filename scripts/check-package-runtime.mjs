@@ -61,6 +61,32 @@ try {
     const probe = path.join(temporary, 'probe.cjs')
     writeFileSync(probe, verify)
     execFileSync(process.execPath, [probe], { cwd: temporary, stdio: 'pipe' })
-    console.log(`Packed ${pkg.name}@${pkg.version}: ESM import, CommonJS require, and public renderer exports passed with only React peers.`)
+    if (pkg.name === '@hudsonkit/arc') {
+      // Typecheck the packed API in isolation too. A rolled-up declaration can
+      // accidentally import a bundled dev dependency even when JS is portable.
+      mkdirSync(path.join(modules, '@types'), { recursive: true })
+      for (const peer of ['react', 'react-dom']) symlinkSync(path.join(repository, 'node_modules', '@types', peer), path.join(modules, '@types', peer))
+      const typeProbe = path.join(temporary, 'probe.mts')
+      writeFileSync(typeProbe, `
+        import type { ComponentProps } from 'react';
+        import { ArcDiagram } from '@hudsonkit/arc';
+        const overlay: NonNullable<ComponentProps<typeof ArcDiagram>['renderCanvasOverlay']> = context => {
+          const position = context.motion?.nodes.api?.x;
+          if (position) {
+            const current: number = position.get();
+            const unsubscribe = position.on('change', (next: number) => { void next; });
+            unsubscribe();
+            void current;
+          }
+          return null;
+        };
+        void overlay;
+      `)
+      execFileSync(process.execPath, [path.join(repository, 'node_modules/typescript/bin/tsc'),
+        '--noEmit', '--strict', '--target', 'ES2022', '--module', 'NodeNext',
+        '--moduleResolution', 'NodeNext', '--lib', 'ES2022,DOM,DOM.Iterable',
+        '--types', 'react,react-dom', typeProbe], { cwd: temporary, stdio: 'pipe' })
+    }
+    console.log(`Packed ${pkg.name}@${pkg.version}: ESM import, CommonJS require, public renderer exports${pkg.name === '@hudsonkit/arc' ? ', and isolated public declarations' : ''} passed with only React peers.`)
   }
 } finally { rmSync(temporary, { recursive: true, force: true }) }

@@ -17,6 +17,9 @@ export default defineConfig({
       include: ['src'],
       outDir: 'lib',
       rollupTypes: true,
+      // Motion is bundled into runtime JS; inline its overlay value types too
+      // so consumers only need Arc's existing React peer dependencies.
+      bundledPackages: ['motion', 'framer-motion', 'motion-dom', 'motion-utils'],
       afterBuild() {
         copyFileSync(resolve(__dirname, 'lib/index.d.ts'), resolve(__dirname, 'lib/index.d.cts'))
       },

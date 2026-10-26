@@ -18,6 +18,7 @@ const SoftwareListPage = lazy(() => import('./components/SoftwareListPage'))
 const IsometricDemo = lazy(() => import('./components/IsometricDemo'))
 const IsometricExamples = lazy(() => import('./components/IsometricExamples'))
 const PlayerShowcase = lazy(() => import('./components/PlayerShowcase'))
+const LiveDiagramPage = lazy(() => import('./components/LiveDiagramPage'))
 const NativeMermaidSequencesPost = lazy(() => import('./components/blog/NativeMermaidSequencesPost'))
 const ConnectionPoolExplainer = lazy(() => import('./components/explainers/ConnectionPoolExplainer'))
 const ExamplesPage = lazy(() => import('./components/ExamplesPage'))
@@ -462,6 +463,8 @@ function App() {
         <Route path="/" element={<LandingPageWrapper />} />
         <Route path="/editor" element={<EditorPage />} />
         <Route path="/editor/:sessionId" element={<EditorPage />} />
+        <Route path="/live" element={<LiveDiagramPage />} />
+        <Route path="/live/:sessionId" element={<LiveDiagramPage />} />
         <Route path="/player/*" element={<PlayerPage />} />
         <Route path="/docs" element={<DocsWrapper />} />
         <Route path="/docs/:page" element={<DocsWrapper />} />

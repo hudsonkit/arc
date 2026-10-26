@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // Baked at build time from GA_MEASUREMENT_ID; defaults to arc's GA4 property.
 const GA_MEASUREMENT_ID = import.meta.env.GA_MEASUREMENT_ID || 'G-SEDXMKVG9K';
@@ -12,7 +13,14 @@ declare global {
 }
 
 export function GoogleAnalytics() {
+  const { pathname } = useLocation();
+  const live = pathname === '/live' || pathname.startsWith('/live/');
   useEffect(() => {
+    // Live links carry a read capability in their fragment. Keep live sessions
+    // out of analytics, including after navigating from an ordinary site page.
+    const flags = window as unknown as Record<string, unknown>;
+    flags[`ga-disable-${GA_MEASUREMENT_ID}`] = live;
+    if (live) return;
     // Check if gtag already exists
     if (typeof window.gtag !== 'undefined') {
       return;
@@ -32,7 +40,9 @@ export function GoogleAnalytics() {
       }
       window.gtag = gtag;
       gtag('js', new Date());
-      gtag('config', GA_MEASUREMENT_ID);
+      gtag('config', GA_MEASUREMENT_ID, {
+        page_location: `${window.location.origin}${window.location.pathname}`,
+      });
     };
 
     return () => {
@@ -41,7 +51,7 @@ export function GoogleAnalytics() {
         script.parentNode.removeChild(script);
       }
     };
-  }, []);
+  }, [live]);
 
   return null;
 }

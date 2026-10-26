@@ -1,0 +1,367 @@
+{
+  "layout": {
+    "width": 1470,
+    "height": 765
+  },
+  "nodes": {
+    "web": {
+      "x": 50,
+      "y": 230,
+      "size": "m"
+    },
+    "api": {
+      "x": 290,
+      "y": 230,
+      "size": "m"
+    },
+    "db": {
+      "x": 530,
+      "y": 230,
+      "size": "m"
+    },
+    "queue": {
+      "x": 290,
+      "y": 430,
+      "size": "m"
+    },
+    "worker": {
+      "x": 530,
+      "y": 430,
+      "size": "m"
+    },
+    "cache": {
+      "x": 290,
+      "y": 70,
+      "size": "m"
+    },
+    "notifications": {
+      "x": 770,
+      "y": 430,
+      "size": "m"
+    },
+    "worker2": {
+      "x": 530,
+      "y": 630,
+      "size": "m"
+    },
+    "monitoring": {
+      "x": 770,
+      "y": 230,
+      "size": "m"
+    },
+    "retry": {
+      "x": 290,
+      "y": 630,
+      "size": "m"
+    },
+    "storage": {
+      "x": 770,
+      "y": 630,
+      "size": "m"
+    },
+    "analytics": {
+      "x": 1010,
+      "y": 430,
+      "size": "m"
+    },
+    "search": {
+      "x": 1250,
+      "y": 430,
+      "size": "m"
+    },
+    "audit": {
+      "x": 1010,
+      "y": 630,
+      "size": "m"
+    },
+    "reports": {
+      "x": 1250,
+      "y": 630,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "web": {
+      "kind": "frontend",
+      "name": "Web app",
+      "subtitle": "The request starts here"
+    },
+    "api": {
+      "kind": "backend",
+      "name": "API service",
+      "subtitle": "Handles requests"
+    },
+    "db": {
+      "kind": "database",
+      "name": "Postgres",
+      "subtitle": "Durable application data"
+    },
+    "queue": {
+      "kind": "queue",
+      "name": "Job queue",
+      "subtitle": "Work that can wait"
+    },
+    "worker": {
+      "kind": "service",
+      "name": "Worker 01",
+      "subtitle": "Processes queued jobs",
+      "color": "amber"
+    },
+    "cache": {
+      "kind": "cache",
+      "name": "Cache",
+      "subtitle": "Frequently requested data"
+    },
+    "notifications": {
+      "kind": "service",
+      "icon": "Bell",
+      "name": "Notifications",
+      "subtitle": "Let people know",
+      "color": "violet"
+    },
+    "worker2": {
+      "kind": "service",
+      "icon": "Server",
+      "name": "Worker 02",
+      "subtitle": "Share the queue",
+      "color": "amber"
+    },
+    "monitoring": {
+      "kind": "service",
+      "icon": "Activity",
+      "name": "Health monitor",
+      "subtitle": "Track delivery",
+      "color": "emerald"
+    },
+    "retry": {
+      "kind": "queue",
+      "icon": "RefreshCw",
+      "name": "Retry queue",
+      "subtitle": "Recover failed jobs",
+      "color": "rose"
+    },
+    "storage": {
+      "kind": "service",
+      "icon": "HardDrive",
+      "name": "Object storage",
+      "subtitle": "Save generated files",
+      "color": "sky"
+    },
+    "analytics": {
+      "kind": "service",
+      "icon": "BarChart",
+      "name": "Analytics",
+      "subtitle": "Understand delivery",
+      "color": "violet"
+    },
+    "search": {
+      "kind": "service",
+      "icon": "Search",
+      "name": "Search index",
+      "subtitle": "Find recent events",
+      "color": "sky"
+    },
+    "audit": {
+      "kind": "service",
+      "icon": "Shield",
+      "name": "Audit log",
+      "subtitle": "Keep a delivery trail",
+      "color": "emerald"
+    },
+    "reports": {
+      "kind": "service",
+      "icon": "PieChart",
+      "name": "Reports",
+      "subtitle": "Turn events into insight",
+      "color": "amber"
+    }
+  },
+  "connectors": [
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "request"
+    },
+    {
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "storage"
+    },
+    {
+      "id": "api-queue",
+      "from": "api",
+      "to": "queue",
+      "fromAnchor": "bottom",
+      "toAnchor": "top",
+      "style": "jobs"
+    },
+    {
+      "id": "queue-worker",
+      "from": "queue",
+      "to": "worker",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "jobs"
+    },
+    {
+      "id": "worker-db",
+      "from": "worker",
+      "to": "db",
+      "fromAnchor": "top",
+      "toAnchor": "bottom",
+      "style": "storage"
+    },
+    {
+      "id": "api-cache",
+      "from": "api",
+      "to": "cache",
+      "fromAnchor": "top",
+      "toAnchor": "bottom",
+      "style": "cache"
+    },
+    {
+      "id": "worker-notifications",
+      "from": "worker",
+      "to": "notifications",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "events"
+    },
+    {
+      "id": "queue-worker2",
+      "from": "queue",
+      "to": "worker2",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "jobs",
+      "curve": "step"
+    },
+    {
+      "id": "worker2-notifications",
+      "from": "worker2",
+      "to": "notifications",
+      "fromAnchor": "top",
+      "toAnchor": "bottom",
+      "style": "events",
+      "curve": "step"
+    },
+    {
+      "id": "notifications-monitoring",
+      "from": "notifications",
+      "to": "monitoring",
+      "fromAnchor": "top",
+      "toAnchor": "bottom",
+      "style": "telemetry",
+      "curve": "direct"
+    },
+    {
+      "id": "worker2-retry",
+      "from": "worker2",
+      "to": "retry",
+      "fromAnchor": "left",
+      "toAnchor": "right",
+      "style": "retry",
+      "curve": "direct"
+    },
+    {
+      "id": "worker2-storage",
+      "from": "worker2",
+      "to": "storage",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "files"
+    },
+    {
+      "id": "monitoring-analytics",
+      "from": "monitoring",
+      "to": "analytics",
+      "fromAnchor": "right",
+      "toAnchor": "top",
+      "style": "telemetry"
+    },
+    {
+      "id": "storage-analytics",
+      "from": "storage",
+      "to": "analytics",
+      "fromAnchor": "top",
+      "toAnchor": "bottom",
+      "style": "events"
+    },
+    {
+      "id": "analytics-search",
+      "from": "analytics",
+      "to": "search",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "events"
+    },
+    {
+      "id": "storage-audit",
+      "from": "storage",
+      "to": "audit",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "events"
+    },
+    {
+      "id": "search-reports",
+      "from": "search",
+      "to": "reports",
+      "fromAnchor": "bottom",
+      "toAnchor": "top",
+      "style": "events",
+      "curve": "direct"
+    }
+  ],
+  "connectorStyles": {
+    "request": {
+      "color": "violet",
+      "strokeWidth": 2,
+      "label": "HTTPS"
+    },
+    "storage": {
+      "color": "blue",
+      "strokeWidth": 2,
+      "label": "SQL"
+    },
+    "jobs": {
+      "color": "amber",
+      "strokeWidth": 2,
+      "label": "Jobs"
+    },
+    "cache": {
+      "color": "emerald",
+      "strokeWidth": 2,
+      "label": "Read through"
+    },
+    "events": {
+      "color": "violet",
+      "strokeWidth": 2,
+      "label": "Events"
+    },
+    "telemetry": {
+      "color": "emerald",
+      "strokeWidth": 2,
+      "label": "Telemetry",
+      "dashed": true
+    },
+    "retry": {
+      "color": "rose",
+      "strokeWidth": 2,
+      "label": "Retry",
+      "dashed": true
+    },
+    "files": {
+      "color": "sky",
+      "strokeWidth": 2,
+      "label": "Files"
+    }
+  },
+  "id": "working-together"
+}

@@ -43,16 +43,19 @@
     "devtools"
   ],
   "bin": {
-    "arc-mcp": "./dist/arc-mcp.mjs"
+    "arc-mcp": "./dist/arc-mcp.mjs",
+    "arc-mcp-http": "./dist/arc-mcp-http.mjs"
   },
   "files": [
     "dist/arc-mcp.mjs",
+    "dist/arc-mcp-http.mjs",
     "server.json"
   ],
   "scripts": {
     "build": "bun build.mjs",
     "dev": "bun src/server.ts",
     "dev:http": "bun src/http-server.ts",
+    "serve:http": "bun dist/arc-mcp-http.mjs",
     "test": "bun test",
     "prepublishOnly": "bun run build"
   },
