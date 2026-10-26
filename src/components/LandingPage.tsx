@@ -380,6 +380,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
                 <div><dt>OUT</dt><dd>PNG · SVG · GIF · MP4</dd></div>
                 <div><dt>EMBED</dt><dd>React</dd></div>
               </dl>
+              <a className="tl-live-jump" href="#live-review">Watch the live collaboration preview ↓</a>
             </div>
             <HeroPlate animate={!reducedMotion} mode={mode} />
           </section>
@@ -387,6 +388,46 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
       </div>
 
       <div className="tl-shell">
+        <section id="live-review" className="tl-section tl-live-review" aria-labelledby="live-review-heading">
+          <div className="tl-live-intro">
+            <div>
+              <h2 id="live-review-heading" className="tl-h2">Work through the diagram together.</h2>
+              <p className="tl-section-p">
+                Explore an architecture or workflow with your agent while Arc updates the shared view.
+                Follow real MCP edits as nodes appear, move, and settle into place.
+              </p>
+              <p className="tl-section-p">
+                The diagram stays declarative: editable JSON or TypeScript remains the source
+                for reviewable changes, embeds, and production exports.
+              </p>
+            </div>
+            <p className="tl-live-availability">
+              <strong>Private preview</strong>
+              This live workflow is not included in the published MCP package.
+            </p>
+          </div>
+          <figure className="tl-live-film">
+            <video
+              className="tl-live-video"
+              controls
+              playsInline
+              preload="none"
+              width={1280}
+              height={960}
+              poster={`${import.meta.env.BASE_URL}arc-live-review-poster.jpg`}
+              aria-label="Arc live collaboration preview"
+              aria-describedby="live-review-caption"
+            >
+              <source src={`${import.meta.env.BASE_URL}arc-live-review.mp4`} type="video/mp4" />
+              <a href={`${import.meta.env.BASE_URL}arc-live-review.mp4`}>Download the Arc live preview video.</a>
+            </video>
+            <figcaption id="live-review-caption" className="tl-live-caption">
+              <span>Real MCP calls add a router, a review store, and a saved review. The shared canvas moves and reframes with each change.</span>
+              <span className="tl-live-duration">22 seconds · silent · 60 fps export</span>
+            </figcaption>
+          </figure>
+        </section>
+
         {/* SOURCE → OUTPUT */}
         <section id="formats" className="tl-section tl-formats" aria-labelledby="formats-heading">
           <div className="tl-head">

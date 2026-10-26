@@ -2,18 +2,19 @@
   <img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-readme-header.png" alt="Arc — illustrations, made with agents. Two hollow rounded rectangular eyes and an upward-open smile sit beside the wordmark." width="800" />
 </p>
 
-**Arc helps you make illustrations and interactive diagrams with AI agents.**
-Explain a product, map a process, explore a concept, or show how software works.
-Embed the result in your app, or export a figure for your docs.
+**Arc is a declarative diagram toolkit for creating, presenting, and refining
+visual explanations with AI agents.** Define an architecture, workflow, or
+illustration in JSON or TypeScript. Turn that source into an interactive
+walkthrough, an embedded viewer, or a finished figure for your docs.
 
-Define the elements and their relationships in declarative JSON or TypeScript.
-Give an agent the Arc skill to compose, render, and refine the illustration,
-or author the source yourself. Keep the editable source to review and reuse.
-Architecture diagrams also have a visual studio, CLI, and MCP tools.
+Author the source yourself, work in the visual studio, or give an agent the
+Arc skill and MCP tools. The diagram stays editable, typed, and ready to
+version alongside your code. The live review preview builds on that same
+format: watch an agent develop the explanation while you review the changes.
 
 Supported Mermaid source can also become an Arc diagram or a playable sequence.
 
-[Get started](#get-started) · [Examples](https://arc.jdi.sh/examples/) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md) · [Open the studio](https://arc.jdi.sh/editor)
+[Get started](#get-started) · [Live review preview](#review-the-diagram-as-your-agent-works) · [Examples](https://hudsonkit.com/arc/examples/) · [Documentation](https://github.com/hudsonkit/arc/blob/main/docs/overview.md) · [Open the studio](https://hudsonkit.com/arc/editor)
 
 [![npm version](https://img.shields.io/npm/v/@hudsonkit/arc.svg?color=2e5fa5&label=%40hudsonkit%2Farc)](https://www.npmjs.com/package/@hudsonkit/arc)
 [![license](https://img.shields.io/npm/l/@hudsonkit/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
@@ -30,6 +31,29 @@ Supported Mermaid source can also become an Arc diagram or a playable sequence.
   through a Mermaid sequence one message at a time.
 - **Use the result.** Embed a React viewer, edit in the studio, or export an image
   or flow animation. Keep the source for the next change.
+
+## Review the diagram as your agent works
+
+**Private preview.** Bring the diagram into a live architecture review in the
+Hudson Kit studio. An agent adds and moves nodes through MCP while you watch
+the canvas update. A marked work region shows where the agent is working.
+Nodes and connections transition smoothly as the view fits the changing diagram.
+
+[![Watch a live Arc review: real MCP calls add and move nodes, with an active work region and a light canvas.](https://hudsonkit.com/arc/arc-live-review-poster.jpg)](https://hudsonkit.com/arc/#live-review)
+
+[Watch the 22-second demo](https://hudsonkit.com/arc/#live-review) · [Open the 60 fps video](https://hudsonkit.com/arc/arc-live-review.mp4)
+
+- **See work in progress.** Presence shows the agent's harness and name when provided.
+  Activity appears over the declared work region and settles when work ends.
+- **Review together.** One agent writes to a review; multiple people can follow
+  it through a private, read-only viewer link.
+- **Return to the review.** Saved architecture reviews retain the baseline,
+  revisions, findings, and decisions. Reopen them on the same private host.
+- **Keep the source.** Live changes use the same declarative Arc data as the
+  renderers. Refine the definition, present it, and produce your final output.
+
+The video shows the private preview, which is not yet included in the published
+MCP package. The setup below covers the released diagram tools.
 
 ## Bring your source. Choose your output.
 
@@ -123,19 +147,19 @@ renderer has React and static SVG APIs, including a vanilla JavaScript embed.
 
 ## Let readers operate the explanation
 
-Turn up demand in the [connection-pool explainer](https://arc.jdi.sh/examples/connection-pool/).
+Turn up demand in the [connection-pool explainer](https://hudsonkit.com/arc/examples/connection-pool/).
 All four database connections fill, and requests start waiting. Step through a
 handoff to see which request gets the next connection. Stop arrivals and watch
 the queue drain.
 
-[![The connection-pool explainer with four busy connections, waiting requests, and demand controls](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-connection-pool.png)](https://arc.jdi.sh/examples/connection-pool/)
+[![The connection-pool explainer with four busy connections, waiting requests, and demand controls](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-connection-pool.png)](https://hudsonkit.com/arc/examples/connection-pool/)
 
 The queue, leases, counts, and handoffs come from the same deterministic model.
 This working example combines a custom mechanism view with an Arc diagram
 projection. It shows how to build an explanation that responds to the reader's
 actions and makes cause and effect visible.
 
-[Operate the pool](https://arc.jdi.sh/examples/connection-pool/) · [Read the model](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolModel.ts) · [See the Arc projection](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolDiagram.ts)
+[Operate the pool](https://hudsonkit.com/arc/examples/connection-pool/) · [Read the model](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolModel.ts) · [See the Arc projection](https://github.com/hudsonkit/arc/blob/main/src/components/explainers/connectionPoolDiagram.ts)
 
 ## Create on the canvas. Refine in code.
 
@@ -155,7 +179,7 @@ The editor's React components, context, and hooks are available for embedding.
 The player showcase lets you tune a viewer's appearance and controls, then
 copy the matching JSX.
 
-Open the studio from [Arc](https://arc.jdi.sh/), or [run it locally](#development).
+Open the studio from [Arc](https://hudsonkit.com/arc/), or [run it locally](#development).
 
 ## Give the drawing a visual identity
 
@@ -235,8 +259,8 @@ in that browser.
 
 ## Get started
 
-**Try the experience:** open [Arc](https://arc.jdi.sh/) or
-[operate the connection pool](https://arc.jdi.sh/examples/connection-pool/).
+**Try the experience:** open [Arc](https://hudsonkit.com/arc/) or
+[operate the connection pool](https://hudsonkit.com/arc/examples/connection-pool/).
 
 **Build with React:** install the main package in a React 18 or 19 project.
 
@@ -326,11 +350,11 @@ Add the MCP server to a client that supports stdio:
 }
 ```
 
-The repository's server provides ten tools: validation, structural diff,
-automatic layout, ASCII/SVG/PNG/animation/HTML rendering, TypeScript generation,
-and editor handoff. It also serves the schema, authoring skill, and LLM guide
-as resources. Packages are versioned separately; use `bun run mcp` to run the
-server from this checkout, or `bun run mcp:http` for self-hosted HTTP transport.
+The published MCP server provides validation, structural diff, automatic
+layout, ASCII/SVG/PNG/animation/HTML rendering, TypeScript generation, and editor
+handoff. It also serves the schema, authoring skill, and LLM guide as resources.
+Use `bun run mcp` to run the server from a source checkout. The live review
+workflow shown above is a separate private preview.
 
 [MCP setup and tool reference](https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md)
 
