@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ArrowUpRight, ChevronRight, Download, Moon, Search, SquarePen } from 'lucide-react'
 import { ArcDiagram } from '@hudsonkit/arc'
 import { ArcMermaidPlayer } from '../../packages/viewer/src/mermaid'
 import { importMermaid } from '../../packages/viewer/src/importMermaid'
@@ -18,6 +19,7 @@ export default function ExamplesPage() {
   const [view, setView] = useState<'preview' | 'source'>('preview')
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const detailRef = useRef<HTMLElement>(null)
+  const catalogRef = useRef<HTMLElement>(null)
   const selectExample = () => {
     setView('preview')
     if (window.matchMedia('(max-width: 720px)').matches) detailRef.current?.scrollIntoView({ block: 'start' })
@@ -28,6 +30,17 @@ export default function ExamplesPage() {
   const source = exampleSource(example)
   const extension = example.source ? 'mmd' : 'json'
   const sourceHref = `data:${example.source ? 'text/plain' : 'application/json'};charset=utf-8,${encodeURIComponent(source)}`
+  // A deep link can land on any of the 16; the catalog scrolls on its own,
+  // so bring the selected row into it without moving the page.
+  useEffect(() => {
+    const catalog = catalogRef.current
+    const selected = catalog?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!catalog || !selected) return
+    const top = selected.getBoundingClientRect().top - catalog.getBoundingClientRect().top + catalog.scrollTop
+    if (top < catalog.scrollTop || top + selected.offsetHeight > catalog.scrollTop + catalog.clientHeight) {
+      catalog.scrollTop = Math.max(0, top - catalog.clientHeight / 3)
+    }
+  }, [example.id, category, query])
   useMeta({ title: `${exampleId ? example.title : 'Diagram examples'} | Arc`, description: exampleId ? example.description : 'Explore 16 architecture, sequence, flowchart, and state examples. Preview the diagram and download its source.', url: `/examples${exampleId ? `/${example.id}` : ''}` })
 
   if (exampleId && !examples.some(item => item.id === exampleId)) {
@@ -42,24 +55,24 @@ export default function ExamplesPage() {
           <nav aria-label="Main navigation"><Link to="/">Overview</Link><Link to="/exploded">Exploded views</Link><Link to="/panel-cube">Panel cube</Link><Link to="/docs/examples">Docs</Link><Link to="/editor">Open editor ↗</Link></nav>
         </header>
         <main>
-          <div className="eg-intro"><p className="eg-eyebrow">THE EXAMPLE LIBRARY · {examples.length} WORKING DIAGRAMS</p><h1>Start with a system<br />you know.</h1><p>A cache miss. A payment retry. A release going live. Explore the diagram, read its source, and make it your own.</p></div>
+          <div className="eg-intro"><p className="eg-eyebrow">THE EXAMPLE LIBRARY · {examples.length} WORKING DIAGRAMS</p><h1>Start with a system you know.</h1><p>A cache miss. A payment retry. A release going live. Explore the diagram, read its source, and make it your own.</p></div>
           <div className="eg-filter-bar">
-            <div className="eg-filters" aria-label="Filter examples">{categories.map(item => <button key={item} onClick={() => setCategory(item)} aria-pressed={category === item}>{item}<span>{item === 'All' ? examples.length : examples.filter(e => e.category === item).length}</span></button>)}</div>
-            <label className="eg-search"><span className="eg-sr-only">Search examples</span><input type="search" placeholder="Find a system…" value={query} onChange={event => setQuery(event.target.value)} /></label>
+            <div className="eg-filters eg-seg" role="group" aria-label="Filter examples">{categories.map(item => <button key={item} className="eg-seg-btn" onClick={() => setCategory(item)} aria-pressed={category === item}>{item}<span className="eg-count">{item === 'All' ? examples.length : examples.filter(e => e.category === item).length}</span></button>)}</div>
+            <label className="eg-search"><span className="eg-sr-only">Search examples</span><Search className="eg-search-icon" size={14} strokeWidth={1.75} aria-hidden="true" /><input type="search" placeholder="Find a system…" value={query} onChange={event => setQuery(event.target.value)} /></label>
           </div>
           <div className="eg-workbench">
-            <aside className="eg-catalog" aria-label="Example library">
+            <aside ref={catalogRef} className="eg-catalog" aria-label="Example library">
               <p className="eg-result-count" aria-live="polite">{visible.length} examples</p>
-              {visible.map(item => <Link key={item.id} to={`/examples/${item.id}`} className={`eg-example ${item.id === example.id ? 'is-selected' : ''}`} aria-current={item.id === example.id ? 'page' : undefined} onClick={selectExample}><span className="eg-example-category">{item.category}</span><strong>{item.title}</strong><span>{item.description}</span><span className="eg-example-arrow" aria-hidden="true">↗</span></Link>)}
+              {visible.map(item => <Link key={item.id} to={`/examples/${item.id}`} className={`eg-example ${item.id === example.id ? 'is-selected' : ''}`} aria-current={item.id === example.id ? 'page' : undefined} onClick={selectExample}><span className="eg-example-category">{item.category}</span><strong>{item.title}</strong><span>{item.description}</span><ChevronRight className="eg-example-arrow" size={14} strokeWidth={1.75} aria-hidden="true" /></Link>)}
               {!visible.length && <p className="eg-empty">No matches. Try another search or category.</p>}
             </aside>
             <section ref={detailRef} className="eg-detail" aria-label="Selected example">
               <header className="eg-detail-header"><span className="eg-eyebrow">{example.category} / {example.source ? 'MERMAID SOURCE' : 'ARC JSON'}</span><h2>{example.title}</h2><p>{example.description}</p></header>
-              <div className="eg-toolbar"><div role="group" aria-label="Example view"><button aria-pressed={view === 'preview'} onClick={() => setView('preview')}>Preview</button><button aria-pressed={view === 'source'} onClick={() => setView('source')}>Source</button></div><button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} aria-pressed={mode === 'dark'}>Dark mode</button></div>
+              <div className="eg-viewer"><div className="eg-toolbar"><div className="eg-seg" role="group" aria-label="Example view"><button className="eg-seg-btn" aria-pressed={view === 'preview'} onClick={() => setView('preview')}>Preview</button><button className="eg-seg-btn" aria-pressed={view === 'source'} onClick={() => setView('source')}>Source</button></div><button className="eg-toggle" onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} aria-pressed={mode === 'dark'}><Moon size={14} strokeWidth={1.75} aria-hidden="true" />Dark mode</button></div>
               <div className="eg-stage" data-mode={mode}>
-                {view === 'source' ? <pre tabIndex={0} aria-label={`${example.title} source`}><code>{source}</code></pre> : example.category === 'Sequence' ? <ArcMermaidPlayer key={`${example.id}-${mode}`} source={example.source} mode={mode} title={example.title} defaultZoom="fit" minZoom={0.2} sequence={{ width: 900 }} /> : <ArcDiagram key={`${example.id}-${mode}`} data={diagram!} mode={mode} defaultZoom="fit" fitPadding={32} showArcToggle={false} showControls interactive={false} />}
+                {view === 'source' ? <pre tabIndex={0} aria-label={`${example.title} source`}><code>{source}</code></pre> : example.category === 'Sequence' ? <ArcMermaidPlayer key={`${example.id}-${mode}`} source={example.source} mode={mode} theme="inherit" title={example.title} defaultZoom="fit" minZoom={0.2} sequence={{ width: 900 }} /> : <ArcDiagram key={`${example.id}-${mode}`} data={diagram!} mode={mode} defaultZoom="fit" fitPadding={32} showArcToggle={false} showControls interactive={false} />}
               </div>
-              <footer className="eg-detail-footer"><a href={sourceHref} download={`${example.id}.${extension}`}>Download .{extension} ↓</a>{diagram && <Link to={`/editor#data=${btoa(JSON.stringify(diagram))}`}>Open in editor ↗</Link>}<Link to="/docs/exports">Export PNG · SVG · GIF · MP4 ↗</Link></footer>
+              <footer className="eg-detail-footer"><a className="eg-action is-primary" href={sourceHref} download={`${example.id}.${extension}`}><Download size={14} strokeWidth={1.75} aria-hidden="true" />Download .{extension}</a>{diagram && <Link className="eg-action" to={`/editor#data=${btoa(JSON.stringify(diagram))}`}><SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />Open in editor</Link>}<Link className="eg-action" to="/docs/exports">Export PNG · SVG · GIF · MP4<ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" /></Link></footer></div>
               <p className="eg-caption">{example.category === 'Sequence' ? 'Native sequence playback: step through messages or press play. GIF and MP4 exports use Arc flow animation; they do not capture this timeline.' : example.source ? 'Mermaid source imported into Arc nodes and connectors. Arc applies its own layout. Supported source used with Pele or Beautiful Mermaid follows this same import path.' : 'Live Arc rendering with an animated packet route. The downloaded JSON includes nodes, connectors, and flow timing.'}</p>
             </section>
           </div>
