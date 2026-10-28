@@ -1,6 +1,8 @@
 import { ArrowLeft, ArrowRight, Github } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMeta } from '../../hooks/useMeta'
+import { SITE_URL } from '../../utils/site'
+import { blogSchema, legacyPost } from './blogData'
 import SequenceEngineShowcase from '../SequenceEngineShowcase'
 import '../../blog.css'
 
@@ -8,7 +10,10 @@ export default function NativeMermaidSequencesPost() {
   useMeta({
     title: 'Mermaid in, Arc out | Arc',
     description: 'Why Arc gives sequence diagrams a native semantic model, renderer, and player.',
-    url: '/blog/native-mermaid-sequences',
+    url: '/blog/native-mermaid-sequences/',
+    type: 'article',
+    image: '/og-image.png',
+    structuredData: blogSchema(legacyPost, SITE_URL),
   })
 
   return (
@@ -19,6 +24,7 @@ export default function NativeMermaidSequencesPost() {
           Arc / notes
         </Link>
         <nav aria-label="Build note links">
+          <Link to="/blog/">Blog</Link>
           <Link to="/docs/mermaid-sequences">Sequence docs</Link>
           <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noreferrer">
             <Github size={14} aria-hidden="true" /> GitHub
@@ -28,8 +34,8 @@ export default function NativeMermaidSequencesPost() {
 
       <main className="arc-note__main">
         <article>
-          <Link className="arc-note__back" to="/">
-            <ArrowLeft size={14} aria-hidden="true" /> Back to Arc
+          <Link className="arc-note__back" to="/blog/">
+            <ArrowLeft size={14} aria-hidden="true" /> All articles
           </Link>
 
           <header className="arc-note__hero">

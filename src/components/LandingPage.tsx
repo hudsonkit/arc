@@ -345,6 +345,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               <a href="#sequence"><span className="tl-nav-n">04</span>SEQUENCE</a>
               <a href="#agentic"><span className="tl-nav-n">05</span>AGENTS</a>
               <Link to="/examples">EXAMPLES</Link>
+              <a href={`${import.meta.env.BASE_URL}blog/`}>BLOG</a>
               <Link to="/docs">DOCS</Link>
               <a className="tl-nav-accent" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
             </nav>
@@ -374,6 +375,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
                 <button type="button" className="tl-btn tl-btn-signal" onClick={onLaunchEditor}>Launch the editor →</button>
                 <Link className="tl-btn tl-btn-line" to="/examples">Examples</Link>
                 <Link className="tl-btn tl-btn-quiet" to="/docs">Docs</Link>
+                <a className="tl-btn tl-btn-quiet" href={`${import.meta.env.BASE_URL}blog/`}>Blog</a>
               </div>
               <dl className="tl-specbar">
                 <div><dt>IN</dt><dd>Arc + Mermaid source</dd></div>
@@ -565,7 +567,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
             <SequenceEngineShowcase showSource showIntro={false} />
           </Suspense>
           <div className="tl-sequence-links">
-            <Link to="/blog/native-mermaid-sequences">Read the build note →</Link>
+            <a href={`${import.meta.env.BASE_URL}blog/native-mermaid-sequences/`}>Read the build note →</a>
             <Link to="/docs/mermaid-sequences">Open the implementation guide →</Link>
           </div>
         </section>

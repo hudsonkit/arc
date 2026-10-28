@@ -1,0 +1,14 @@
+{
+  "title": "Architecture or sequence diagram? Explain a cache miss with both",
+  "slug": "architecture-or-sequence-diagram-cache-miss",
+  "description": "Compare architecture and sequence diagrams through a cache miss, with runnable Mermaid source and Arc\u2019s React sequence player.",
+  "readerQuestion": "Should I use an architecture diagram or a sequence diagram to explain a cache miss?",
+  "searchIntent": "Informational comparison with an implementation example",
+  "date": "2026-10-28",
+  "sources": [
+    "https://hudsonkit.com/arc/examples/cache-aside",
+    "https://hudsonkit.com/arc/examples/cache-sequence",
+    "https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md",
+    "https://github.com/hudsonkit/arc/blob/main/docs/mermaid-import.md"
+  ]
+}

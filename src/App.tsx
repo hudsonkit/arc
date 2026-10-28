@@ -20,6 +20,7 @@ const IsometricExamples = lazy(() => import('./components/IsometricExamples'))
 const PlayerShowcase = lazy(() => import('./components/PlayerShowcase'))
 const LiveDiagramPage = lazy(() => import('./components/LiveDiagramPage'))
 const NativeMermaidSequencesPost = lazy(() => import('./components/blog/NativeMermaidSequencesPost'))
+const BlogPage = lazy(() => import('./components/blog/BlogPage'))
 const ConnectionPoolExplainer = lazy(() => import('./components/explainers/ConnectionPoolExplainer'))
 const ExamplesPage = lazy(() => import('./components/ExamplesPage'))
 const ExplodedShowcase = lazy(() => import('./components/ExplodedShowcase'))
@@ -472,6 +473,8 @@ function App() {
         <Route path="/skills" element={<AgentSharePage kind="skills" />} />
         <Route path="/architecture-diagram-software" element={<SoftwareListPage />} />
         <Route path="/blog/native-mermaid-sequences" element={<NativeMermaidSequencesPost />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPage />} />
         <Route path="/iso-demo" element={<IsometricDemo />} />
         <Route path="/iso-examples" element={<IsometricExamples />} />
         <Route path="/exploded" element={<ExplodedShowcase />} />

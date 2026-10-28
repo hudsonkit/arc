@@ -1,0 +1,16 @@
+{
+  "title": "How to turn an architecture diagram into a request walkthrough",
+  "slug": "architecture-diagram-request-walkthrough",
+  "description": "Build an architecture walkthrough with Arc guided views. Use a complete JSON example to explain request storage and background processing.",
+  "readerQuestion": "How can I turn a crowded architecture diagram into a walkthrough of one request path?",
+  "searchIntent": "Practical how-to: architecture diagram walkthrough, request flow diagram, interactive architecture documentation.",
+  "date": "2026-10-28",
+  "sources": [
+    "https://hudsonkit.com/arc/docs/views",
+    "https://hudsonkit.com/arc/docs/focus-stories",
+    "https://hudsonkit.com/arc/docs/mermaid-sequences",
+    "https://github.com/hudsonkit/arc/blob/main/src/utils/nodeKinds.ts",
+    "https://github.com/hudsonkit/arc/blob/main/src/components/ArcDiagram.tsx",
+    "https://www.npmjs.com/package/@hudsonkit/arc/v/0.14.0"
+  ]
+}

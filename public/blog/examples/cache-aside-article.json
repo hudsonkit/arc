@@ -1,0 +1,121 @@
+{
+  "id": "cache-aside",
+  "layout": {
+    "width": 900,
+    "height": 510
+  },
+  "nodes": {
+    "app": {
+      "x": 40,
+      "y": 180,
+      "size": "m"
+    },
+    "cache": {
+      "x": 340,
+      "y": 60,
+      "size": "m"
+    },
+    "db": {
+      "x": 650,
+      "y": 280,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "app": {
+      "name": "Application",
+      "subtitle": "Read product",
+      "icon": "Monitor",
+      "color": "blue"
+    },
+    "cache": {
+      "name": "Cache",
+      "subtitle": "Short-lived values",
+      "icon": "Zap",
+      "color": "violet"
+    },
+    "db": {
+      "name": "Database",
+      "subtitle": "Source of truth",
+      "icon": "Database",
+      "color": "emerald"
+    }
+  },
+  "connectors": [
+    {
+      "id": "cache",
+      "from": "app",
+      "to": "cache",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "cache"
+    },
+    {
+      "id": "read",
+      "from": "app",
+      "to": "db",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "read"
+    },
+    {
+      "id": "return",
+      "from": "db",
+      "to": "app",
+      "fromAnchor": "bottom",
+      "toAnchor": "bottom",
+      "style": "return",
+      "curve": "natural",
+      "curveDepth": 20
+    }
+  ],
+  "connectorStyles": {
+    "cache": {
+      "color": "violet",
+      "label": "lookup / populate",
+      "strokeWidth": 2
+    },
+    "read": {
+      "color": "blue",
+      "label": "read on miss",
+      "strokeWidth": 2
+    },
+    "return": {
+      "color": "emerald",
+      "label": "return row",
+      "strokeWidth": 2
+    }
+  },
+  "flows": [
+    {
+      "id": "request",
+      "legs": [
+        {
+          "from": "app",
+          "to": "cache"
+        },
+        {
+          "from": "app",
+          "to": "cache",
+          "direction": "reverse"
+        },
+        {
+          "from": "app",
+          "to": "db"
+        },
+        {
+          "from": "db",
+          "to": "app"
+        },
+        {
+          "from": "app",
+          "to": "cache"
+        }
+      ],
+      "duration": 7,
+      "marker": "packet",
+      "color": "blue",
+      "trail": "fade"
+    }
+  ]
+}

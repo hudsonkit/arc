@@ -1,0 +1,13 @@
+{
+  "title": "Export an animated architecture diagram for a README",
+  "slug": "export-animated-architecture-diagram-readme",
+  "description": "Export an Arc architecture flow as a GIF for your README, with a static PNG, editable source, and clear SVG and MP4 boundaries.",
+  "readerQuestion": "How do I export an animated architecture diagram for a README and keep it maintainable?",
+  "searchIntent": "Task-oriented how-to with runnable CLI commands",
+  "date": "2026-10-28",
+  "sources": [
+    "https://hudsonkit.com/arc/examples/job-queue",
+    "https://github.com/hudsonkit/arc/blob/main/docs/exports.md",
+    "https://github.com/hudsonkit/arc/blob/main/docs/mermaid-sequences.md"
+  ]
+}

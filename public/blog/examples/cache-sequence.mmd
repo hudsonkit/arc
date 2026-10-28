@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant Client
+  participant API
+  participant Cache
+  participant DB as Database
+  Client->>API: Get product
+  API->>Cache: Lookup key
+  alt Cache hit
+    Cache-->>API: Cached value
+  else Cache miss
+    Cache-->>API: Not found
+    API->>DB: Read product
+    DB-->>API: Product row
+    API->>Cache: Store with TTL
+  end
+  API-->>Client: Product

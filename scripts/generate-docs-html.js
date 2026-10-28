@@ -283,7 +283,7 @@ const sitemapRoutes = [
   ['/editor', '0.5'],
   ['/showcase', '0.5'],
   ['/examples/connection-pool', '0.5'],
-  ['/blog/native-mermaid-sequences', '0.4'],
+  ['/blog/native-mermaid-sequences/', '0.4'],
   ['/iso-demo', '0.3'],
   ['/iso-examples', '0.3'],
   ['/inspiration', '0.3'],

@@ -1,0 +1,16 @@
+{
+  "title": "How to review architecture diagram changes in a pull request",
+  "slug": "review-architecture-diagram-changes",
+  "description": "Review architecture changes with validated diagram source, an Arc structural diff, and a separate check of the code behind each new edge.",
+  "readerQuestion": "How do I review an architecture diagram change alongside a pull request and separate layout edits from changed behavior?",
+  "searchIntent": "Practical how-to: architecture diagram code review, diagram diff, diagrams as code pull request review.",
+  "date": "2026-10-28",
+  "sources": [
+    "https://hudsonkit.com/arc/docs/diff",
+    "https://github.com/hudsonkit/arc/blob/main/src/utils/diffDiagram.ts",
+    "https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts",
+    "https://github.com/hudsonkit/arc/blob/main/src/components/ArcDiagram.tsx",
+    "https://hudsonkit.com/arc/mcp",
+    "https://www.npmjs.com/package/@hudsonkit/arc/v/0.14.0"
+  ]
+}

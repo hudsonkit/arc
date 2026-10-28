@@ -1,0 +1,139 @@
+{
+  "layout": {
+    "width": 900,
+    "height": 430
+  },
+  "nodes": {
+    "client": {
+      "x": 40,
+      "y": 60,
+      "size": "m"
+    },
+    "api": {
+      "x": 350,
+      "y": 60,
+      "size": "m"
+    },
+    "store": {
+      "x": 660,
+      "y": 60,
+      "size": "m"
+    },
+    "queue": {
+      "x": 350,
+      "y": 290,
+      "size": "m"
+    },
+    "worker": {
+      "x": 660,
+      "y": 290,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "client": {
+      "name": "Client",
+      "kind": "frontend"
+    },
+    "api": {
+      "name": "API",
+      "kind": "backend",
+      "description": "Write and enqueue"
+    },
+    "store": {
+      "name": "Storage",
+      "kind": "database"
+    },
+    "queue": {
+      "name": "Queue",
+      "kind": "queue"
+    },
+    "worker": {
+      "name": "Worker",
+      "kind": "service"
+    }
+  },
+  "connectors": [
+    {
+      "id": "request",
+      "from": "client",
+      "to": "api",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "request"
+    },
+    {
+      "id": "write",
+      "from": "api",
+      "to": "store",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "request"
+    },
+    {
+      "id": "enqueue",
+      "from": "api",
+      "to": "queue",
+      "fromAnchor": "bottom",
+      "toAnchor": "top",
+      "style": "background"
+    },
+    {
+      "id": "consume",
+      "from": "queue",
+      "to": "worker",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "background"
+    }
+  ],
+  "connectorStyles": {
+    "request": {
+      "color": "blue",
+      "strokeWidth": 2
+    },
+    "background": {
+      "color": "zinc",
+      "strokeWidth": 1.5,
+      "dashed": true
+    }
+  },
+  "views": [
+    {
+      "id": "request",
+      "title": "Store the request",
+      "nodes": [
+        "client",
+        "api",
+        "store"
+      ],
+      "connectors": [
+        {
+          "id": "request"
+        },
+        {
+          "id": "write"
+        }
+      ],
+      "caption": "The client calls the API, which writes to storage."
+    },
+    {
+      "id": "background",
+      "title": "Process background work",
+      "nodes": [
+        "api",
+        "queue",
+        "worker"
+      ],
+      "connectors": [
+        {
+          "id": "enqueue"
+        },
+        {
+          "id": "consume"
+        }
+      ],
+      "caption": "The API enqueues a job for a worker to process."
+    }
+  ]
+}

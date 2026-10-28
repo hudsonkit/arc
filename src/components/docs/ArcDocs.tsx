@@ -17,6 +17,7 @@ import {
 } from '@arach/dewey'
 import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { SITE_URL } from '../../utils/site'
+import { useMeta } from '../../hooks/useMeta'
 import RenderShowcase from './RenderShowcase'
 import Showcase from './Showcase'
 
@@ -1607,6 +1608,13 @@ interface ArcDocsProps {
 }
 
 export default function ArcDocs({ pageId }: ArcDocsProps) {
+  const page = pages[pageId]
+  useMeta({
+    title: page ? `${page.title} | Arc Docs` : 'Arc Documentation',
+    description: page?.description || 'Reference and guides for creating architecture diagrams with Arc.',
+    url: page ? `/docs/${pageId}` : '/docs',
+    image: '/og-docs.png',
+  })
   return (
     <DeweyProvider
       components={{ Link: RouterLink }}

@@ -1,0 +1,62 @@
+{
+  "layout": {
+    "width": 900,
+    "height": 430
+  },
+  "nodes": {
+    "client": {
+      "x": 40,
+      "y": 60,
+      "size": "m"
+    },
+    "api": {
+      "x": 350,
+      "y": 60,
+      "size": "m"
+    },
+    "store": {
+      "x": 660,
+      "y": 60,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "client": {
+      "name": "Client",
+      "kind": "frontend"
+    },
+    "api": {
+      "name": "API",
+      "kind": "backend",
+      "description": "Write request"
+    },
+    "store": {
+      "name": "Storage",
+      "kind": "database"
+    }
+  },
+  "connectors": [
+    {
+      "id": "request",
+      "from": "client",
+      "to": "api",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "request"
+    },
+    {
+      "id": "write",
+      "from": "api",
+      "to": "store",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "request"
+    }
+  ],
+  "connectorStyles": {
+    "request": {
+      "color": "blue",
+      "strokeWidth": 2
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "id": "job-queue",
+  "layout": {
+    "width": 900,
+    "height": 510
+  },
+  "nodes": {
+    "api": {
+      "x": 40,
+      "y": 65,
+      "size": "m"
+    },
+    "q": {
+      "x": 340,
+      "y": 65,
+      "size": "m"
+    },
+    "worker": {
+      "x": 650,
+      "y": 65,
+      "size": "m"
+    },
+    "db": {
+      "x": 650,
+      "y": 330,
+      "size": "m"
+    },
+    "dlq": {
+      "x": 340,
+      "y": 330,
+      "size": "m"
+    }
+  },
+  "nodeData": {
+    "api": {
+      "name": "API",
+      "subtitle": "Accept request",
+      "icon": "Globe",
+      "color": "blue"
+    },
+    "q": {
+      "name": "Job queue",
+      "subtitle": "Buffer work",
+      "icon": "Layers",
+      "color": "violet"
+    },
+    "worker": {
+      "name": "Worker",
+      "subtitle": "Process job",
+      "icon": "Cpu",
+      "color": "emerald"
+    },
+    "db": {
+      "name": "Result store",
+      "subtitle": "Persist outcome",
+      "icon": "Database",
+      "color": "amber"
+    },
+    "dlq": {
+      "name": "Dead letters",
+      "subtitle": "Inspect failures",
+      "icon": "AlertTriangle",
+      "color": "sky"
+    }
+  },
+  "connectors": [
+    {
+      "id": "e0",
+      "from": "api",
+      "to": "q",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "e0"
+    },
+    {
+      "id": "e1",
+      "from": "q",
+      "to": "worker",
+      "fromAnchor": "right",
+      "toAnchor": "left",
+      "style": "e1"
+    },
+    {
+      "id": "e2",
+      "from": "worker",
+      "to": "db",
+      "fromAnchor": "bottom",
+      "toAnchor": "top",
+      "style": "e2"
+    },
+    {
+      "id": "e3",
+      "from": "worker",
+      "to": "dlq",
+      "fromAnchor": "left",
+      "toAnchor": "right",
+      "style": "e3"
+    }
+  ],
+  "connectorStyles": {
+    "e0": {
+      "color": "blue",
+      "label": "enqueue",
+      "strokeWidth": 2
+    },
+    "e1": {
+      "color": "violet",
+      "label": "deliver",
+      "strokeWidth": 2
+    },
+    "e2": {
+      "color": "emerald",
+      "label": "save",
+      "strokeWidth": 2
+    },
+    "e3": {
+      "color": "amber",
+      "label": "exhausted retries",
+      "strokeWidth": 2
+    }
+  },
+  "flows": [
+    {
+      "id": "request",
+      "legs": [
+        {
+          "from": "api",
+          "to": "q"
+        },
+        {
+          "from": "q",
+          "to": "worker"
+        },
+        {
+          "from": "worker",
+          "to": "db"
+        }
+      ],
+      "duration": 7,
+      "marker": "packet",
+      "color": "blue",
+      "trail": "fade"
+    }
+  ]
+}
