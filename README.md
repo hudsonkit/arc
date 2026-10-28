@@ -20,10 +20,12 @@ Supported Mermaid source can also become an Arc diagram or a playable sequence.
 [![license](https://img.shields.io/npm/l/@hudsonkit/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
 [![types](https://img.shields.io/npm/types/@hudsonkit/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
 
-[![An illustrative request path: Client calls API, API writes to Storage, and a separate Queue sends background work to a Worker.](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-request-path.png)](https://raw.githubusercontent.com/hudsonkit/arc/main/public/readme-request-path.png)
+[![Watch Arc's Mermaid sequence player trace a cache request, with the active message highlighted beside the example library.](https://hudsonkit.com/arc/arc-mermaid-demo-poster.jpg)](https://hudsonkit.com/arc/arc-mermaid-demo.mp4)
 
-*A request path with a separate lane for background work. Rendered from
-[editable Arc data](https://github.com/hudsonkit/arc/blob/main/skills/arc-diagrams/examples/request-path.arc.json).*
+*A cache miss, step by step: play the sequence, inspect its Mermaid source,
+and switch between light and dark.*
+
+[▶ Watch the 24-second video](https://hudsonkit.com/arc/arc-mermaid-demo.mp4) · [Try the interactive demo](https://hudsonkit.com/arc/examples/cache-sequence/)
 
 - **Explain the structure.** Use components, connections, groups, and spatial
   layers to show how a system fits together.
