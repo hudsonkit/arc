@@ -16,6 +16,11 @@ if (!existsSync(publicDir)) {
 // engineering blue, blueprint grid. Shared by every OG card so GitHub, Slack,
 // and docs previews match https://arc.jdi.sh.
 const MARK = readFileSync(path.join(publicDir, 'arc-mark.svg'), 'utf8')
+// The same glyph without its dark tile, inked for a light card.
+const MARK_LIGHT = MARK
+  .replace(/<rect width="32" height="32"[^>]*\/>\s*/, '')
+  .replace(/#f3efe6/g, '#101518')
+  .replace('<svg ', '<svg class="mark-light" ')
   .replace('<svg ', '<svg width="32" height="32" aria-hidden="true" ')
 
 const FONTS = `
@@ -62,15 +67,20 @@ const BASE_CSS = `
   }
   .brand svg { display: block; }
   .kit {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
     margin-left: 6px;
-    padding: 5px 8px 4px;
-    border: 1px solid rgba(46, 95, 165, 0.28);
+    padding-left: 18px;
+    border-left: 1px solid rgba(16, 21, 24, 0.14);
     font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 10px;
     letter-spacing: 0.12em;
-    color: #2e5fa5;
+    text-transform: uppercase;
+    color: #6b757a;
     line-height: 1;
   }
+  .kit b { font-weight: 600; color: #101518; margin-left: 0.5em; }
   .diagram { padding: 22px 18px 18px; background: #fff; }
   .diagram svg { display: block; width: 100%; height: auto; }
   .card-foot {
@@ -85,15 +95,26 @@ const BASE_CSS = `
     color: #6b757a;
   }
   .card-foot b { font-weight: 500; color: #2e5fa5; }
-  .lockup { display: grid; gap: 5px; line-height: 1; }
-  .name { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
-  .descriptor {
+  .diagram.shot { padding: 0; background: #f6f7f9; }
+  .diagram.shot img { display: block; width: 100%; height: auto; }
+  .url {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid rgba(16, 21, 24, 0.10);
+    padding-top: 16px;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #6b757a;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #2e5fa5;
   }
+  .url::before { content: '→'; color: #8a9298; font-weight: 400; }
+  .brand.single { gap: 10px; }
+  .brand .mark-light { width: 38px; height: 38px; }
+  .brand.single .name { font-size: 26px; }
+  .brand.single .kit { align-self: center; height: 20px; margin-left: 10px; }
+  .name { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
   .repo {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 22px;
@@ -110,6 +131,7 @@ const BASE_CSS = `
     margin-bottom: 14px;
   }
   h1 {
+    text-wrap: balance;
     font-weight: 700;
     font-size: 52px;
     line-height: 1.04;
@@ -259,7 +281,7 @@ function specBar(items) {
   return items.map((item) => `<span>${item}</span>`).join('')
 }
 
-function plate({ eyebrow, title, lead, spec, right, compactTitle = false, wide = false, kit = false, repo = 'github.com/hudsonkit/arc' }) {
+function plate({ eyebrow, title, lead, spec, right, compactTitle = false, wide = false, kit = false, repo = 'github.com/hudsonkit/arc', url }) {
   const split = Boolean(right)
   return `<!DOCTYPE html>
 <html>
@@ -272,19 +294,16 @@ function plate({ eyebrow, title, lead, spec, right, compactTitle = false, wide =
   <div class="grid"></div>
   <div class="shell ${split ? (wide ? 'wide' : 'split') : 'solo'}">
     <div>
-      <div class="brand">
-        ${MARK}
-        <span class="lockup">
-          <span class="name">Arc</span>
-          <span class="descriptor">diagrams as code</span>
-        </span>
-        ${kit ? '<span class="kit">PART OF HUDSON KIT</span>' : ''}
+      <div class="brand single">
+        ${MARK_LIGHT}
+        <span class="name">Arc</span>
+        ${kit ? '<span class="kit">Part of<b>HudsonKit</b></span>' : ''}
       </div>
-      <div class="repo">${repo}</div>
+      ${url ? '' : `<div class="repo">${repo}</div>`}
       ${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}
       <h1${compactTitle ? ' class="compact"' : ''}>${title}</h1>
       <p class="lead">${lead}</p>
-      <div class="spec">${specBar(spec)}</div>
+      ${url ? `<div class="url">${url}</div>` : `<div class="spec">${specBar(spec)}</div>`}
     </div>
     ${right ? `<div>${right}</div>` : ''}
   </div>
@@ -414,26 +433,70 @@ function renderDiagramSvg(file) {
   }
 }
 
-const diagramCard = `
+const OG_DIAGRAM = path.join(__dirname, 'og-diagram.json')
+
+function diagramCard(shot) {
+  const body = shot
+    ? `<div class="diagram shot"><img src="data:image/png;base64,${shot.toString('base64')}" alt=""></div>`
+    : `<div class="diagram">${renderDiagramSvg(OG_DIAGRAM)}</div>`
+  return `
   <div class="card">
     <div class="card-bar">
       <div class="dots"><i></i><i></i><i></i></div>
       <span class="card-name">request-path.arc.json</span>
     </div>
-    <div class="diagram">${renderDiagramSvg(path.join(__dirname, 'og-diagram.json'))}</div>
+    ${body}
     <div class="card-foot"><span><b>$</b> arc render request-path.arc.json</span><span>6 nodes · 5 edges</span></div>
   </div>
 `
+}
 
-const mainOGHtml = plate({
+// The card's picture is Arc's own player (icons, node chrome, theme), captured
+// from the dev server and cropped to the drawing. Without the server it falls
+// back to the static `arc render` SVG, which draws no icons.
+async function capturePlayer(browser, { theme = 'workbench', width = 860, height = 380 } = {}) {
+  const origin = (process.env.ARC_EDITOR_URL || 'http://localhost:5188').replace(/\/+$/, '')
+  const diagram = JSON.parse(readFileSync(OG_DIAGRAM, 'utf8'))
+  const page = await browser.newPage()
+  try {
+    await page.setViewport({ width, height, deviceScaleFactor: 3 })
+    await page.goto(`${origin}/`, { waitUntil: 'domcontentloaded', timeout: 5000 })
+    await page.evaluate((d) => localStorage.setItem('arc-session-og-request-path', JSON.stringify({
+      diagram: d, originalDiagram: d, themeId: null, colorMode: 'light', diagramMeta: {}, updatedAt: Date.now(),
+    })), diagram)
+    const query = new URLSearchParams({ theme, mode: 'light', chrome: 'false', viewport: `${width}x${height}` })
+    await page.goto(`${origin}/player/og-request-path?${query}`, { waitUntil: 'load' })
+    await page.waitForSelector('[data-arc-node]', { timeout: 20_000 })
+    await page.evaluate(async () => { await document.fonts.ready })
+    await new Promise((resolve) => setTimeout(resolve, 1300))
+    const box = await page.evaluate(() => {
+      const rects = [...document.querySelectorAll('[data-arc-node]')].map((el) => el.getBoundingClientRect())
+      return {
+        x: Math.min(...rects.map((r) => r.left)), y: Math.min(...rects.map((r) => r.top)),
+        r: Math.max(...rects.map((r) => r.right)), b: Math.max(...rects.map((r) => r.bottom)),
+      }
+    })
+    const pad = 28
+    return await page.screenshot({
+      type: 'png',
+      clip: { x: box.x - pad, y: box.y - pad, width: box.r - box.x + 2 * pad, height: box.b - box.y + 2 * pad },
+    })
+  } catch (err) {
+    console.warn(`! player capture unavailable (${err.message}); using arc render`)
+    return null
+  } finally {
+    await page.close()
+  }
+}
+
+const mainOGHtml = (shot) => plate({
   title: 'Diagrams that live where your system does.',
   lead: 'Typed, diffable config. Visual editor. The picture ships with the code.',
-  spec: ['REACT', 'TYPESCRIPT', 'SVG / PNG', 'MCP'],
-  right: diagramCard,
+  right: diagramCard(shot),
   compactTitle: true,
   wide: true,
   kit: true,
-  repo: 'hudsonkit.com/arc',
+  url: 'hudsonkit.com/arc',
 })
 
 const docsOGHtml = plate({
@@ -495,7 +558,7 @@ async function generateOGImage(browser, html, filename, { width = 1200, height =
   await page.evaluate(() => document.fonts.ready)
   await new Promise((resolve) => setTimeout(resolve, 400))
 
-  const outputPath = path.join(publicDir, filename)
+  const outputPath = path.join(process.env.OG_OUT_DIR ?? publicDir, filename)
   await page.screenshot({
     path: outputPath,
     type: 'png',
@@ -515,9 +578,10 @@ async function main() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   })
 
-  await generateOGImage(browser, mainOGHtml, 'og-image.png')
-  await generateOGImage(browser, mainOGHtml, 'og-landing.png')
-  await generateOGImage(browser, mainOGHtml, 'github-social.png', { width: 1280, height: 640 })
+  const main = mainOGHtml(await capturePlayer(browser))
+  await generateOGImage(browser, main, 'og-image.png')
+  await generateOGImage(browser, main, 'og-landing.png')
+  await generateOGImage(browser, main, 'github-social.png', { width: 1280, height: 640 })
 
   await generateOGImage(browser, editorOGHtml, 'og-editor.png')
   await generateOGImage(browser, docsOGHtml, 'og-docs.png')
@@ -554,7 +618,7 @@ async function main() {
   await browser.close()
 
   // GitHub social preview wants 1280×640, not the 2× capture.
-  const social = path.join(publicDir, 'github-social.png')
+  const social = path.join(process.env.OG_OUT_DIR ?? publicDir, 'github-social.png')
   if (process.platform === 'darwin') {
     execFileSync('sips', ['-z', '640', '1280', social])
   } else {

@@ -13,8 +13,8 @@ const mark = readFileSync(new URL('../public/arc-mark.svg', import.meta.url), 'u
 // Match the site's Space Grotesk and embed it so the SVG renders offline.
 const font = readFileSync(new URL('./assets/space-grotesk/SpaceGrotesk-Medium.ttf', import.meta.url)).toString('base64')
 const header = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350" viewBox="0 0 1200 350" role="img" aria-labelledby="title desc">
-  <title id="title">Arc — illustrations, made with agents.</title>
-  <desc id="desc">Two hollow rounded rectangles form eyes above an upward-open smile beside the Arc wordmark. The right eye is orange.</desc>
+  <title id="title">Arc — ideas into drawings.</title>
+  <desc id="desc">Two hollow rounded rectangles form eyes above an upward-open smile, measured by a dimension line marked 25.0, beside the Arc wordmark. Drawn in one ink.</desc>
   <style>
     @font-face {
       font-family: "Space Grotesk";
@@ -26,7 +26,7 @@ const header = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350
   <rect width="1200" height="350" fill="#fbfaf8"/>
   ${mark}
   <text x="550" y="187" font-size="156" letter-spacing="-4" fill="#0d1726">Arc</text>
-  <text x="600" y="281" text-anchor="middle" font-size="45" letter-spacing="-1" fill="#0d1726">Illustrations, made with agents.</text>
+  <text x="600" y="281" text-anchor="middle" font-size="45" letter-spacing="-1" fill="#0d1726">Ideas into drawings.</text>
 </svg>`.replace(/[ \t]+$/gm, '')
 writeFileSync(new URL('../public/arc-readme-header.svg', import.meta.url), header)
 const chromePath = process.env.ARC_CHROME || process.env.CHROME_PATH

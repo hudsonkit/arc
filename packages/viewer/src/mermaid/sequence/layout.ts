@@ -34,17 +34,33 @@ const NOTE_PAD_X = 10
 const FRAGMENT_PAD = 9
 const FRAGMENT_LABEL_H = 18
 const LANE_SEP = 6
-const CHAR_WIDTH = 6.8
+/**
+ * Average advance of the 10px system sans the parts render with (measured
+ * ~4.7px for mixed-case labels), rounded up: an estimate that runs short lets a
+ * line spill past its lane, one that runs long wraps labels that would fit.
+ */
+const CHAR_WIDTH = 5.3
 const LINE_HEIGHT = 14
+/** Baseline-to-baseline distance for message labels and note text. */
+const LABEL_LINE_HEIGHT = 12
+/** Gap between a message label's last baseline and its arrow. */
+const LABEL_ARROW_GAP = 5
+/** Clearance a message label keeps from the lifelines at either end. */
+const LABEL_LANE_INSET = 10
+/** A label never wraps narrower than this, however tight its lanes. */
+const MIN_LABEL_WIDTH = 84
 
-function estimateTextWidth(text: string, maxWidth: number): { lines: string[]; height: number; width: number } {
-  if (!text) return { lines: [''], height: LINE_HEIGHT, width: 0 }
-  const words = text.split(/\s+/)
+const textWidth = (text: string) => text.length * CHAR_WIDTH
+
+/** Greedy word wrap of one segment to a pixel width. */
+function wrapSegment(text: string, maxWidth: number): string[] {
+  const words = text.split(/\s+/).filter(Boolean)
+  if (words.length === 0) return ['']
   const lines: string[] = []
   let current = ''
   for (const word of words) {
     const next = current ? `${current} ${word}` : word
-    if (next.length * CHAR_WIDTH > maxWidth && current) {
+    if (textWidth(next) > maxWidth && current) {
       lines.push(current)
       current = word
     } else {
@@ -52,11 +68,43 @@ function estimateTextWidth(text: string, maxWidth: number): { lines: string[]; h
     }
   }
   if (current) lines.push(current)
-  if (lines.length === 0) lines.push('')
-  const width = Math.min(
-    maxWidth,
-    Math.max(...lines.map((l) => l.length * CHAR_WIDTH)),
-  )
+  return lines
+}
+
+/**
+ * Wrap to `maxWidth` without orphans: keep the line count greedy wrapping
+ * needs, then find the narrowest width that still fits in that many lines, so
+ * "…loaded before the / turn" becomes three even lines instead.
+ */
+function wrapBalanced(text: string, maxWidth: number): string[] {
+  const greedy = wrapSegment(text, maxWidth)
+  if (greedy.length < 2) return greedy
+  let lo = Math.max(...text.split(/\s+/).map(textWidth))
+  let hi = maxWidth
+  let best = greedy
+  while (hi - lo > 1) {
+    const mid = (lo + hi) / 2
+    const lines = wrapSegment(text, mid)
+    if (lines.length <= greedy.length) {
+      best = lines
+      hi = mid
+    } else {
+      lo = mid
+    }
+  }
+  return best
+}
+
+/** Wrap every authored segment (Mermaid `<br>` breaks stay breaks). */
+function wrapLabel(label: string[], maxWidth: number): string[] {
+  if (label.length === 0) return ['']
+  const lines = label.flatMap((segment) => wrapBalanced(segment, maxWidth))
+  return lines.length ? lines : ['']
+}
+
+function estimateTextWidth(text: string, maxWidth: number): { lines: string[]; height: number; width: number } {
+  const lines = wrapSegment(text, maxWidth)
+  const width = Math.min(maxWidth, Math.max(0, ...lines.map(textWidth)))
   return { lines, height: lines.length * LINE_HEIGHT, width }
 }
 
@@ -129,17 +177,39 @@ export function layoutSequence(
     participantX[p.id] = startX + i * gap
   })
 
+  // Wrap each label once, here, at the width its lanes actually give it, and
+  // size the row from those lines. The parts draw these same lines, so a row
+  // can never be shorter than its label and a label never lands on its arrow.
+  const messageLines = new Map<number, string[]>()
+  const noteLines = new Map<number, string[]>()
+
   // Build rows in authored order
   const rows: FlatRow[] = []
   for (const event of document.events) {
     if (event.type === 'message') {
-      const est = estimateLabelBlock(event.label, maxLabelWidth)
       const self = event.from === event.to
-      const h = Math.max(MESSAGE_MIN_HEIGHT, est.height + (self ? 24 : 12)) + ROW_GAP
+      const span = Math.abs(
+        (participantX[event.to] ?? startX) - (participantX[event.from] ?? startX),
+      )
+      const wrapWidth = self
+        ? maxLabelWidth
+        : Math.max(MIN_LABEL_WIDTH, Math.min(maxLabelWidth, span - LABEL_LANE_INSET * 2))
+      const lines = wrapLabel(event.label, wrapWidth)
+      messageLines.set(event.order, lines)
+      const extra = (lines.length - 1) * LABEL_LINE_HEIGHT
+      const h = self
+        ? Math.max(MESSAGE_MIN_HEIGHT, extra + 36) + ROW_GAP
+        : MESSAGE_MIN_HEIGHT + 2 + extra + ROW_GAP
       rows.push({ kind: 'message', event, height: h, order: event.order })
     } else if (event.type === 'note') {
-      const est = estimateLabelBlock(event.text, maxLabelWidth + 40)
-      const h = Math.max(36, est.height + NOTE_PAD_Y * 2) + ROW_GAP
+      const spanIds =
+        event.placement === 'over'
+          ? expandParticipantRange(document, event.participants)
+          : event.participants
+      const { width } = spanX(participantX, spanIds)
+      const lines = wrapLabel(event.text, Math.max(80, width - NOTE_PAD_X * 2))
+      noteLines.set(event.order, lines)
+      const h = Math.max(32, lines.length * LABEL_LINE_HEIGHT + NOTE_PAD_Y * 2 + 2) + ROW_GAP
       rows.push({ kind: 'note', event, height: h, order: event.order })
     } else if (event.type === 'fragmentStart') {
       rows.push({
@@ -203,12 +273,21 @@ export function layoutSequence(
       const toX = participantX[ev.to] ?? startX
       const top = orderY.get(ev.order) ?? 0
       const h = orderH.get(ev.order) ?? MESSAGE_MIN_HEIGHT
+      const self = ev.from === ev.to
+      const labelLines = messageLines.get(ev.order) ?? ev.label
       messages.push({
         event: ev,
-        y: top + h / 2 - ROW_GAP / 2,
+        // A straight arrow sits under its whole label block; a self-call's
+        // loop is centred in its row with the label beside it.
+        y: self
+          ? top + (h - ROW_GAP) / 2
+          : top + MESSAGE_MIN_HEIGHT / 2 + 2 + (labelLines.length - 1) * LABEL_LINE_HEIGHT,
         fromX,
         toX,
-        self: ev.from === ev.to,
+        self,
+        labelLines,
+        labelLineHeight: LABEL_LINE_HEIGHT,
+        labelGap: LABEL_ARROW_GAP,
       })
     }
     if (row.kind === 'note' && row.event?.type === 'note') {
@@ -220,13 +299,16 @@ export function layoutSequence(
           ? expandParticipantRange(document, ev.participants)
           : ev.participants
       const { x, width } = spanX(participantX, spanIds)
-      const est = estimateLabelBlock(ev.text, Math.max(80, width - NOTE_PAD_X * 2))
+      const lines = noteLines.get(ev.order) ?? ev.text
+      const textW = Math.max(0, ...lines.map(textWidth))
       notes.push({
         event: ev,
         x,
         y: top,
-        width: Math.max(width, est.width + NOTE_PAD_X * 2),
+        width: Math.max(width, textW + NOTE_PAD_X * 2),
         height: h,
+        lines,
+        lineHeight: LABEL_LINE_HEIGHT,
       })
     }
   }
@@ -339,4 +421,4 @@ function layoutFragments(
   return fragments
 }
 
-export { estimateLabelBlock, HEADER_BOX_W, HEADER_BOX_H, HEADER_HEIGHT, PADDING_Y }
+export { estimateLabelBlock, wrapLabel, HEADER_BOX_W, HEADER_BOX_H, HEADER_HEIGHT, PADDING_Y }

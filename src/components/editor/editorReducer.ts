@@ -684,6 +684,9 @@ export function editorReducer(state, action) {
         ...saveToHistory(state),
         diagram: {
           ...state.diagram,
+          // The markup carries the id whenever the diagram has one, so an id
+          // missing from it was deleted on purpose.
+          id: next.id,
           layout: next.layout ?? state.diagram.layout,
           nodes: next.nodes ?? {},
           nodeData: next.nodeData ?? {},

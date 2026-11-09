@@ -105,7 +105,7 @@ export function LiveDiagramContent() {
                 maxY: snapshot.work.scope.y + snapshot.work.scope.height,
               } : undefined}
               renderCanvasOverlay={({ nodes, zoom, camera, viewport, motion }) => {
-                if (s.working && snapshot.work?.status === 'working') return <CanvasWorkPresence nodes={nodes} bounds={liveDiagramBounds(snapshot.diagram, false)} zoom={zoom} camera={camera} viewport={viewport} motion={motion} actor={snapshot.actor} work={snapshot.work} animate={s.motion} />
+                if (s.working && snapshot.work?.status === 'working') return <CanvasWorkPresence nodes={nodes} connectors={snapshot.diagram.connectors} connectorStyles={snapshot.diagram.connectorStyles} bounds={liveDiagramBounds(snapshot.diagram, false)} zoom={zoom} camera={camera} viewport={viewport} motion={motion} work={snapshot.work} animate={s.motion} />
                 const edit = s.editPresence
                 const node = edit && nodes.find(node => node.id === edit.nodeId)
                 return node && edit ? <CanvasEditPresence key={`${edit.updatedAt ?? snapshot.work?.finishedAt ?? snapshot.revision}:${edit.nodeId}`} node={node} zoom={zoom} motion={motion} actor={snapshot.actor} action={edit.action} /> : null

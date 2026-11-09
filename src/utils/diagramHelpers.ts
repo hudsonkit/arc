@@ -51,6 +51,39 @@ export function anchorOnNode(
   }
 }
 
+// Advance of a monospace connector label: ~0.6em per glyph plus tracking.
+export function monoLabelWidth(text: string, fontSize: number, letterSpacing = 0): number {
+  return text.length * (fontSize * 0.6 + letterSpacing)
+}
+
+/**
+ * Baseline of a centred connector label — the one that rides above the
+ * midpoint of a horizontal run. That spot is only clear while the label fits
+ * the span between the two boxes; a label wider than the gap lands on their
+ * edges and arrowheads. Then it rises to sit above whichever box it would
+ * cross, still centred on the gap. Shared by the player and the static export.
+ */
+export function centeredLabelBaseline(
+  mid: Point,
+  labelWidth: number,
+  fontSize: number,
+  boxes: Array<{ x: number; y: number; width: number; height: number }>,
+  lift = 8,
+): number {
+  const baseline = mid.y - lift
+  const pad = 3
+  const left = mid.x - labelWidth / 2 - pad
+  const right = mid.x + labelWidth / 2 + pad
+  const top = baseline - fontSize * 0.8
+  let y = baseline
+  for (const b of boxes) {
+    const crossesX = right > b.x && left < b.x + b.width
+    const crossesY = baseline + pad > b.y && top < b.y + b.height
+    if (crossesX && crossesY) y = Math.min(y, b.y - 6)
+  }
+  return y
+}
+
 // Calculate anchor point coordinates for a node
 export function anchor(
   nodes: Record<string, NodePosition>,

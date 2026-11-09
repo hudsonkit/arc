@@ -26,7 +26,7 @@ import {
 import { getIsoStyle, type IsoStyleId } from '../utils/isoStyles'
 import { isoContentBounds, isoPlateBounds, buildNodeIndex } from '../utils/isoBlueprint'
 import IsometricNodeLayer from './editor/IsometricNodeLayer'
-import { anchorOnNode, getContentBounds } from '../utils/diagramHelpers'
+import { anchorOnNode, centeredLabelBaseline, getContentBounds, monoLabelWidth } from '../utils/diagramHelpers'
 import IsometricConnectorLayer from './editor/IsometricConnectorLayer'
 import TechnicalBackdrop from './technical/TechnicalBackdrop'
 import TechnicalPlate from './technical/TechnicalPlate'
@@ -878,9 +878,13 @@ export function Node({ nodeId, node, data, mode, themeColors, brand, hovered, di
   )
 }
 
-function getAnchorPoint(node: NodePosition, position: AnchorPosition): { x: number; y: number } {
+function nodeBox(node: NodePosition): { x: number; y: number; width: number; height: number } {
   const size = NODE_SIZES[node.size] ?? NODE_SIZES.m
-  return anchorOnNode({ x: node.x, y: node.y, width: node.width ?? size.width, height: node.height ?? size.height }, position)
+  return { x: node.x, y: node.y, width: node.width ?? size.width, height: node.height ?? size.height }
+}
+
+function getAnchorPoint(node: NodePosition, position: AnchorPosition): { x: number; y: number } {
+  return anchorOnNode(nodeBox(node), position)
 }
 
 // Lines, arrowheads, exports and time-sampled packets share the same route.
@@ -929,13 +933,26 @@ function ConnectorBody({ connector, connectorIndex, nodes, motionNodes, styles, 
   // One geometry derivation reads the same MotionValues as the node shell.
   // SVG attributes update on Motion's scheduler without a React render.
   const geometry = useTransform(() => {
-    const from = getAnchorPoint(motionNodes?.[connector.from] ? readNodeMotion(fromNode, motionNodes[connector.from]) : fromNode, connector.fromAnchor)
-    const to = getAnchorPoint(motionNodes?.[connector.to] ? readNodeMotion(toNode, motionNodes[connector.to]) : toNode, connector.toAnchor)
+    const fromBox = motionNodes?.[connector.from] ? readNodeMotion(fromNode, motionNodes[connector.from]) : fromNode
+    const toBox = motionNodes?.[connector.to] ? readNodeMotion(toNode, motionNodes[connector.to]) : toNode
+    const from = getAnchorPoint(fromBox, connector.fromAnchor)
+    const to = getAnchorPoint(toBox, connector.toAnchor)
     const route = connectorPathGeometry(connector, from, to)
     const vertical = Math.abs(to.y - from.y) > Math.abs(to.x - from.x)
     const align = style.labelAlign ?? (vertical ? 'right' : 'center')
     const side = connector.curve !== 'natural' && vertical && align !== 'center'
     const offset = side ? { x: align === 'right' ? 8 : -8, y: 4 } : { x: 0, y: -8 }
+    const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
+    if (!side && labelText) {
+      // Same sizes the <text> below renders at (10px tracked caps, else 9px).
+      const fontPx = brand?.upperLabels ? 10 : 9
+      const width = monoLabelWidth(labelText, fontPx, fontPx * (brand?.upperLabels ? 0.08 : 0.02))
+      // Measured from the higher end: a run that climbs or drops is an S-curve
+      // whose middle is steep, so a label parked just above the midpoint sits
+      // on the line. Above the higher end clears the whole curve.
+      const top = { x: mid.x, y: Math.min(from.y, to.y) }
+      offset.y = centeredLabelBaseline(top, width, fontPx, [nodeBox(fromBox), nodeBox(toBox)]) - mid.y
+    }
     const role = (p: { x: number; y: number }, angle: number) => {
       const a = angle * Math.PI / 180
       return { x: p.x + Math.cos(a) * 20, y: p.y + Math.sin(a) * 20 + 10 }
@@ -943,7 +960,7 @@ function ConnectorBody({ connector, connectorIndex, nodes, motionNodes, styles, 
     return { from, to, path: route.d,
       fromTransform: `translate(${from.x}px, ${from.y}px) rotate(${route.startAngle + 180}deg)`,
       toTransform: `translate(${to.x}px, ${to.y}px) rotate(${route.endAngle}deg)`,
-      label: { x: (from.x + to.x) / 2 + offset.x, y: (from.y + to.y) / 2 + offset.y },
+      label: { x: mid.x + offset.x, y: mid.y + offset.y },
       textAnchor: side ? align === 'right' ? 'start' as const : 'end' as const : 'middle' as const,
       fromRole: role(from, route.startAngle), toRole: role(to, route.endAngle + 180),
     }

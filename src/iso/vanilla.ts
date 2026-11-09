@@ -1,4 +1,4 @@
-import { PRINT_COLORS, PRINT_DOTS } from './materials'
+import { MATTE_COLORS, MATTE_EDGE, MATTE_INK, PRINT_COLORS, PRINT_DOTS } from './materials'
 /**
  * Vanilla JS renderer for non-React environments
  * Renders diagram to static SVG string or DOM element
@@ -51,8 +51,9 @@ function interpolateColor(darkColor: string, lightColor: string, intensity: numb
 export function renderToString(config: DiagramConfig): string {
   const { theme, canvas, origin, tiers, floorSize, nodes, cornerRadius = 0 } = config
   const print = config.material === 'retro-print'
-  const colors = print ? PRINT_COLORS : theme === 'dark' ? DARK_COLORS : LIGHT_COLORS
-  const bgColor = print ? (theme === 'dark' ? '#202624' : '#f4efe6') : theme === 'dark' ? '#0f172a' : '#fafafa'
+  const matte = config.material === 'matte'
+  const colors = print ? PRINT_COLORS : matte ? MATTE_COLORS : theme === 'dark' ? DARK_COLORS : LIGHT_COLORS
+  const bgColor = print ? (theme === 'dark' ? '#202624' : '#f4efe6') : matte ? '#f6f7f9' : theme === 'dark' ? '#0f172a' : '#fafafa'
   const textColor = print ? '#202a29' : theme === 'dark' ? '#e2e8f0' : '#1e293b'
   const labelColor = print ? (theme === 'dark' ? '#c5c4b7' : '#505b56') : theme === 'dark' ? '#64748b' : '#94a3b8'
 
@@ -82,7 +83,7 @@ export function renderToString(config: DiagramConfig): string {
     <filter id="labelshadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="0.5" stdDeviation="0.7" flood-color="#000000" flood-opacity="0.7"/></filter>
   </defs>`
 
-  svg += `<rect width="100%" height="100%" fill="${print ? bgColor : 'url(#bg)'}"/>`
+  svg += `<rect width="100%" height="100%" fill="${print || matte ? bgColor : 'url(#bg)'}"/>`
   svg += `<rect width="100%" height="100%" fill="url(#grid)" opacity="0.5"/>`
   svg += `<g transform="translate(${origin.x},${origin.y})">`
 
@@ -103,13 +104,13 @@ export function renderToString(config: DiagramConfig): string {
     const floorOpacity = tier.floorOpacity || (tierIndex === 0 ? 0.95 : 0.5)
 
     svg += `<g transform="translate(${floorPos.screenX},${floorPos.screenY})">`
-    if (tierIndex === 0) {
+    if (tierIndex === 0 && !matte) {
       svg += `<g transform="translate(4,4)" opacity="0.2"><path d="${floorBox.top}" fill="#000"/></g>`
     }
     svg += `<path d="${floorBox.top}" fill="${floorColor}" opacity="${floorOpacity}"/>`
     if (tierIndex === 0) {
-      svg += `<path d="${floorBox.left}" fill="${theme === 'dark' ? '#0f172a' : '#cbd5e1'}" opacity="0.8"/>`
-      svg += `<path d="${floorBox.right}" fill="${theme === 'dark' ? '#1e293b' : '#94a3b8'}" opacity="0.8"/>`
+      svg += `<path d="${floorBox.left}" fill="${matte ? colors.slate.side : theme === 'dark' ? '#0f172a' : '#cbd5e1'}" opacity="${matte ? 1 : 0.8}"/>`
+      svg += `<path d="${floorBox.right}" fill="${matte ? colors.slate.front : theme === 'dark' ? '#1e293b' : '#94a3b8'}" opacity="${matte ? 1 : 0.8}"/>`
     }
     svg += `<path d="${floorBox.top}" fill="none" stroke="${tier.borderColor || (theme === 'dark' ? '#475569' : '#94a3b8')}" stroke-width="${tierIndex === 0 ? 1.5 : 0.75}" opacity="${tierIndex === 0 ? 1 : 0.6}"/>`
     svg += `</g>`
@@ -127,7 +128,7 @@ export function renderToString(config: DiagramConfig): string {
       // Contact shadow grounding the box on its floor
       const sp = isoToScreen(node.x - 3, node.y - 3, tier.elevation)
       const shadowTop = isoBox(node.width + 6, node.depth + 6, 0, sp.screenX, sp.screenY, cornerRadius).top
-      svg += `<path d="${shadowTop}" fill="#000000" opacity="0.3" filter="url(#contact)"/>`
+      if (!matte) svg += `<path d="${shadowTop}" fill="#000000" opacity="0.3" filter="url(#contact)"/>`
 
       // Corners
       if (box.cornerBackRight) {
@@ -141,11 +142,14 @@ export function renderToString(config: DiagramConfig): string {
         }
       }
 
+      // Silhouette: a 2px ink stroke under the faces leaves its outer 1px showing.
+      if (matte) svg += `<path d="${box.left} ${box.right} ${box.top}" fill="none" stroke="${MATTE_INK}" stroke-width="2" stroke-linejoin="round"/>`
+
       // Faces
       svg += `<path d="${box.left}" fill="${nodeColors.side}"/>`
-      svg += `<path d="${box.left}" fill="url(#${print ? 'print' : 'shade'})"/>`
+      if (!matte) svg += `<path d="${box.left}" fill="url(#${print ? 'print' : 'shade'})"/>`
       svg += `<path d="${box.right}" fill="${nodeColors.front}"/>`
-      svg += `<path d="${box.right}" fill="url(#${print ? 'print' : 'shade'})"/>`
+      if (!matte) svg += `<path d="${box.right}" fill="url(#${print ? 'print' : 'shade'})"/>`
 
       if (box.cornerFrontRight) {
         for (const seg of box.cornerFrontRight) {
@@ -159,8 +163,14 @@ export function renderToString(config: DiagramConfig): string {
       }
 
       svg += `<path d="${box.top}" fill="${nodeColors.top}"/>`
-      svg += `<path d="${box.top}" fill="url(#${print ? 'print' : 'sheen'})"/>`
-      svg += `<path d="${box.top}" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.75" stroke-linejoin="round"/>`
+      if (matte) {
+        for (const face of [box.left, box.right, box.top]) {
+          svg += `<path d="${face}" fill="none" stroke="${MATTE_EDGE}" stroke-width="0.7" stroke-linejoin="round"/>`
+        }
+      } else {
+        svg += `<path d="${box.top}" fill="url(#${print ? 'print' : 'sheen'})"/>`
+        svg += `<path d="${box.top}" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.75" stroke-linejoin="round"/>`
+      }
 
       // Label
       if (node.label) {

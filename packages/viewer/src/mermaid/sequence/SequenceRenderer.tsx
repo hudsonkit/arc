@@ -213,11 +213,6 @@ export function SequenceRenderer({
           rx={10}
         />
 
-        {/* Fragments behind messages */}
-        {layout.fragments.map((f) => (
-          <Fragment key={f.id} laidOut={f} context={context} />
-        ))}
-
         {/* Lifelines */}
         {document.participants.map((p) => (
           <Lifeline
@@ -229,6 +224,11 @@ export function SequenceRenderer({
             context={context}
             emphasized={isEmphasizedParticipant(p.id)}
           />
+        ))}
+
+        {/* Fragments over lifelines (their fill is a translucent wash) and behind messages */}
+        {layout.fragments.map((f) => (
+          <Fragment key={f.id} laidOut={f} context={context} />
         ))}
 
         {/* Participant headers */}

@@ -276,14 +276,14 @@ const monoTheme: Theme = {
 // (cohesive indigo/blue/teal/amber/gray) and differ by grid, frame, and type,
 // not color. Mid-tone so it reads on any of their dark surfaces.
 const techDark: ColorPalette = {
-  violet:  { border: 'border-[#7c8cff]/55', bg: 'bg-[#7c8cff]/[0.08]', icon: 'text-[#7c8cff]', stroke: '#7c8cff' },
-  emerald: { border: 'border-[#2dd4bf]/55', bg: 'bg-[#2dd4bf]/[0.08]', icon: 'text-[#2dd4bf]', stroke: '#2dd4bf' },
-  blue:    { border: 'border-[#4f8cff]/55', bg: 'bg-[#4f8cff]/[0.08]', icon: 'text-[#4f8cff]', stroke: '#4f8cff' },
-  amber:   { border: 'border-[#e0a83d]/55', bg: 'bg-[#e0a83d]/[0.08]', icon: 'text-[#e0a83d]', stroke: '#e0a83d' },
-  sky:     { border: 'border-[#54b6e6]/55', bg: 'bg-[#54b6e6]/[0.08]', icon: 'text-[#54b6e6]', stroke: '#54b6e6' },
-  zinc:    { border: 'border-[#8b93a0]/55', bg: 'bg-[#8b93a0]/[0.08]', icon: 'text-[#8b93a0]', stroke: '#8b93a0' },
-  rose:    { border: 'border-[#e0726e]/55', bg: 'bg-[#e0726e]/[0.08]', icon: 'text-[#e0726e]', stroke: '#e0726e' },
-  orange:  { border: 'border-[#e0884a]/55', bg: 'bg-[#e0884a]/[0.08]', icon: 'text-[#e0884a]', stroke: '#e0884a' },
+  violet:  { border: 'border-[#7c8cff]/55', bg: 'bg-[#7c8cff]/[0.13]', icon: 'text-[#7c8cff]', stroke: '#7c8cff' },
+  emerald: { border: 'border-[#2dd4bf]/55', bg: 'bg-[#2dd4bf]/[0.13]', icon: 'text-[#2dd4bf]', stroke: '#2dd4bf' },
+  blue:    { border: 'border-[#4f8cff]/55', bg: 'bg-[#4f8cff]/[0.13]', icon: 'text-[#4f8cff]', stroke: '#4f8cff' },
+  amber:   { border: 'border-[#e0a83d]/55', bg: 'bg-[#e0a83d]/[0.13]', icon: 'text-[#e0a83d]', stroke: '#e0a83d' },
+  sky:     { border: 'border-[#54b6e6]/55', bg: 'bg-[#54b6e6]/[0.13]', icon: 'text-[#54b6e6]', stroke: '#54b6e6' },
+  zinc:    { border: 'border-[#8b93a0]/55', bg: 'bg-[#8b93a0]/[0.13]', icon: 'text-[#8b93a0]', stroke: '#8b93a0' },
+  rose:    { border: 'border-[#e0726e]/55', bg: 'bg-[#e0726e]/[0.13]', icon: 'text-[#e0726e]', stroke: '#e0726e' },
+  orange:  { border: 'border-[#e0884a]/55', bg: 'bg-[#e0884a]/[0.13]', icon: 'text-[#e0884a]', stroke: '#e0884a' },
 }
 
 const engineeringTheme: Theme = {
@@ -312,9 +312,9 @@ const engineeringTheme: Theme = {
     palette: techDark,
     background: {
       container: 'bg-[#0e1116] border border-[#393939]',
-      grid: { color: 'rgba(125, 170, 255, 0.20)', opacity: 1, size: 18 },
+      grid: { color: 'rgba(125, 170, 255, 0.14)', opacity: 1, size: 18 },
     },
-    text: { primary: 'text-[#f4f4f4]', secondary: 'text-[#c6c6c6]', muted: 'text-[#8d8d8d]' },
+    text: { primary: 'text-[#f4f4f4]', secondary: 'text-[#e0e0e0]', muted: 'text-[#bebebe]' },
   },
   brand: {
     fontFamily: "system-ui, -apple-system, sans-serif",
@@ -357,9 +357,9 @@ const workbenchTheme: Theme = {
     palette: techDark,
     background: {
       container: 'bg-[#1c2127] border border-[#2f343c]',
-      grid: { color: 'rgba(180, 188, 200, 0.22)', opacity: 1, size: 16 },
+      grid: { color: 'rgba(180, 188, 200, 0.16)', opacity: 1, size: 16 },
     },
-    text: { primary: 'text-[#f6f7f9]', secondary: 'text-[#abb3bf]', muted: 'text-[#738091]' },
+    text: { primary: 'text-[#f6f7f9]', secondary: 'text-[#dce0e5]', muted: 'text-[#c5cbd3]' },
   },
   brand: {
     fontFamily: "'Inter', system-ui, sans-serif",
@@ -402,9 +402,9 @@ const tacticalTheme: Theme = {
     palette: techDark,
     background: {
       container: 'bg-[#0b0d0e] border border-[#23292d]',
-      grid: { color: 'rgba(224, 168, 61, 0.20)', opacity: 1, size: 24 },
+      grid: { color: 'rgba(224, 168, 61, 0.11)', opacity: 1, size: 24 },
     },
-    text: { primary: 'text-[#e8e6e1]', secondary: 'text-[#9aa0a4]', muted: 'text-[#5f676c]' },
+    text: { primary: 'text-[#e8e6e1]', secondary: 'text-[#d0d4d6]', muted: 'text-[#b4babd]' },
   },
   brand: {
     fontFamily: "'Chakra Petch', system-ui, sans-serif",

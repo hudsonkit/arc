@@ -2,7 +2,7 @@ import { hostThemeTokens, colorAlpha } from '../../packages/viewer/src/theme/hos
 import { NODE_SIZES } from './constants'
 import type { AnchorPosition } from '../types/editor'
 import type { ArcDiagramData } from '../types/diagram'
-import { anchorOnNode, arrowShape, connectorEndAngle, connectorPath, connectorStartAngle } from './diagramHelpers'
+import { anchorOnNode, arrowShape, centeredLabelBaseline, connectorEndAngle, connectorPath, connectorStartAngle, monoLabelWidth } from './diagramHelpers'
 import { renderFlowLayer } from './flowSvg'
 import { resolveNodeColor, resolveNodeIcon } from './nodeKinds'
 import { resolveNodeDecor, resolveNodeShape, shapeCut, shapeFillPath } from './nodeShape'
@@ -181,7 +181,8 @@ function svgTitleBlock(theme: Theme | undefined, drawing: string, right: number,
   if (!theme?.brand?.titleBlock) return ''
   const mono = theme.brand.monoFamily || theme.brand.fontFamily || 'ui-monospace, monospace'
   const family = escapeXml(mono)
-  const title = drawing || 'System Architecture'
+  // Same strip as the player's TitleBlock: the drawing number has its own cell.
+  const title = 'System Architecture'
   const cells: Array<[string, string]> = [
     ['DWG NO', drawing || '—'],
     ['SCALE', 'NTS'],
@@ -358,6 +359,14 @@ export function generateSVG(diagram: any, options: any = {}) {
       const label = brand?.upperLabels ? connectorLabel.toUpperCase() : connectorLabel
       const isVertical = Math.abs(toPos.y - fromPos.y) > Math.abs(toPos.x - fromPos.x)
       let lx = midX, ly = midY - 8, anchor = 'middle'
+      if (!isVertical) {
+        const fontPx = 10
+        const width = monoLabelWidth(label, fontPx, brand?.upperLabels ? 1 : 0)
+        const box = (n: typeof fromNode, size: typeof fromSize) => ({ x: n.x, y: n.y, width: n.width || size.width, height: n.height || size.height })
+        // Above the higher end, as the player does: the middle of a climbing
+        // S-curve is steep, and a label just above the midpoint sits on it.
+        ly = centeredLabelBaseline({ x: midX, y: Math.min(fromPos.y, toPos.y) }, width, fontPx, [box(fromNode, fromSize), box(toNode, toSize)])
+      }
       if (isVertical) {
         const side = style.labelAlign === 'left' ? -1 : 1
         lx = midX + 8 * side

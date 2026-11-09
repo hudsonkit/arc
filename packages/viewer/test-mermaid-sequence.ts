@@ -7,6 +7,7 @@ import {
   ArcMermaidPlayer,
   classifyNoteAccent,
   getSequenceThemeTokens,
+  layoutSequence,
   parseMermaid,
 } from './src/mermaid/index'
 
@@ -114,5 +115,39 @@ describe('native Mermaid sequence documents', () => {
     expect(result.diagnostics).toContainEqual(
       expect.objectContaining({ code: 'id-collision', severity: 'error' }),
     )
+  })
+
+  test('wrapped message labels stack above their arrow, inside their row', () => {
+    const parsed = parseMermaid(source).document
+    if (parsed?.family !== 'sequence') throw new Error('Expected sequence document')
+    // Narrow lanes force wraps ("Read, edit, or run as granted" used to put its
+    // second line on the arrow).
+    const layout = layoutSequence(parsed, { width: 748, maxLabelWidth: 168 })
+    const wrapped = layout.messages.filter((m) => !m.self && (m.labelLines?.length ?? 1) > 1)
+    expect(wrapped.length).toBeGreaterThan(0)
+    for (const m of layout.messages) {
+      if (m.self) continue
+      const lines = m.labelLines ?? []
+      const firstBaseline = m.y - (m.labelGap ?? 5) - (lines.length - 1) * (m.labelLineHeight ?? 11)
+      const row = layout.metrics.rowTops.find((top, i) =>
+        top <= m.y && m.y < top + layout.metrics.rowHeights[i])!
+      // ~8px of cap height above the first baseline still lies inside the row.
+      expect(firstBaseline - 8).toBeGreaterThanOrEqual(row)
+      expect(firstBaseline + (lines.length - 1) * (m.labelLineHeight ?? 11)).toBeLessThan(m.y)
+      const span = Math.abs(m.toX - m.fromX)
+      for (const line of lines) expect(line.length * 5.3).toBeLessThanOrEqual(Math.max(84, span - 20))
+    }
+  })
+
+  test('notes are wrapped once, in the layout, without an orphaned last word', () => {
+    const parsed = parseMermaid(source).document
+    if (parsed?.family !== 'sequence') throw new Error('Expected sequence document')
+    const layout = layoutSequence(parsed, { width: 748, maxLabelWidth: 168 })
+    const note = layout.notes.find((n) => n.event.text.join(' ').startsWith('Scout prompt'))!
+    const lines = note.lines ?? []
+    expect(lines.length).toBeGreaterThan(1)
+    const lengths = lines.map((l) => l.length)
+    expect(Math.min(...lengths)).toBeGreaterThan(Math.max(...lengths) * 0.6)
+    expect(note.height).toBeGreaterThanOrEqual(lines.length * (note.lineHeight ?? 12))
   })
 })

@@ -43,8 +43,8 @@ export interface DiagramConfig {
   theme: 'dark' | 'light'
   /** Render style: shaded solids, or a technical line-art plate. */
   style?: IsoStyleId
-  /** Flat mineral inks and deterministic stipple; defaults to the existing material. */
-  material?: 'standard' | 'retro-print'
+  /** Surface finish: shaded `standard`, flat `matte` inks with hairline edges, or `retro-print` stipple. */
+  material?: 'standard' | 'matte' | 'retro-print'
   canvas: { width: number; height: number }
   origin: { x: number; y: number }
   cornerRadius?: number

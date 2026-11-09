@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="860" height="460" viewBox="-20 -20 860 460">
   <rect x="-20" y="-20" width="860" height="460" fill="#0e1116"/>
-  <defs><pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M 18 0 L 0 0 0 18" fill="none" stroke="rgba(125, 170, 255, 0.20)" stroke-width="1"/></pattern></defs><g opacity="1"><rect x="-20" y="-20" width="860" height="460" fill="url(#grid)"/></g>
+  <defs><pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M 18 0 L 0 0 0 18" fill="none" stroke="rgba(125, 170, 255, 0.14)" stroke-width="1"/></pattern></defs><g opacity="1"><rect x="-20" y="-20" width="860" height="460" fill="url(#grid)"/></g>
   <rect x="280" y="20" width="380" height="380" rx="8" fill="#8b93a00f" stroke="#8b93a0" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="8 4"/>
   <text x="292" y="39" fill="#8b93a0" font-size="11" font-weight="600" letter-spacing="0.7" font-family="system-ui, -apple-system, sans-serif">PRODUCTION</text>
   <path d="M 200 97.5 C 250 97.5, 250 184, 300 184" fill="none" stroke="#54b6e6" stroke-width="2"/>
   <path d="M 0 0 L -9.2 -4.4 L -5.6 0 L -9.2 4.4 Z" fill="#54b6e6" fill-opacity="0.88" transform="translate(300 184) rotate(0)"/>
-  <text x="250" y="132.75" text-anchor="middle" fill="#54b6e6" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="1">TLS</text>
+  <text x="250" y="89.5" text-anchor="middle" fill="#54b6e6" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="1">TLS</text>
   <path d="M 200 297.5 C 250 297.5, 250 184, 300 184" fill="none" stroke="#54b6e6" stroke-width="2"/>
   <path d="M 0 0 L -9.2 -4.4 L -5.6 0 L -9.2 4.4 Z" fill="#54b6e6" fill-opacity="0.88" transform="translate(300 184) rotate(0)"/>
   <text x="258" y="244.75" text-anchor="start" fill="#54b6e6" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="1">TLS</text>
@@ -24,7 +24,7 @@
     <g transform="translate(40 60)" clip-path="url(#clip-web)"><path d="M 7 13 V 7 H 13 M 147 7 H 153 V 13 M 153 62 V 68 H 147 M 13 68 H 7 V 62" stroke="#54b6e6" stroke-width="1" fill="none" opacity="0.75"/></g>
     <g transform="translate(40 60)" clip-path="url(#clip-web)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f4f4f4" font-size="11" font-weight="500" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-0.165">Web</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#c6c6c6" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">NEXT.JS</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#e0e0e0" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">NEXT.JS</text>
     </g>
   </g>
   <g opacity="1">
@@ -33,7 +33,7 @@
     <g transform="translate(40 260)" clip-path="url(#clip-mobile)"><path d="M 7 13 V 7 H 13 M 147 7 H 153 V 13 M 153 62 V 68 H 147 M 13 68 H 7 V 62" stroke="#e0726e" stroke-width="1" fill="none" opacity="0.75"/></g>
     <g transform="translate(40 260)" clip-path="url(#clip-mobile)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f4f4f4" font-size="11" font-weight="500" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-0.165">Mobile</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#c6c6c6" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">EXPO</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#e0e0e0" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">EXPO</text>
     </g>
   </g>
   <g opacity="1">
@@ -50,7 +50,7 @@
     <g transform="translate(480 40)" clip-path="url(#clip-workers)"><path d="M 7 13 V 7 H 13 M 147 7 H 153 V 13 M 153 62 V 68 H 147 M 13 68 H 7 V 62" stroke="#2dd4bf" stroke-width="1" fill="none" opacity="0.75"/></g>
     <g transform="translate(480 40)" clip-path="url(#clip-workers)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f4f4f4" font-size="11" font-weight="500" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-0.165">Workers</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#c6c6c6" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">X4</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#e0e0e0" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">X4</text>
     </g>
   </g>
   <g opacity="1">
@@ -67,7 +67,7 @@
     <g transform="translate(480 280)" clip-path="url(#clip-store)"><path d="M 7 13 V 7 H 13 M 147 7 H 153 V 13 M 153 62 V 68 H 147 M 13 68 H 7 V 62" stroke="#4f8cff" stroke-width="1" fill="none" opacity="0.75"/></g>
     <g transform="translate(480 280)" clip-path="url(#clip-store)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f4f4f4" font-size="11" font-weight="500" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-0.165">Object Store</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#c6c6c6" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">S3</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#e0e0e0" opacity="0.72" font-size="9" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" letter-spacing="0.54">S3</text>
     </g>
   </g>
   <g opacity="1">
@@ -79,5 +79,5 @@
     </g>
   </g>
   <rect x="-8" y="-8" width="836" height="436" stroke="#8b93a0" stroke-width="1" fill="none" /><rect x="-4" y="-4" width="828" height="428" stroke="#8b93a0" stroke-width="1" fill="none" opacity="0.35"/>
-  <g><rect x="640" y="369" width="172" height="43" fill="none" stroke="#8b93a0" stroke-width="1"/><line x1="640" y1="388" x2="812" y2="388" stroke="#8b93a0" stroke-width="1"/><text x="650" y="382" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="9" font-weight="600" letter-spacing="1.5" fill="#c6c6c6">SYSTEM ARCHITECTURE</text><text x="650" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#c6c6c6">DWG NO</text><text x="650" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">—</text><line x1="685" y1="388" x2="685" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="695" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#c6c6c6">SCALE</text><text x="695" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">NTS</text><line x1="726" y1="388" x2="726" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="736" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#c6c6c6">REV</text><text x="736" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">A</text><line x1="759" y1="388" x2="759" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="769" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#c6c6c6">SHEET</text><text x="769" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">1 / 1</text></g>
+  <g><rect x="640" y="369" width="172" height="43" fill="none" stroke="#8b93a0" stroke-width="1"/><line x1="640" y1="388" x2="812" y2="388" stroke="#8b93a0" stroke-width="1"/><text x="650" y="382" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="9" font-weight="600" letter-spacing="1.5" fill="#e0e0e0">SYSTEM ARCHITECTURE</text><text x="650" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#e0e0e0">DWG NO</text><text x="650" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">—</text><line x1="685" y1="388" x2="685" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="695" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#e0e0e0">SCALE</text><text x="695" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">NTS</text><line x1="726" y1="388" x2="726" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="736" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#e0e0e0">REV</text><text x="736" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">A</text><line x1="759" y1="388" x2="759" y2="412" stroke="#8b93a0" stroke-width="1"/><text x="769" y="396" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="6.5" letter-spacing="0.9" fill="#e0e0e0">SHEET</text><text x="769" y="407" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="10.5" letter-spacing="0.3" fill="#f4f4f4">1 / 1</text></g>
 </svg>

@@ -348,6 +348,8 @@ export interface FileMeta {
 
 // Full diagram format (internal Arc state)
 export interface ArcDiagram {
+  /** Drawing number — the player's label and the Engineering title block's DWG NO. */
+  id?: string
   layout: DiagramLayout
   grid: GridConfig
   /** Authored legend policy; a viewer prop can still override it. */
@@ -392,6 +394,9 @@ export interface ArcDiagramData {
 // Convert full diagram to clean export format
 export function toExportFormat(diagram: ArcDiagram): ArcDiagramData {
   return {
+    // The id is the drawing number: dropping it here left every exported
+    // diagram's title block reading "DWG NO —".
+    ...(diagram.id ? { id: diagram.id } : {}),
     layout: diagram.layout,
     legend: diagram.legend,
     _meta: diagram._meta,

@@ -38,6 +38,12 @@ export interface SequenceLaidOutMessage {
   fromX: number
   toX: number
   self: boolean
+  /** Label already wrapped to the lanes it spans; parts should draw these lines. */
+  labelLines?: string[]
+  /** Baseline-to-baseline distance for `labelLines`. */
+  labelLineHeight?: number
+  /** Gap between the label's last baseline and the arrow. */
+  labelGap?: number
 }
 
 export interface SequenceLaidOutNote {
@@ -46,6 +52,10 @@ export interface SequenceLaidOutNote {
   y: number
   width: number
   height: number
+  /** Note text already wrapped (and balanced) to the note's width. */
+  lines?: string[]
+  /** Baseline-to-baseline distance for `lines`. */
+  lineHeight?: number
 }
 
 export interface SequenceLaidOutFragmentLane {

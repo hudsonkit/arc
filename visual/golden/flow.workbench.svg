@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="360" viewBox="-20 -20 800 360">
   <style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap");</style>
   <rect x="-20" y="-20" width="800" height="360" fill="#1c2127"/>
-  <defs><pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="rgba(180, 188, 200, 0.22)"/></pattern></defs><g opacity="1"><rect x="-20" y="-20" width="800" height="360" fill="url(#grid)"/></g>
+  <defs><pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="rgba(180, 188, 200, 0.16)"/></pattern></defs><g opacity="1"><rect x="-20" y="-20" width="800" height="360" fill="url(#grid)"/></g>
   <rect x="280" y="95" width="200" height="130" rx="8" fill="#8b93a00f" stroke="#8b93a0" stroke-opacity="0.55" stroke-width="1.5"/>
   <text x="292" y="114" fill="#8b93a0" font-size="11" font-weight="600" letter-spacing="0.7" font-family="&#39;Inter&#39;, system-ui, sans-serif">Edge</text>
   <path d="M 200 157.5 C 250 157.5, 250 157.5, 300 157.5" fill="none" stroke="#4f8cff" stroke-width="2"/>
@@ -9,17 +9,17 @@
   <text x="250" y="149.5" text-anchor="middle" fill="#4f8cff" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">HTTPS</text>
   <path d="M 460 157.5 C 510 157.5, 510 77.5, 560 77.5" fill="none" stroke="#2dd4bf" stroke-width="2"/>
   <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#2dd4bf" fill-opacity="0.88" transform="translate(560 77.5) rotate(0)"/>
-  <text x="510" y="109.5" text-anchor="middle" fill="#2dd4bf" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">REST</text>
+  <text x="510" y="69.5" text-anchor="middle" fill="#2dd4bf" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">REST</text>
   <path d="M 460 157.5 L 500 157.5 Q 510 157.5 510 167.5 L 510 227.5 Q 510 237.5 520 237.5 L 560 237.5" fill="none" stroke="#e0a83d" stroke-width="2" stroke-dasharray="6 3"/>
   <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#e0a83d" fill-opacity="0.88" transform="translate(560 237.5) rotate(0)"/>
-  <text x="510" y="189.5" text-anchor="middle" fill="#e0a83d" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">SQL</text>
+  <text x="510" y="149.5" text-anchor="middle" fill="#e0a83d" font-size="10" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace">SQL</text>
   <g opacity="1">
     <rect x="40" y="120" width="160" height="75" rx="3" fill="#7c8cff1f" stroke="#7c8cff" stroke-width="1" stroke-opacity="0.55"/>
     <defs><clipPath id="clip-client"><rect width="160" height="75" rx="3"/></clipPath></defs>
     <g transform="translate(40 120)" clip-path="url(#clip-client)"><line x1="16" y1="54.7" x2="144" y2="54.7" stroke="#7c8cff" stroke-width="1" opacity="0.2"/></g>
     <g transform="translate(40 120)" clip-path="url(#clip-client)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f6f7f9" font-size="11" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Client</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#abb3bf" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">React</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#dce0e5" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">React</text>
     </g>
   </g>
   <g opacity="1">
@@ -28,7 +28,7 @@
     <g transform="translate(300 120)" clip-path="url(#clip-gateway)"><line x1="16" y1="54.7" x2="144" y2="54.7" stroke="#4f8cff" stroke-width="1" opacity="0.2"/></g>
     <g transform="translate(300 120)" clip-path="url(#clip-gateway)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f6f7f9" font-size="11" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Gateway</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#abb3bf" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Edge</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#dce0e5" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Edge</text>
     </g>
   </g>
   <g opacity="1">
@@ -37,7 +37,7 @@
     <g transform="translate(560 40)" clip-path="url(#clip-api)"><line x1="16" y1="54.7" x2="144" y2="54.7" stroke="#2dd4bf" stroke-width="1" opacity="0.2"/></g>
     <g transform="translate(560 40)" clip-path="url(#clip-api)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f6f7f9" font-size="11" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">API</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#abb3bf" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Node</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#dce0e5" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Node</text>
     </g>
   </g>
   <g opacity="1">
@@ -46,7 +46,7 @@
     <g transform="translate(560 200)" clip-path="url(#clip-db)"><line x1="16" y1="54.7" x2="144" y2="54.7" stroke="#e0a83d" stroke-width="1" opacity="0.2"/></g>
     <g transform="translate(560 200)" clip-path="url(#clip-db)">
     <text x="80" y="34.3" text-anchor="middle" fill="#f6f7f9" font-size="11" font-weight="500" font-family="&#39;Inter&#39;, system-ui, sans-serif" letter-spacing="-0.165">Postgres</text>
-    <text x="80" y="47.7" text-anchor="middle" fill="#abb3bf" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Primary</text>
+    <text x="80" y="47.7" text-anchor="middle" fill="#dce0e5" opacity="0.72" font-size="9" font-family="&#39;Inter&#39;, system-ui, sans-serif">Primary</text>
     </g>
   </g>
   <rect x="-19.5" y="-19.5" width="799" height="359" stroke="#8b93a0" stroke-width="1" fill="none" />

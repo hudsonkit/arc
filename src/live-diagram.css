@@ -30,10 +30,10 @@
 .arc-live-edit-label > svg { color: var(--arc-acc); flex-shrink: 0; }
 .arc-live-work-region { position: absolute; pointer-events: none; z-index: 15; border-style: dashed; border-color: color-mix(in oklab, var(--arc-acc) 60%, transparent); box-sizing: border-box; }
 .arc-live-work-anchor { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-.arc-live-work-label { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 300px; color: var(--arc-ink-2); font-size: 11px; line-height: 15px; transform: translateY(calc(-100% - 9px)); }
-.arc-live-work-label > span:last-child { display: flex; flex-direction: column; min-width: 0; max-width: 230px; }
-.arc-live-work-label strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.arc-live-work-label > span > span { color: var(--arc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arc-live-work-label { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 340px; color: var(--arc-ink-2); font-size: 11px; font-weight: 500; line-height: 15px; }
+/* The summary wraps rather than truncating; three lines covers any sentence a
+   caller should be writing, and the caption below the canvas carries it whole. */
+.arc-live-work-label > span:last-child { min-width: 0; max-width: 270px; overflow-wrap: anywhere; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 @keyframes arc-live-edit-arrive { from { opacity: 0; } to { opacity: 1; } }
 .arc-live-content[data-arc-live-motion="off"] .arc-live-edit-label { animation: none; }
 .arc-live-tools { flex-shrink: 0; gap: 4px; padding: 4px; border: 1px solid var(--arc-line); border-radius: var(--arc-radius); background: var(--arc-surface); }

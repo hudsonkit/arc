@@ -14,6 +14,14 @@ interface SequenceEngineShowcaseProps {
   showIntro?: boolean
   compact?: boolean
   className?: string
+  /**
+   * Layout width of the sequence (default 1040). A capture that wants legible
+   * text narrows this to its frame and starts at `startZoom` 1, so the drawing
+   * renders at 1:1 instead of being shrunk to fit.
+   */
+  sequenceWidth?: number
+  /** Starting zoom; defaults to a width-aware 0.82 (0.72 compact). */
+  startZoom?: number
 }
 
 type MermaidTokenKind =
@@ -155,14 +163,17 @@ export default function SequenceEngineShowcase({
   showIntro = true,
   compact = false,
   className = '',
+  sequenceWidth = 1040,
+  startZoom: requestedZoom,
 }: SequenceEngineShowcaseProps) {
   const [view, setView] = useState<'player' | 'source'>('player')
   // The player reads its zoom once at mount and the sequence is 1040 wide, so a
   // phone needs a smaller start or the right-hand lifelines open off-screen.
   const [startZoom] = useState(() => {
+    if (requestedZoom != null) return requestedZoom
     const preferred = compact ? 0.72 : 0.82
     if (typeof window === 'undefined') return preferred
-    return Math.max(0.5, Math.min(preferred, (window.innerWidth - 60) / 1040))
+    return Math.max(0.5, Math.min(preferred, (window.innerWidth - 60) / sequenceWidth))
   })
 
   return (
@@ -213,7 +224,7 @@ export default function SequenceEngineShowcase({
             title="Scout interaction model"
             description="How a local Scout message becomes either a concierge reply or delegated repository work."
             sequence={{
-              width: 1040,
+              width: sequenceWidth,
               maxLabelWidth: 168,
               noteAccent: (event) => classifyNoteAccent(event.text),
             }}

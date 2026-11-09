@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-readme-header.png" alt="Arc — illustrations, made with agents. Two hollow rounded rectangular eyes and an upward-open smile sit beside the wordmark." width="800" />
+  <img src="https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-readme-hero.png" alt="Arc — ideas into drawings. Beside the wordmark, a sepia blueprint plate drawn by Arc: an exploded isometric system in three layers (interface, services, data) with hatched components, callouts, a component index and a title block." width="900" />
 </p>
 
 **Arc is a declarative diagram toolkit for creating, presenting, and refining

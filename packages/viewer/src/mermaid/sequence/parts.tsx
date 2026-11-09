@@ -229,7 +229,9 @@ export function DefaultMessage({
   const opacity = context.dimmed && !emphasized ? tokens.dimOpacity : 1
   const markerId = `${context.idPrefix}-arrow-${event.id}`
   const label = event.label.join(' ')
-  const lines = wrapLines(event.label, 28)
+  const lines = laidOut.labelLines ?? wrapLines(event.label, 28)
+  const lineHeight = laidOut.labelLineHeight ?? 11
+  const labelGap = laidOut.labelGap ?? 5
 
   const arrowHead = (
     <marker
@@ -283,16 +285,19 @@ export function DefaultMessage({
           strokeDasharray={dashed ? '5 4' : undefined}
           markerEnd={`url(#${markerId})`}
         />
-        <text
-          x={fromX + loopW + 6}
-          y={y + 1}
-          fill={tokens.messageLabel}
-          fontSize={10}
-          fontFamily="ui-sans-serif, system-ui, -apple-system, sans-serif"
-          dominantBaseline="middle"
-        >
-          {label}
-        </text>
+        {lines.map((ln, i) => (
+          <text
+            key={i}
+            x={fromX + loopW + 6}
+            y={y + 1 + (i - (lines.length - 1) / 2) * lineHeight}
+            fill={tokens.messageLabel}
+            fontSize={10}
+            fontFamily="ui-sans-serif, system-ui, -apple-system, sans-serif"
+            dominantBaseline="middle"
+          >
+            {ln}
+          </text>
+        ))}
       </g>
     )
   }
@@ -301,7 +306,9 @@ export function DefaultMessage({
   const x1 = fromX
   const x2 = toX - dir * 2
   const midX = (x1 + x2) / 2
-  const labelY = y - 5 - (lines.length - 1) * 5.5
+  // Stack the label upward from the arrow: the last line sits just above it,
+  // earlier lines above that, so no wrapped line can fall onto the shaft.
+  const labelY = y - labelGap - (lines.length - 1) * lineHeight
 
   return (
     <g
@@ -351,7 +358,7 @@ export function DefaultMessage({
         <text
           key={i}
           x={midX}
-          y={labelY + i * 11}
+          y={labelY + i * lineHeight}
           textAnchor="middle"
           fill={tokens.messageLabel}
           fontSize={10}
@@ -387,14 +394,17 @@ export function DefaultNote({ laidOut, context, emphasized }: NotePartProps) {
         ? tokens.modelText
         : tokens.noteText
   const opacity = context.dimmed && !emphasized ? tokens.dimOpacity : 1
-  const lines = wrapLines(
-    laidOut.event.text,
-    Math.max(12, Math.floor((laidOut.width - 16) / 6.5)),
-  )
+  const lines =
+    laidOut.lines ??
+    wrapLines(laidOut.event.text, Math.max(12, Math.floor((laidOut.width - 16) / 6.5)))
+  const lineHeight = laidOut.lineHeight ?? 12
   const { x, y, width, height } = laidOut
 
   return (
     <g opacity={opacity} style={{ transition: 'opacity 160ms ease-out' }}>
+      {/* Accent fills are translucent; an opaque base keeps lifelines from
+          striking through the note's text. */}
+      <rect x={x} y={y} width={width} height={height} rx={8} ry={8} fill={tokens.background} />
       <rect
         x={x}
         y={y}
@@ -410,7 +420,7 @@ export function DefaultNote({ laidOut, context, emphasized }: NotePartProps) {
         <text
           key={i}
           x={x + width / 2}
-          y={y + height / 2 + (i - (lines.length - 1) / 2) * 12}
+          y={y + height / 2 + (i - (lines.length - 1) / 2) * lineHeight}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={textColor}
@@ -473,6 +483,10 @@ export function DefaultFragment({ laidOut, context }: FragmentPartProps) {
           dominantBaseline="middle"
           fill={tokens.textSecondary}
           fontSize={10}
+          paintOrder="stroke"
+          stroke={tokens.background}
+          strokeWidth={4}
+          strokeLinejoin="round"
           fontFamily="ui-sans-serif, system-ui, -apple-system, sans-serif"
         >
           {label}
@@ -496,6 +510,10 @@ export function DefaultFragment({ laidOut, context }: FragmentPartProps) {
             fill={tokens.textSecondary}
             fontSize={10}
             fontWeight={600}
+            paintOrder="stroke"
+            stroke={tokens.background}
+            strokeWidth={4}
+            strokeLinejoin="round"
             fontFamily="ui-sans-serif, system-ui, -apple-system, sans-serif"
           >
             {`else${lane.label ? ` ${lane.label}` : ''}`}

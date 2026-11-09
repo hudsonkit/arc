@@ -93,7 +93,10 @@ function parseHashData(): HashPayload | null {
       const n = node as any
       paddedNodes[id] = { ...n, x: n.x + pad, y: n.y + pad }
     }
+    // The id is the drawing number (label, title block DWG NO): keep it on
+    // both copies, or the handoff renders every title block as "—".
     const originalDiagram = {
+      ...(d.id ? { id: d.id } : {}),
       layout: { width: diagramLayout.width + pad * 2, height: diagramLayout.height + pad * 2 },
       nodes: paddedNodes,
       nodeData: d.nodeData || {},
@@ -107,6 +110,7 @@ function parseHashData(): HashPayload | null {
 
     return {
       diagram: {
+        ...(d.id ? { id: d.id } : {}),
         layout,
         grid: { enabled: true, size: 24, color: '#71717a', opacity: 0.1, type: 'dots' },
         nodes: offsetNodes,

@@ -147,7 +147,11 @@ export default function ArcDiagram({ config, options = {}, className, style, onN
 
 
   // Entrance animation
-  const [animatedTiers, setAnimatedTiers] = useState<Set<number>>(new Set())
+  // Without animation every tier starts visible, so a server render
+  // (renderToStaticMarkup, where effects never run) still draws the scene.
+  const [animatedTiers, setAnimatedTiers] = useState<Set<number>>(
+    () => (animate ? new Set() : new Set(tiers.map((_, i) => i))),
+  )
 
   useEffect(() => {
     if (animate) {

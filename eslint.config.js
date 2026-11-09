@@ -19,6 +19,7 @@ export default defineConfig([
     'docs-backup',
     'public',
     '.claude',
+    '.local',
   ]),
   {
     files: ['**/*.{js,jsx,ts,tsx}'],

@@ -6,7 +6,7 @@
   <text x="292" y="39" fill="#6f6a61" font-size="11" font-weight="600" letter-spacing="0.7" font-family="&#39;Source Serif 4&#39;, Georgia, &#39;Times New Roman&#39;, serif">Production</text>
   <path d="M 200 97.5 C 250 97.5, 250 184, 300 184" fill="none" stroke="#5b8fa8" stroke-width="2"/>
   <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#5b8fa8" fill-opacity="0.88" transform="translate(300 184) rotate(0)"/>
-  <text x="250" y="132.75" text-anchor="middle" fill="#5b8fa8" font-size="10" font-family="&#39;IBM Plex Mono&#39;, &#39;JetBrains Mono&#39;, ui-monospace, monospace">TLS</text>
+  <text x="250" y="89.5" text-anchor="middle" fill="#5b8fa8" font-size="10" font-family="&#39;IBM Plex Mono&#39;, &#39;JetBrains Mono&#39;, ui-monospace, monospace">TLS</text>
   <path d="M 200 297.5 C 250 297.5, 250 184, 300 184" fill="none" stroke="#5b8fa8" stroke-width="2"/>
   <path d="M 0 0 L -8 -3.0769230769230766 L -8 3.0769230769230766 Z" fill="#5b8fa8" fill-opacity="0.88" transform="translate(300 184) rotate(0)"/>
   <text x="258" y="244.75" text-anchor="start" fill="#5b8fa8" font-size="10" font-family="&#39;IBM Plex Mono&#39;, &#39;JetBrains Mono&#39;, ui-monospace, monospace">TLS</text>
