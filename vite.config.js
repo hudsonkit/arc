@@ -2,10 +2,60 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { Marked } from 'marked'
 import { resolve } from 'path'
 import { existsSync, readFileSync } from 'fs'
 import captureMiddleware from './plugins/captureMiddleware.js'
 import { resolveSiteVersion } from './scripts/site-version.js'
+
+const readmeMarked = new Marked()
+readmeMarked.use({
+  renderer: {
+    heading({ text, depth }) {
+      const plain = text.replace(/<[^>]+>/g, '')
+      const id = plain.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')
+      return `<h${depth} id="${id}">${text}</h${depth}>\n`
+    },
+  },
+})
+
+/** Dev-only page at /readme-preview. Repo images load from public/, not GitHub. */
+function readmePreviewHtml(root) {
+  const markdown = readFileSync(resolve(root, 'README.md'), 'utf8')
+    .replaceAll('https://raw.githubusercontent.com/hudsonkit/arc/main/public/', '/')
+  const body = readmeMarked.parse(markdown)
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arc README · local</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; background: #f4f1ea; color: #1c2126; font: 16px/1.6 ui-sans-serif, system-ui, sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 24px 96px; }
+  .note { margin: 0 0 28px; color: #5c656c; font-size: 13px; }
+  h1, h2, h3 { line-height: 1.25; letter-spacing: -0.02em; }
+  h1 { font-size: 32px; } h2 { font-size: 24px; margin-top: 2.2em; } h3 { font-size: 18px; }
+  a { color: #1d4e89; }
+  img { display: block; max-width: 100%; height: auto; margin: 16px 0; }
+  p > img, a > img { margin-inline: auto; }
+  pre { overflow: auto; padding: 14px 16px; background: #fff; border: 1px solid #e4ddd0; border-radius: 8px; }
+  code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.86em; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; background: #fff; }
+  th, td { border: 1px solid #e4ddd0; padding: 8px 12px; text-align: left; vertical-align: top; }
+  blockquote { margin-left: 0; padding-left: 14px; border-left: 3px solid #d9d0c2; color: #3d464c; }
+  hr { border: 0; border-top: 1px solid #e4ddd0; }
+</style>
+</head>
+<body>
+<main>
+<p class="note">Local preview of README.md. Pictures are the files in this checkout. Refresh after you edit.</p>
+${body}
+</main>
+</body>
+</html>`
+}
 
 const __dirname = new URL('.', import.meta.url).pathname
 
@@ -37,6 +87,20 @@ export default defineConfig(async ({ mode }) => {
       'import.meta.env.VITE_SITE_URL': JSON.stringify((process.env.SITE_URL || 'https://hudsonkit.com/arc').replace(/\/$/, '')),
     },
     plugins: [
+      {
+        name: 'arc-readme-preview',
+        apply: 'serve',
+        configureServer(server) {
+          const root = server.config.root
+          server.middlewares.use((req, res, next) => {
+            const pathname = (req.url || '/').split('?')[0]
+            if (pathname !== '/readme-preview' && pathname !== '/readme-preview/') return next()
+            res.setHeader('Content-Type', 'text/html; charset=utf-8')
+            res.setHeader('Cache-Control', 'no-store')
+            res.end(readmePreviewHtml(root))
+          })
+        },
+      },
       {
         // Vite's SPA preview otherwise serves index.html for extensionless
         // article URLs. Match the generated directory routes before fallback.

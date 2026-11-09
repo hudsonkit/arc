@@ -20,7 +20,7 @@ Supported Mermaid source can also become an Arc diagram or a playable sequence.
 [![license](https://img.shields.io/npm/l/@hudsonkit/arc.svg?color=41b883)](https://github.com/hudsonkit/arc/blob/main/LICENSE)
 [![types](https://img.shields.io/npm/types/@hudsonkit/arc.svg?color=3b82f6)](https://github.com/hudsonkit/arc/blob/main/src/types/diagram.ts)
 
-[![Watch Arc's Mermaid sequence player trace a cache request, with the active message highlighted beside the example library.](https://hudsonkit.com/arc/arc-mermaid-demo-poster.jpg)](https://hudsonkit.com/arc/arc-mermaid-demo.mp4)
+[![A cache miss, drawn as a sequence. The read from the database is the active step.](https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-mermaid-demo-poster.jpg)](https://hudsonkit.com/arc/arc-mermaid-demo.mp4)
 
 *A cache miss, step by step: play the sequence, inspect its Mermaid source,
 and switch between light and dark.*
@@ -41,7 +41,7 @@ Hudson Kit studio. An agent adds and moves nodes through MCP while you watch
 the canvas update. A marked work region shows where the agent is working.
 Nodes and connections transition smoothly as the view fits the changing diagram.
 
-[![Watch a live Arc review: real MCP calls add and move nodes, with an active work region and a light canvas.](https://hudsonkit.com/arc/arc-live-review-poster.jpg)](https://hudsonkit.com/arc/#live-review)
+[![A live architecture review. The agent has just connected the saved review, and the work region marks that box.](https://raw.githubusercontent.com/hudsonkit/arc/main/public/arc-live-review-poster.jpg)](https://hudsonkit.com/arc/#live-review)
 
 [Watch the 22-second demo](https://hudsonkit.com/arc/#live-review) · [Open the 60 fps video](https://hudsonkit.com/arc/arc-live-review.mp4)
 

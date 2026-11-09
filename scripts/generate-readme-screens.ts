@@ -34,7 +34,8 @@ const THEMES = ['engineering', 'workbench', 'tactical'] as const
 // One frame for every theme plate, so the three README tiles line up.
 const THEME_PAGE = { width: 1120, height: 500 }
 const THEME_VIEWPORT = { width: 1024, height: 404 }
-const STUDIO_PAGE = { width: 1512, height: 950 }
+// Short enough that the drawing fills the README column, wide enough for the inspector.
+const STUDIO_PAGE = { width: 1440, height: 680 }
 
 const requested = new Set(process.argv.slice(2))
 const wants = (name: string) => requested.size === 0 || requested.has(name)
@@ -91,14 +92,72 @@ async function renderThemes(page: Page) {
   }
 }
 
+async function frameStudio(page: Page) {
+  // The default fit stops at 110%, which leaves the architecture drawing
+  // floating in an empty canvas. Step in until it owns the frame, then
+  // select the hub. Selection listens for a real pointer press.
+  const fillOf = () => {
+    const canvas = document.querySelector('.arc-editor-canvas')
+    const nodes = [...document.querySelectorAll('[data-arc-node]')]
+    if (!canvas || nodes.length === 0) return 1
+    const box = canvas.getBoundingClientRect()
+    const union = nodes.reduce((acc, el) => {
+      const rect = el.getBoundingClientRect()
+      return {
+        left: Math.min(acc.left, rect.left),
+        top: Math.min(acc.top, rect.top),
+        right: Math.max(acc.right, rect.right),
+        bottom: Math.max(acc.bottom, rect.bottom),
+      }
+    }, { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity })
+    return Math.max((union.right - union.left) / box.width, (union.bottom - union.top) / box.height)
+  }
+  for (let i = 0; i < 8; i++) {
+    if (await page.evaluate(fillOf) > 0.68) break
+    const zoomIn = await page.$('[title="Zoom in"]')
+    if (!zoomIn) break
+    await zoomIn.click()
+    await new Promise(resolve => setTimeout(resolve, 120))
+  }
+  const point = await page.evaluate(() => {
+    const title = [...document.querySelectorAll('[data-arc-node-title]')].find(el => el.textContent?.trim() === 'Diagram Model')
+    const rect = title?.closest('[data-arc-node]')?.getBoundingClientRect()
+    return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null
+  })
+  if (!point) throw new Error('Diagram Model node was not on the canvas')
+  const fill = await page.evaluate(fillOf)
+  console.log(`  studio drawing fills ${Math.round(fill * 100)}% of the canvas`)
+  await page.mouse.click(point.x, point.y)
+  await new Promise(resolve => setTimeout(resolve, 300))
+}
+
 async function renderStudio(page: Page) {
   await page.setViewport({ ...STUDIO_PAGE, deviceScaleFactor: SCALE })
   // Fresh profile: no stored skin, density or markup toggle, so the shell
   // comes up on its defaults. The theme is passed explicitly because a
   // handoff without one opens untinted.
-  const payload = { ...architecture, _theme: 'workbench', _mode: 'dark' }
-  await page.goto(`${origin}/editor#data=${encodeHashData(payload)}`, { waitUntil: 'load' })
+  // The stock architecture drawing paints two blues and a gray, which collapse
+  // on the dark canvas. Spread the five nodes across hues for the studio shot.
+  const studio = structuredClone(architecture)
+  studio.nodeData.editor.color = 'violet'
+  studio.nodeData.templates.color = 'amber'
+  studio.nodeData.model.color = 'sky'
+  studio.nodeData.docs.color = 'rose'
+  studio.nodeData.exporters.color = 'emerald'
+  studio.connectorStyles.diagram.color = 'violet'
+  studio.connectorStyles.themes.color = 'amber'
+  studio.connectorStyles.publish.color = 'rose'
+  studio.connectorStyles.export.color = 'emerald'
+  const payload = { ...studio, _theme: 'workbench', _mode: 'light' }
+  // The shell follows Hudson's theme, and a dark system preference would
+  // paint the chrome dark and then overwrite the diagram mode. Pin both.
+  await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }])
+  await page.goto(`${origin}/editor?theme=light#data=${encodeHashData(payload)}`, { waitUntil: 'load' })
+  // The hash handoff renders, then redirects to /editor/:id. Wait that out
+  // before measuring, or the click lands on a document that is already gone.
+  await page.waitForFunction(() => /^\/editor\/.+/.test(location.pathname), { timeout: 20_000 })
   await settle(page, '[data-arc-node]')
+  await frameStudio(page)
   await reportWrapping(page, 'studio')
   await page.screenshot({ path: out('studio.png') })
   console.log(`studio.png  ${STUDIO_PAGE.width * SCALE}x${STUDIO_PAGE.height * SCALE}`)

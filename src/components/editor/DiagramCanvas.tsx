@@ -632,6 +632,13 @@ export default function DiagramCanvas({ onViewportChange, embedConfig, zoomConfi
     height: containerSize.height / zoom,
   }
 
+  // Screen point at the middle of the canvas. Zoom keeps this canvas point
+  // still, so the minimap's viewport rectangle stays centred on the drawing.
+  const viewCenter = () => {
+    const rect = containerRef.current?.getBoundingClientRect()
+    return rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : undefined
+  }
+
   // Report viewport changes to parent
   useEffect(() => {
     onViewportChange?.(viewportBounds)
@@ -1207,9 +1214,9 @@ export default function DiagramCanvas({ onViewportChange, embedConfig, zoomConfi
           zoom={zoom}
           minZoom={minZoom}
           maxZoom={maxZoom}
-          onZoomIn={() => zoomIn()}
-          onZoomOut={() => zoomOut()}
-          onZoomChange={(newZoom) => setZoom(newZoom)}
+          onZoomIn={() => zoomIn(viewCenter())}
+          onZoomOut={() => zoomOut(viewCenter())}
+          onZoomChange={(newZoom) => setZoom(newZoom, viewCenter())}
           onReset={resetTransform}
           onFitToView={() => {
             const bounds = viewMode === 'isometric' ? getIsoBounds() : contentBounds

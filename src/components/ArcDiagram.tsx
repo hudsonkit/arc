@@ -1945,8 +1945,8 @@ interface ArcDiagramProps {
   hoverEffects?: boolean | HoverEffectsConfig
   /** Called when a node is hovered/clicked (nodeId) or released (null) */
   onNodeHover?: (nodeId: string | null) => void
-  /** Override the engineering title-block fields (shown when the theme opts in). */
-  titleBlock?: TitleBlockInfo
+  /** Override the engineering title-block fields. `false` hides the block. */
+  titleBlock?: TitleBlockInfo | false
   /** Render the diagram in isometric projection. Default: '2d' */
   defaultViewMode?: ViewMode
   /** Isometric render style — 'solid' | 'blueprint' | 'cyanotype'. Default: 'solid' */
@@ -2455,7 +2455,7 @@ export default function ArcDiagram({
   const borderedFrame = frameVariant === 'sheet' || frameVariant === 'inset'
   const chromeInset = borderedFrame ? 28 : 12
 
-  const showTitleBlock = !!brand?.titleBlock && !showArc
+  const showTitleBlock = titleBlock !== false && !!brand?.titleBlock && !showArc
   const showLabel = !!displayLabel && !brand?.titleBlock
   const zoomShown = (interactive || showControls) && !showArc
 
@@ -2699,7 +2699,7 @@ export default function ArcDiagram({
       )}
 
       {/* Engineering title block - bottom right (theme opt-in) */}
-      {brand?.titleBlock && !showArc && !(isIso && isoStyle.technical) && (
+      {showTitleBlock && !(isIso && isoStyle.technical) && (
         <TitleBlock
           mode={mode}
           mono={brand.monoFamily}
@@ -2707,11 +2707,11 @@ export default function ArcDiagram({
           bottom={chromeInset}
           onHeight={setTitleBlockH}
           info={{
-            title: titleBlock?.title ?? 'System Architecture',
-            drawing: titleBlock?.drawing ?? displayLabel ?? '—',
-            scale: titleBlock?.scale ?? 'NTS',
-            rev: titleBlock?.rev ?? 'A',
-            sheet: titleBlock?.sheet ?? '1 / 1',
+            title: (titleBlock || undefined)?.title ?? 'System Architecture',
+            drawing: (titleBlock || undefined)?.drawing ?? displayLabel ?? '—',
+            scale: (titleBlock || undefined)?.scale ?? 'NTS',
+            rev: (titleBlock || undefined)?.rev ?? 'A',
+            sheet: (titleBlock || undefined)?.sheet ?? '1 / 1',
           }}
         />
       )}

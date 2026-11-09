@@ -95,8 +95,10 @@ export function LiveDiagramContent() {
               theme="engineering"
               frame="none"
               label=""
+              titleBlock={false}
               defaultZoom="fit"
-              fitPadding={80}
+              maxFitZoom={1.15}
+              fitPadding={64}
               animateUpdates={s.motion}
               autoFrameUpdates
               framingBounds={snapshot.work?.scope.type === 'region' ? {

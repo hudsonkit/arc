@@ -9,6 +9,8 @@ const nodeColors = {
   amber: '#fbbf24',
   zinc: '#71717a',
   sky: '#38bdf8',
+  rose: '#fb7185',
+  orange: '#fb923c',
 }
 
 export default function MiniMap({
@@ -20,40 +22,42 @@ export default function MiniMap({
 }) {
   const mapRef = useRef(null)
 
-  // Calculate scale to fit diagram in minimap
+  // The camera can show space outside the layout. The map has to include that
+  // space, or the viewport rectangle is clipped and only a corner of it remains.
   const layout = diagram.layout
-  const scaleX = width / layout.width
-  const scaleY = height / layout.height
-  const scale = Math.min(scaleX, scaleY)
+  const world = { minX: 0, minY: 0, maxX: layout.width, maxY: layout.height }
+  const include = (x, y, w, h) => {
+    if (![x, y, w, h].every(Number.isFinite)) return
+    world.minX = Math.min(world.minX, x)
+    world.minY = Math.min(world.minY, y)
+    world.maxX = Math.max(world.maxX, x + w)
+    world.maxY = Math.max(world.maxY, y + h)
+  }
+  for (const [nodeId, node] of Object.entries(diagram.nodes || {})) {
+    if (!diagram.nodeData?.[nodeId]) continue
+    const size = node.size || 'm'
+    include(node.x, node.y, node.width || (size === 'l' ? 210 : size === 's' ? 95 : size === 'xs' ? 80 : 145), node.height || (size === 'l' ? 85 : size === 's' ? 42 : size === 'xs' ? 36 : 68))
+  }
+  for (const group of diagram.groups || []) include(group.x, group.y, group.width, group.height)
+  for (const image of diagram.images || []) include(image.x, image.y, image.width, image.height)
+  if (viewportBounds) include(viewportBounds.x, viewportBounds.y, viewportBounds.width, viewportBounds.height)
+  const worldW = Math.max(1, world.maxX - world.minX)
+  const worldH = Math.max(1, world.maxY - world.minY)
 
-  // Actual minimap dimensions maintaining aspect ratio
-  const mapWidth = layout.width * scale
-  const mapHeight = layout.height * scale
+  const scale = Math.min(width / worldW, height / worldH)
+  const mapWidth = worldW * scale
+  const mapHeight = worldH * scale
 
-  // Convert viewport bounds to minimap coordinates
-  const viewX = (viewportBounds?.x || 0) * scale
-  const viewY = (viewportBounds?.y || 0) * scale
-  const viewW = (viewportBounds?.width || layout.width) * scale
-  const viewH = (viewportBounds?.height || layout.height) * scale
-
-  // Handle click on minimap to pan viewport
+  // The parent pans so this canvas point lands in the middle of the view.
   const handleClick = useCallback((e) => {
     if (!mapRef.current || !onViewportChange) return
-
-    const rect = mapRef.current.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const clickY = e.clientY - rect.top
-
-    // Convert to canvas coordinates
-    const canvasX = clickX / scale
-    const canvasY = clickY / scale
-
-    // Center viewport on clicked point
-    onViewportChange({
-      x: canvasX - (viewportBounds?.width || layout.width) / 2,
-      y: canvasY - (viewportBounds?.height || layout.height) / 2,
-    })
-  }, [scale, onViewportChange, viewportBounds, layout])
+    const svg = mapRef.current.querySelector('svg')
+    if (!svg) return
+    const rect = svg.getBoundingClientRect()
+    const canvasX = world.minX + ((e.clientX - rect.left) / rect.width) * worldW
+    const canvasY = world.minY + ((e.clientY - rect.top) / rect.height) * worldH
+    onViewportChange({ x: canvasX, y: canvasY })
+  }, [onViewportChange, world.minX, world.minY, worldW, worldH])
 
   return (
     <div
@@ -67,7 +71,7 @@ export default function MiniMap({
       <svg
         width={mapWidth}
         height={mapHeight}
-        viewBox={`0 0 ${layout.width} ${layout.height}`}
+        viewBox={`${world.minX} ${world.minY} ${worldW} ${worldH}`}
       >
         {/* Groups */}
         {(diagram.groups || []).map((group) => (
@@ -144,17 +148,19 @@ export default function MiniMap({
           )
         })}
 
-        {/* Viewport rectangle */}
-        <rect
-          x={viewX / scale}
-          y={viewY / scale}
-          width={viewW / scale}
-          height={viewH / scale}
-          fill="none"
-          stroke="var(--arc-acc, #3b82f6)"
-          strokeWidth={2 / scale}
-          strokeDasharray={`${4 / scale} ${2 / scale}`}
-        />
+        {/* The real camera window. It is centred on the drawing when the view is. */}
+        {viewportBounds && (
+          <rect
+            x={viewportBounds.x}
+            y={viewportBounds.y}
+            width={viewportBounds.width}
+            height={viewportBounds.height}
+            fill="none"
+            stroke="var(--arc-acc, #3b82f6)"
+            strokeWidth={1.5 / scale}
+            strokeDasharray={`${4 / scale} ${2 / scale}`}
+          />
+        )}
       </svg>
     </div>
   )

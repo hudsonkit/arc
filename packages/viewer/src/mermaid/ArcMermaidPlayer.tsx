@@ -21,6 +21,8 @@ export interface ArcMermaidPlayerProps extends ArcMermaidProps {
   zoomStep?: number
   showControls?: boolean
   showPlayback?: boolean
+  /** Message index to open on. `-1` is the overview. */
+  defaultStep?: number
   autoplayMs?: number
   onStepChange?: (step: number, eventId: string | null) => void
 }
@@ -50,6 +52,7 @@ export function ArcMermaidPlayer({
   zoomStep = 0.2,
   showControls = true,
   showPlayback = true,
+  defaultStep = -1,
   autoplayMs = 1400,
   onStepChange,
 }: ArcMermaidPlayerProps) {
@@ -68,7 +71,7 @@ export function ArcMermaidPlayer({
   )
 
   const [zoom, setZoom] = useState(defaultZoom === 'fit' ? 1 : defaultZoom)
-  const [stepIndex, setStepIndex] = useState(-1)
+  const [stepIndex, setStepIndex] = useState(defaultStep)
   const [playing, setPlaying] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
 
