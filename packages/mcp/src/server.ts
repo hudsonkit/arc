@@ -32,6 +32,9 @@ import pkg from '../package.json'
 import diagramSchemaJson from '../../../schemas/arc-diagram.schema.json'
 import skillMarkdown from '../../../skills/arc-diagrams/SKILL.md' with { type: 'text' }
 import llmBriefing from '../../../docs/llm.txt' with { type: 'text' }
+import diagramWidgetHtml from './diagram-widget.html' with { type: 'text' }
+
+const DIAGRAM_WIDGET_URI = 'ui://arc/diagram-v1.html'
 
 const diagramSchema = z.record(z.unknown())
 const agentLabel = z.string().trim().min(1).max(80).regex(/^[^\u0000-\u001f\u007f]+$/, 'Agent labels must be single-line text without control characters')
@@ -82,6 +85,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
   })
 
   const connectionId = options.connectionId ?? randomUUID()
+  const collaborativeDiagrams = new Map<string, { diagram: ArcDiagramData; rev: number; updatedBy: string }>()
   let localService: ReturnType<typeof startLocalLiveService> | undefined
   const liveService = () => options.live
     ? Promise.resolve(options.live)
@@ -100,6 +104,100 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
   }
   const liveResult = (value: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] })
   const liveError = (error: unknown) => ({ ...liveResult({ ok: false, error: error instanceof Error ? error.message : String(error) }), isError: true as const })
+
+  const diagramSnapshot = (documentId: string) => {
+    const value = collaborativeDiagrams.get(documentId)
+    if (!value) throw new Error(`Unknown diagram document: ${documentId}`)
+    return { ok: true, documentId, diagram: value.diagram, rev: value.rev, updatedBy: value.updatedBy }
+  }
+
+  server.registerTool(
+    'show_diagram',
+    {
+      title: 'Show Arc diagram',
+      description: 'Show a valid Arc diagram in the collaborative diagram widget. Use once to open the shared view, then use update_diagram and read_diagram with the returned documentId.',
+      inputSchema: {
+        diagram: diagramSchema.describe('Valid ArcDiagramData JSON'),
+        documentId: z.string().min(1).max(200).optional().describe('Stable document ID; generated when omitted'),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+      _meta: {
+        ui: { resourceUri: DIAGRAM_WIDGET_URI },
+        'openai/outputTemplate': DIAGRAM_WIDGET_URI,
+        'openai/widgetAccessible': true,
+        'openai/toolInvocation/invoking': 'Opening diagram…',
+        'openai/toolInvocation/invoked': 'Diagram ready',
+      },
+    },
+    async ({ diagram, documentId }) => {
+      try {
+        const id = documentId ?? randomUUID()
+        const data = parseDiagram(diagram)
+        collaborativeDiagrams.set(id, { diagram: data, rev: 1, updatedBy: 'agent' })
+        const snapshot = diagramSnapshot(id)
+        return {
+          structuredContent: snapshot,
+          content: [{ type: 'text', text: `Opened Arc diagram ${id} at revision 1.` }],
+        }
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.registerTool(
+    'update_diagram',
+    {
+      title: 'Update Arc diagram',
+      description: 'Replace a collaborative Arc diagram using compare-and-swap. Pass the revision last read; on conflict, read the current diagram and reconcile instead of overwriting it.',
+      inputSchema: {
+        documentId: z.string().min(1).max(200),
+        baseRev: z.number().int().positive(),
+        diagram: diagramSchema.describe('Complete next ArcDiagramData JSON'),
+        actor: z.enum(['agent', 'person']).optional().describe('Who made this edit; defaults to agent'),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+      _meta: { ui: { visibility: ['model', 'app'] }, 'openai/widgetAccessible': true },
+    },
+    async ({ documentId, baseRev, diagram, actor }) => {
+      try {
+        const current = collaborativeDiagrams.get(documentId)
+        if (!current) throw new Error(`Unknown diagram document: ${documentId}`)
+        if (current.rev !== baseRev) {
+          const snapshot = diagramSnapshot(documentId)
+          return {
+            structuredContent: { ...snapshot, ok: false, conflict: true, expectedRev: baseRev },
+            content: [{ type: 'text', text: `Revision conflict for ${documentId}: expected ${baseRev}, current ${current.rev}.` }],
+          }
+        }
+        const data = parseDiagram(diagram)
+        collaborativeDiagrams.set(documentId, { diagram: data, rev: current.rev + 1, updatedBy: actor ?? 'agent' })
+        const snapshot = diagramSnapshot(documentId)
+        return {
+          structuredContent: snapshot,
+          content: [{ type: 'text', text: `Updated Arc diagram ${documentId} to revision ${snapshot.rev}.` }],
+        }
+      } catch (error) { return liveError(error) }
+    },
+  )
+
+  server.registerTool(
+    'read_diagram',
+    {
+      title: 'Read Arc diagram',
+      description: 'Read the authoritative current diagram and revision, including edits saved by the person in the widget. Call before continuing after asking the person to edit.',
+      inputSchema: { documentId: z.string().min(1).max(200) },
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      _meta: { ui: { visibility: ['model', 'app'] }, 'openai/widgetAccessible': true },
+    },
+    async ({ documentId }) => {
+      try {
+        const snapshot = diagramSnapshot(documentId)
+        return {
+          structuredContent: snapshot,
+          content: [{ type: 'text', text: JSON.stringify(snapshot, null, 2) }],
+        }
+      } catch (error) { return liveError(error) }
+    },
+  )
 
   server.tool(
     'open_live_diagram',
@@ -633,6 +731,24 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
         uri: 'arc://schema/diagram',
         mimeType: 'application/json',
         text: JSON.stringify(diagramSchemaJson, null, 2),
+      }],
+    }),
+  )
+
+  server.registerResource(
+    'diagram-widget',
+    DIAGRAM_WIDGET_URI,
+    { description: 'Interactive Arc diagram editor for MCP Apps and Scout Canvas', mimeType: 'text/html;profile=mcp-app' },
+    async () => ({
+      contents: [{
+        uri: DIAGRAM_WIDGET_URI,
+        mimeType: 'text/html;profile=mcp-app',
+        text: diagramWidgetHtml,
+        _meta: {
+          ui: { prefersBorder: false },
+          'openai/widgetDescription': 'An editable Arc architecture diagram. Changes are saved with revision checks.',
+          'openai/widgetPrefersBorder': false,
+        },
       }],
     }),
   )
