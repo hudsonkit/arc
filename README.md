@@ -315,6 +315,13 @@ Arc bundles its other runtime code and CSS. No Tailwind configuration is
 required. Use `flowTime={1.25}` to inspect a specific instant, or add `views`
 and `showViews` to turn the diagram into a guided walkthrough.
 
+The stylesheet styles only elements inside Arc's root (the `arc-root` class),
+so it does not restyle the host page. When the host resizes the container,
+pass a new `fitKey` to fit the diagram again without a remount. Inside a scaled
+ancestor, add `fitMeasure="layout"`. To validate diagram JSON on a server or in
+a CLI without React, import from `@hudsonkit/arc/validate`. The
+[API reference](docs/api.md#embedding-in-a-host-page) has the details.
+
 ### Start with a Mermaid sequence
 
 Install `@hudsonkit/arc-viewer` for the native sequence player:

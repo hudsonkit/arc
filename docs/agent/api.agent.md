@@ -12,6 +12,8 @@ interface ArcDiagramProps {
   interactive?: boolean
   defaultZoom?: number | 'fit'
   maxFitZoom?: number
+  fitKey?: string | number                 // refit in place when it changes; first value does not refit
+  fitMeasure?: 'screen' | 'layout'         // 'layout' = clientWidth/Height, for scaled ancestors
   hoverEffects?: boolean | HoverEffectsConfig
   showControls?: boolean
   showMinimap?: boolean
@@ -26,6 +28,17 @@ interface ArcDiagramProps {
   className?: string
 }
 ```
+
+- A `fitKey` refit re-frames the active view, else fits the whole drawing
+  (capped by `maxFitZoom`). It never changes the view or calls `onViewChange`.
+- `lib/arc.css` is scoped to `.arc-root` (`ARC_ROOT_CLASS`, exported). Every
+  component renders it on its root. Tokens apply to `.arc-root`, not `:root`;
+  selectors use `:where()`, so there is no specificity change. `@property`,
+  keyframes and layer names stay global. Portal targets outside Arc need the
+  class. The transform is `scripts/scopeCss.mjs`, run by the lib build.
+- `@hudsonkit/arc/validate`: `validateDiagram`, `validateDiagramShape`,
+  `isDiagramShape` and the `Diagnostic`, `DiagnosticSeverity`,
+  `DiagnosticSubject`, `Fix` types. No React, CSS or DOM.
 
 ## ArcDiagramData Schema
 

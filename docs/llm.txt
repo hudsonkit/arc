@@ -125,6 +125,7 @@ GIF/MP4 artifacts come from Chrome frame capture plus ffmpeg.
 `locale` (BCP-47 — viewer `lang`/`dir` + Intl formatting; invalid tags fail `arc check` as `semantic/invalid-locale`)
 
 Validate external JSON with `validateDiagram()` in `src/utils/diagramDiagnostics.ts`, or `arc check diagram.json --json` from the CLI. `validateDiagramShape()` in `src/utils/diagramValidation.ts` remains the low-level shape gate.
+Both validators (and the `Diagnostic` types) are also on the React-free subpath `@hudsonkit/arc/validate`, for servers, CLIs and build steps.
 `validateDiagram()` also emits `composition/*` advisories for the authoring contract: `composition/too-dense` (>16 nodes without groups/views chaptering) and `composition/label-overflow` (name longer than the node's size budget). The full contract — budgets, one spine, spacing math, autoLayout thresholds, label and routing rules — lives in `skills/arc-diagrams/SKILL.md` under "Layout judgment".
 
 For CI artifacts, `arc render diagram.json --out diagram.svg --json` validates,
@@ -162,6 +163,8 @@ const diagram: ArcDiagramData = {
 
 <ArcDiagram data={diagram} mode="light" theme="default" defaultZoom="fit" />
 ```
+
+`@hudsonkit/arc/arc.css` is scoped to `.arc-root` (exported as `ARC_ROOT_CLASS`), so it does not restyle the host page. Pass a new `fitKey` to refit after the host resizes the container; add `fitMeasure="layout"` inside a scaled ancestor.
 
 ## Auto-layout (prefer over hand-positioning)
 

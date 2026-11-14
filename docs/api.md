@@ -20,6 +20,8 @@ interface ArcDiagramProps {
   defaultZoom?: number | 'fit'  // Initial zoom, or 'fit' to size to the container
   maxFitZoom?: number           // Cap applied when defaultZoom='fit' (default: 1)
   zoomLevels?: number[]         // Zoom steps for the +/- controls
+  fitKey?: string | number      // Refit when this value changes (the first value does not refit)
+  fitMeasure?: 'screen' | 'layout' // How the container is measured for centring (default: 'screen')
 
   // Chrome
   showControls?: boolean   // Zoom controls (default: follows `interactive`)
@@ -43,6 +45,77 @@ interface ArcDiagramProps {
 
 Every one of these is live at [`/showcase`](/showcase), which emits the matching
 JSX for whatever combination you dial in.
+
+### Refit without remounting
+
+The diagram fits once, when it first has a size. When the host changes the
+container later (a panel opens, a pane is resized), pass a new `fitKey` and
+the diagram fits again in place. It keeps its state, and it does not remount.
+
+```tsx
+<ArcDiagram data={diagram} defaultZoom="fit" fitKey={`${width}x${height}`} />
+```
+
+- With an active view, the refit frames that view again. Otherwise it fits the
+  whole drawing, capped by `maxFitZoom`.
+- A refit does not change the active view, and it does not call
+  `onViewChange`. `view`, `defaultViewId` and `onViewChange` work as before.
+- The first `fitKey` value does not refit, so a stable key costs nothing.
+
+`fitMeasure` chooses how Arc measures the container when it centres the
+drawing:
+
+- `'screen'` (the default) uses `getBoundingClientRect()`, the on-screen size.
+- `'layout'` uses `clientWidth` and `clientHeight`, the layout size without
+  CSS transforms. Use it when an ancestor is scaled, for example a zoomed
+  canvas or a scaled preview. The on-screen size of that container is not its
+  layout size, so a fit that uses it centres the drawing in the wrong place.
+
+## Embedding in a host page
+
+`@hudsonkit/arc/arc.css` styles only elements inside Arc's root, the element
+with the `arc-root` class. Every Arc component renders this class on its root.
+A host page can import the stylesheet and keep its own styles:
+
+- The design tokens and theme rules apply to `.arc-root`, not to `:root`.
+- The CSS reset and the utility classes apply only inside `.arc-root`.
+- The scope uses `:where()`, so it adds no specificity. Inside Arc, the result
+  is the same as before.
+
+These parts of the stylesheet stay global:
+
+- The `@property` registrations. CSS does not allow them to be scoped. They
+  only register typed custom properties with initial values, so they do not
+  restyle the host.
+- The `spin`, `pulse` and `bounce` keyframes, and the cascade layer names
+  (`theme`, `base`, `components`, `utilities`, `properties`).
+
+Some content renders outside Arc's root, for example a menu in a portal on
+`document.body`. Add `ARC_ROOT_CLASS` to the container of that content to give
+it Arc's styles:
+
+```tsx
+import { ARC_ROOT_CLASS } from '@hudsonkit/arc'
+
+<div className={ARC_ROOT_CLASS}>{/* portal target */}</div>
+```
+
+## Validating without React
+
+`@hudsonkit/arc/validate` holds the diagram validators. It imports no React,
+no CSS and no DOM API, so a server, a CLI or a build step can use it.
+
+```ts
+import { validateDiagram, validateDiagramShape, isDiagramShape, type Diagnostic } from '@hudsonkit/arc/validate'
+
+const shapeError = validateDiagramShape(json)   // null when the shape is valid, else a message
+const diagnostics: Diagnostic[] = validateDiagram(json)
+const errors = diagnostics.filter(diagnostic => diagnostic.severity === 'error')
+```
+
+The subpath also exports the types `Diagnostic`, `DiagnosticSeverity`,
+`DiagnosticSubject` and `Fix`. It has ES module and CommonJS builds. The main
+entry exports the same validators.
 
 ## ArcDiagramData Schema
 
