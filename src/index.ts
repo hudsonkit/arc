@@ -45,6 +45,9 @@ export {
 // Theme utilities
 export { THEMES, getTheme, getThemeList, type Theme, type ColorPalette } from './utils/themes'
 
+// The class lib/arc.css is scoped to; every Arc component root carries it.
+export { ARC_ROOT_CLASS } from './utils/cssScope'
+
 // 3D Isometric Diagram Player (tiers, floorSize, nodes format)
 export { default as ArcDiagramIsometric } from './iso/ArcDiagram'
 export { renderToElement, renderToString } from './iso/vanilla'

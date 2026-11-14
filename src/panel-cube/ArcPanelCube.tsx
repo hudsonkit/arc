@@ -2,6 +2,7 @@ import { createElement, useId, useMemo, useRef, useState, type CSSProperties, ty
 import { createPanelCubeScene, type PanelCubeSvgNode } from './render'
 import { useRotationHandles } from './RotationHandles'
 import type { PanelCubeDocument, PanelCubeRenderOptions, PanelCubeRotation } from './types'
+import { withArcRoot } from '../utils/cssScope'
 
 export interface ArcPanelCubeProps extends PanelCubeRenderOptions {
   data: PanelCubeDocument
@@ -123,7 +124,7 @@ export function ArcPanelCube({ data, progress = 1, activeFace = null, onFaceChan
     return createElement(entry.tag, props, ...children)
   }
   return <div
-    className={['arc-panel-cube', className].filter(Boolean).join(' ')}
+    className={withArcRoot('arc-panel-cube', className)}
     style={{ ...style, ...(onRotationChange ? { touchAction: 'none', userSelect: 'none', cursor: dragging || handles.activeAxis ? 'grabbing' : 'grab' } : {}) }}
     {...(onRotationChange ? {
       role: 'group', tabIndex: 0,

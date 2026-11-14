@@ -67,6 +67,7 @@
     "lib/*.d.ts",
     "lib/*.d.cts",
     "lib/*.css",
+    "validate/package.json",
     "bin/arc.mjs",
     "bin/arc-ascii.mjs",
     "docs/llm.txt",
@@ -86,6 +87,16 @@
       "require": {
         "types": "./lib/index.d.cts",
         "default": "./lib/arc.cjs"
+      }
+    },
+    "./validate": {
+      "import": {
+        "types": "./lib/validate.d.ts",
+        "default": "./lib/validate.js"
+      },
+      "require": {
+        "types": "./lib/validate.d.cts",
+        "default": "./lib/validate.cjs"
       }
     },
     "./arc.css": "./lib/arc.css",
@@ -149,6 +160,7 @@
     "lucide-react": "^0.562.0",
     "marked": "^18.1.2",
     "motion": "^14.6.0",
+    "postcss": "^8.5.6",
     "publint": "^0.3.21",
     "puppeteer": "^24.34.0",
     "react": "^19.2.0",

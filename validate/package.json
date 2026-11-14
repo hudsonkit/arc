@@ -1,0 +1,9 @@
+{
+  "name": "@hudsonkit/arc-validate",
+  "private": true,
+  "description": "Resolves @hudsonkit/arc/validate for tools that predate package.json exports (TypeScript moduleResolution node10). Everything else reads the root exports map.",
+  "main": "../lib/validate.cjs",
+  "module": "../lib/validate.js",
+  "types": "../lib/validate.d.ts",
+  "sideEffects": false
+}

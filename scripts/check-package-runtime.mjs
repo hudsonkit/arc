@@ -30,6 +30,49 @@ try {
       console.log(`Packed ${pkg.name}@${pkg.version}: MCP initialization, runtime version, and tool discovery passed.`)
     } finally { await client.close() }
   } else {
+    if (pkg.name === '@hudsonkit/arc') {
+      // `@hudsonkit/arc/validate` must load and run with React absent: nothing
+      // but the packed package is installed yet, and node has no DOM.
+      const validateProbe = path.join(temporary, 'validate-probe.cjs')
+      writeFileSync(validateProbe, `
+        const assert = require('node:assert/strict');
+        assert.throws(() => require.resolve('react'), /Cannot find module/);
+        assert.equal(typeof document, 'undefined');
+        const diagram = {
+          layout: { width: 400, height: 200 },
+          nodes: { a: { x: 20, y: 20, size: 'm' }, b: { x: 240, y: 20, size: 'm' } },
+          nodeData: { a: { name: 'A', icon: 'Server', color: 'blue' }, b: { name: 'B', icon: 'Database', color: 'emerald' } },
+          connectors: [{ id: 'ab', from: 'a', to: 'b', fromAnchor: 'right', toAnchor: 'left', style: 'x' }],
+          connectorStyles: { x: { color: 'blue', strokeWidth: 2 } },
+        };
+        function verify(v) {
+          assert.deepEqual(Object.keys(v).filter(key => key !== 'default' && key !== '__esModule').sort(), ['isDiagramShape', 'validateDiagram', 'validateDiagramShape']);
+          assert.equal(v.validateDiagramShape(diagram), null);
+          assert.equal(v.isDiagramShape({}), false);
+          assert.deepEqual(v.validateDiagram(diagram).filter(d => d.severity === 'error'), []);
+          const broken = { ...diagram, connectors: [{ ...diagram.connectors[0], to: 'missing' }] };
+          assert.ok(v.validateDiagram(broken).some(d => d.severity === 'error'));
+        }
+        (async () => {
+          verify(require('@hudsonkit/arc/validate'));
+          verify(await import('@hudsonkit/arc/validate'));
+        })().catch(error => { console.error(error.message); process.exit(1); });
+      `)
+      execFileSync(process.execPath, [validateProbe], { cwd: temporary, stdio: 'pipe' })
+      // Its declarations must typecheck with no React types and no DOM lib.
+      writeFileSync(path.join(temporary, 'validate-probe.mts'), `
+        import { validateDiagram, validateDiagramShape, type Diagnostic } from '@hudsonkit/arc/validate';
+        const diagnostics: Diagnostic[] = validateDiagram({});
+        const shape: string | null = validateDiagramShape({});
+        void diagnostics; void shape;
+      `)
+      writeFileSync(path.join(temporary, 'tsconfig.json'), JSON.stringify({
+        compilerOptions: { noEmit: true, strict: true, target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', lib: ['ES2022'], types: [] },
+        files: ['validate-probe.mts'],
+      }))
+      execFileSync(process.execPath, [path.join(repository, 'node_modules/typescript/bin/tsc'), '-p', 'tsconfig.json'], { cwd: temporary, stdio: 'pipe' })
+      console.log(`Packed ${pkg.name}@${pkg.version}/validate: ESM import, CommonJS require and declarations passed without React or the DOM.`)
+    }
     // Only the declared React peers are available to the packed library.
     for (const peer of ['react', 'react-dom']) symlinkSync(path.join(repository, 'node_modules', peer), path.join(modules, peer))
     const assertions = pkg.name === '@hudsonkit/arc' ? `

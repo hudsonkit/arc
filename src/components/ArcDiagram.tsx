@@ -37,6 +37,7 @@ import type { DiagramDelta } from '../utils/diffDiagram'
 import type { ArcDiagramData as CanonicalArcDiagramData, DiagramFlow, DiagramFlowLeg, DiagramSource, FileMeta, FlowDirection, FlowEasing, FlowMarker, FlowTrail, LegendMode } from '../types/diagram'
 import { LiveFlowLayer } from './LiveFlowLayer'
 import { sourceLabel } from '../utils/sourceRef'
+import { ARC_ROOT_CLASS } from '../utils/cssScope'
 import { isRtlLocale, isValidLocale } from '../utils/locale'
 import { diagramGeometryKey, followCamera, liveDiagramBounds, type LiveBounds } from '../utils/liveMotion'
 import { useLiveCamera, useLiveDiagramMotion, useReducedDiagramMotion, readCameraMotion, readNodeMotion, type LiveNodeMotion, type LiveCanvasMotion } from '../hooks/useLiveDiagramMotion'
@@ -1908,6 +1909,18 @@ interface ArcDiagramProps {
   /** Explicit fit inset per edge in CSS pixels. Replaces the legacy content/chrome margins.
    *  Ensure layout bounds include any connector excursions when using a tight inset. */
   fitPadding?: number
+  /** Fit again whenever this value changes, without remounting: the active view,
+   *  hover lock, flows and source toggle are kept. With a view active, its
+   *  highlight is framed again; otherwise the whole drawing is fitted, capped
+   *  by `maxFitZoom`. The first value does not refit — `defaultZoom` owns the
+   *  first frame. Example: `fitKey={`${width}x${height}`}`. */
+  fitKey?: string | number
+  /** How the container is measured when fitting and centring. 'screen' (default)
+   *  centres on the box as drawn on screen, CSS transforms included. 'layout'
+   *  uses the untransformed box in layout pixels (the container's client size),
+   *  which is what the drawing is laid out in, so a scaled ancestor such as a
+   *  zoomed canvas does not skew the fit. */
+  fitMeasure?: 'screen' | 'layout'
   /** Custom zoom level steps. Default: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2] */
   zoomLevels?: number[]
   /** Show the .arc source toggle button. Default: true */
@@ -1996,6 +2009,8 @@ export default function ArcDiagram({
   titleBlock,
   maxFitZoom = 1,
   fitPadding,
+  fitKey,
+  fitMeasure = 'screen',
   defaultViewMode = '2d',
   defaultIsoStyle = 'solid',
   delta,
@@ -2237,14 +2252,19 @@ export default function ArcDiagram({
 
   const centreOnBounds = useCallback(
     (b: { minX: number; minY: number; maxX: number; maxY: number }, z: number) => {
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (!rect) return
+      const element = containerRef.current
+      if (!element) return
+      // 'layout' measures the box the camera draws in; 'screen' keeps the
+      // historical on-screen measure, which a transformed ancestor scales.
+      const box = fitMeasure === 'layout'
+        ? { width: element.clientWidth, height: element.clientHeight }
+        : element.getBoundingClientRect()
       setPan({
-        x: rect.width / 2 - ((b.minX + b.maxX) / 2) * z,
-        y: rect.height / 2 - ((b.minY + b.maxY) / 2) * z,
+        x: box.width / 2 - ((b.minX + b.maxX) / 2) * z,
+        y: box.height / 2 - ((b.minY + b.maxY) / 2) * z,
       })
     },
-    [],
+    [fitMeasure],
   )
 
   // Set initial zoom after mount (needed for 'fit' to measure container)
@@ -2327,16 +2347,14 @@ export default function ArcDiagram({
     return () => observer.disconnect()
   }, [autoFrameUpdates, initialized, geometryKey, framingKey, isIso, isoStyle.technical, fitPadding, maxFitZoom])
 
-  // The camera follows the active view: entering one frames its highlight set;
-  // leaving restores the default framing. 2D only — iso handles its own pan.
-  React.useEffect(() => {
-    if (!initialized || isIso || autoFrameUpdates) return
+  // Frame a view's highlight set. 2D only — iso handles its own pan. Returns
+  // false when it leaves the camera alone.
+  const frameView = useCallback((target: NonNullable<typeof activeView>): boolean => {
+    if (isIso || autoFrameUpdates) return false
     const el = containerRef.current
-    if (!el) return
+    if (!el) return false
 
-    if (!activeView) return // exiting leaves the camera where the reader put it
-
-    const { nodeIds } = resolveViewFocus(activeView, connectors, focusTargets)
+    const { nodeIds } = resolveViewFocus(target, connectors, focusTargets)
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const id of nodeIds) {
       const pos = nodes[id]
@@ -2347,7 +2365,7 @@ export default function ArcDiagram({
       maxX = Math.max(maxX, pos.x + size.width)
       maxY = Math.max(maxY, pos.y + size.height)
     }
-    if (minX === Infinity) return // empty highlight — leave the camera alone
+    if (minX === Infinity) return false // empty highlight — leave the camera alone
 
     const PADDING = 88
     const cw = el.clientWidth
@@ -2362,7 +2380,32 @@ export default function ArcDiagram({
       x: cw / 2 - ((minX + maxX) / 2) * z,
       y: ch / 2 - ((minY + maxY) / 2) * z,
     })
-  }, [activeView, initialized, isIso, autoFrameUpdates, nodes, connectors, focusTargets])
+    return true
+  }, [isIso, autoFrameUpdates, nodes, connectors, focusTargets])
+
+  // The camera follows the active view: entering one frames its highlight set;
+  // exiting leaves the camera where the reader put it.
+  React.useEffect(() => {
+    if (initialized && activeView) frameView(activeView)
+  }, [activeView, initialized, frameView])
+
+  // `fitKey`: fit again on demand, keeping every other piece of player state.
+  // The active view keeps the camera on its highlight; otherwise the whole
+  // drawing is fitted. `onViewChange` does not fire — the view is unchanged.
+  const fitAgain = useCallback(() => {
+    if (activeView && frameView(activeView)) return
+    const nextZoom = calculateFitZoom()
+    setZoom(nextZoom)
+    centreOnBounds(isIso && isoBounds ? isoBounds : contentBounds, nextZoom)
+  }, [activeView, frameView, calculateFitZoom, centreOnBounds, isIso, isoBounds, contentBounds])
+  const lastFitKey = React.useRef(fitKey)
+  React.useEffect(() => {
+    if (Object.is(lastFitKey.current, fitKey)) return
+    lastFitKey.current = fitKey
+    // Before the first frame, the mount fit has not run yet and will measure
+    // the current box itself.
+    if (initialized) fitAgain()
+  }, [fitKey, initialized, fitAgain])
 
   // Sorted zoom levels for consistent navigation
   const sortedZoomLevels = React.useMemo(() => [...zoomLevels].sort((a, b) => a - b), [zoomLevels])
@@ -2481,7 +2524,7 @@ export default function ArcDiagram({
       dir={dirAttr}
       data-arc-theme={theme}
       // Native focus scrolling must not offset the transform-based camera.
-      className={`${frameVariant === 'none' ? '' : 'rounded-2xl'} overflow-clip relative ${themeColors.background.container} ${className}`}
+      className={`${ARC_ROOT_CLASS} ${frameVariant === 'none' ? '' : 'rounded-2xl'} overflow-clip relative ${themeColors.background.container} ${className}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

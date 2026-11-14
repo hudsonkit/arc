@@ -12,6 +12,7 @@ import TechnicalBackdrop from '../components/technical/TechnicalBackdrop'
 import TechnicalPlate from '../components/technical/TechnicalPlate'
 import { TechnicalBox, TechnicalCallout } from '../components/technical/TechnicalNode'
 import type { DiagramConfig, DiagramNode, PlayerOptions } from './types'
+import { withArcRoot } from '../utils/cssScope'
 
 // Typography
 const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace'
@@ -183,7 +184,7 @@ export default function ArcDiagram({ config, options = {}, className, style, onN
   })
 
   return (
-    <div className={className} style={{ display: 'inline-block', ...style }}>
+    <div className={withArcRoot(className)} style={{ display: 'inline-block', ...style }}>
       <svg width={canvas.width} height={canvas.height} style={{ backgroundColor: bgColor }}
         onClick={() => { if (interactive) { setSelected(null); setSoloTier(null) } }}>
         <defs>
