@@ -6,7 +6,7 @@ import architectureDiagram from './components/diagrams/architecture.diagram'
 import { DEFAULT_THEME, getTheme, THEMES, type ThemeId } from './utils/themes'
 import { GoogleAnalytics } from './components/GoogleAnalytics'
 import { useMeta } from './hooks/useMeta'
-import { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession } from './utils/sessionStorage'
+import { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession, subscribeDiagramSession } from './utils/sessionStorage'
 import './landing.css'
 
 // Heavy surfaces load on demand — the landing shouldn't ship the editor,
@@ -301,22 +301,13 @@ function PlayerPage() {
     }
   }, [diagramPath])
 
-  // Poll localStorage for changes (enables agent iteration: write → auto-refresh)
+  // Push changes from this document and other editor tabs; no refresh timer.
   useEffect(() => {
     if (!diagramPath) return
-    const sessionId = deriveSessionId(diagramPath)
-    const interval = setInterval(() => {
-      if (document.hidden) return
-      const current = loadDiagramSession(sessionId)
-      if (current) {
-        setSession(prev => {
-          if (prev && current.updatedAt !== prev.updatedAt) return current
-          if (!prev) return current
-          return prev
-        })
-      }
-    }, 1000)
-    return () => clearInterval(interval)
+    return subscribeDiagramSession(deriveSessionId(diagramPath), current => {
+      setSession(current)
+      setError(null)
+    })
   }, [diagramPath])
 
   // URL params override session values
