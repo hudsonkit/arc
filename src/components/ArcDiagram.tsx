@@ -2561,7 +2561,7 @@ export default function ArcDiagram({
                     subtitle: nodeData[nodeId]?.subtitle,
                     color: resolveNodeColor(nodeData[nodeId]),
                   }))}
-                title={titleBlock?.title ?? displayLabel}
+                title={(titleBlock && titleBlock.title) || displayLabel}
                 tally={`${String(Object.keys(nodeData).length).padStart(2, '0')} CMP / ${String(connectors.length).padStart(2, '0')} LNK`}
               />
             )}

@@ -1,3 +1,4 @@
+import { serveArcLive } from '../../../scripts/arc-live.ts'
 /**
  * Arc MCP server — stdio tools for diagram authoring.
  * Run locally: `bun packages/mcp/src/server.ts` or `bun run mcp`
@@ -83,6 +84,24 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
     name: 'arc',
     version: pkg.version,
   })
+
+  let commandRelay: ReturnType<typeof serveArcLive> | undefined
+  server.tool('arc_live_serve', 'Start a loopback push stream (SSE, WebSocket and RPC).', {
+    stream: z.string().min(1), port: z.number().int().min(1024).max(65535).default(5190),
+  }, async ({ stream, port }) => {
+    if (commandRelay) return { content: [{ type: 'text' as const, text: 'A command relay is already running' }], isError: true }
+    commandRelay = serveArcLive(stream, port)
+    try { await commandRelay.ready } catch (error) { commandRelay = undefined; throw error }
+    return { content: [{ type: 'text' as const, text: JSON.stringify({ stream, port }) }] }
+  })
+  server.tool('arc_live_apply', 'Atomically apply a v1 command envelope to the local push stream.', {
+    envelope: z.unknown(),
+  }, async ({ envelope }) => ({
+    content: [{ type: 'text' as const, text: JSON.stringify(commandRelay ? commandRelay.apply(envelope) : { diagnostics: ['Start arc_live_serve first'] }) }],
+  }))
+  server.tool('arc_live_read', 'Read the current command stream state.', {}, async () => ({
+    content: [{ type: 'text' as const, text: JSON.stringify(commandRelay?.getState() ?? null) }],
+  }))
 
   const connectionId = options.connectionId ?? randomUUID()
   const collaborativeDiagrams = new Map<string, { diagram: ArcDiagramData; rev: number; updatedBy: string }>()
