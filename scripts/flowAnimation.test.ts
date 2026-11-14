@@ -5,7 +5,7 @@ import ArcDiagram from '../src/components/ArcDiagram'
 import { writeFileSync } from 'node:fs'
 import type { ArcDiagramData } from '../src/types/diagram.ts'
 import { flowAnimationEnd, flowPositionAt, resolveDiagramFlow } from '../src/utils/flowAnimation.ts'
-import { diagramFlowDuration, renderFlowLayer } from '../src/utils/flowSvg.ts'
+import { diagramFlowDuration, renderFlowLayer, smilRepeatCount } from '../src/utils/flowSvg.ts'
 import { validateDiagram } from '../src/utils/diagramDiagnostics.ts'
 import { renderDiagramSvg } from './renderImage.ts'
 import { renderDiagramAnimation } from './renderAnimation.ts'
@@ -133,6 +133,27 @@ describe('flow SVG rendering', () => {
     expect(layer).toContain('data-arc-flow="request"')
     // The 0.5s hold hides markers after the 2s travel window inside a 2.5s cycle.
     expect(layer).toContain('values="0;1;0" keyTimes="0;0.015;0.8"')
+  })
+
+  test('repeatCount is always a whole number or "indefinite", never the raw value', () => {
+    expect(smilRepeatCount('indefinite')).toBe('indefinite')
+    expect(smilRepeatCount(3)).toBe('3')
+    expect(smilRepeatCount(2.7)).toBe('2')
+    expect(smilRepeatCount('4')).toBe('4')
+    expect(smilRepeatCount(0)).toBe('1')
+    expect(smilRepeatCount(-2)).toBe('1')
+    for (const bad of [Number.NaN, Infinity, '', '"/><script>alert(1)</script>', null, {}, true]) {
+      expect(smilRepeatCount(bad)).toBe('indefinite')
+    }
+
+    // An unvalidated document reaches the renderer with a hostile repeat.
+    const hostile = structuredClone(diagram)
+    hostile.flows![0].repeat = '1" onbegin="alert(1)' as unknown as number
+    const layer = renderFlowLayer(hostile, { animate: true })
+    expect(layer).not.toContain('onbegin')
+    const counts = [...layer.matchAll(/repeatCount="([^"]*)"/g)].map(match => match[1])
+    expect(counts.length).toBeGreaterThan(0)
+    for (const count of counts) expect(count).toMatch(/^(?:indefinite|[1-9]\d*)$/)
   })
 
   test('flowTime renders a deterministic still instead of SMIL', () => {
