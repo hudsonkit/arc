@@ -33,7 +33,7 @@ export default function MiniMap({
     world.maxX = Math.max(world.maxX, x + w)
     world.maxY = Math.max(world.maxY, y + h)
   }
-  for (const [nodeId, node] of Object.entries(diagram.nodes || {})) {
+  for (const [nodeId, node] of Object.entries(diagram.nodes || {}) as [string, import('../../types/diagram').NodePosition][]) {
     if (!diagram.nodeData?.[nodeId]) continue
     const size = node.size || 'm'
     include(node.x, node.y, node.width || (size === 'l' ? 210 : size === 's' ? 95 : size === 'xs' ? 80 : 145), node.height || (size === 'l' ? 85 : size === 's' ? 42 : size === 'xs' ? 36 : 68))

@@ -39,6 +39,7 @@ export function saveDiagramSession(id: string, data: Omit<DiagramSession, 'updat
   }
   try {
     localStorage.setItem(`${STORAGE_PREFIX}${id}`, JSON.stringify(session))
+    window.dispatchEvent(new CustomEvent('arc-session-saved', { detail: { id, session } }))
   } catch (e) {
     console.warn('Failed to save diagram session:', e)
   }
@@ -114,5 +115,40 @@ export function lastSessionId(): string | null {
     return id && localStorage.getItem(`${STORAGE_PREFIX}${id}`) ? id : null
   } catch {
     return null
+  }
+}
+
+/** Same-document writes use a custom event; other tabs receive native storage events. */
+export function subscribeDiagramSession(id: string, listener: (session: DiagramSession) => void): () => void {
+  const saved = (event: Event) => {
+    const detail = (event as CustomEvent<{ id: string; session: DiagramSession }>).detail
+    if (detail.id === id) listener(detail.session)
+  }
+  const storage = (event: StorageEvent) => {
+    if (event.key === `${STORAGE_PREFIX}${id}` && event.newValue) {
+      try { listener(JSON.parse(event.newValue)) } catch { /* Ignore corrupt external writes. */ }
+    }
+  }
+  const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('arc-session-preview') : null
+  if (channel) channel.onmessage = event => {
+    if (event.data?.id === id) listener(event.data.session)
+  }
+  window.addEventListener('arc-session-saved', saved)
+  window.addEventListener('storage', storage)
+  return () => {
+    channel?.close()
+    window.removeEventListener('arc-session-saved', saved)
+    window.removeEventListener('storage', storage)
+  }
+}
+
+/** Publish editor frames without waiting for the debounced durable write. */
+export function publishDiagramSession(id: string, data: Omit<DiagramSession, 'updatedAt'>): void {
+  const session = { ...data, updatedAt: Date.now() }
+  window.dispatchEvent(new CustomEvent('arc-session-saved', { detail: { id, session } }))
+  if (typeof BroadcastChannel !== 'undefined') {
+    const channel = new BroadcastChannel('arc-session-preview')
+    channel.postMessage({ id, session })
+    channel.close()
   }
 }
