@@ -217,7 +217,13 @@ const sharePages = [
   {
     path: 'docs/agentic-loop',
     title: 'The Agentic Loop | Arc Docs',
-    description: 'Diagrams maintained by the same agents that change the code.',
+    description: 'The agents that change the code keep the diagrams current.',
+    image: 'og-docs.png',
+  },
+  {
+    path: 'docs/live-streams',
+    title: 'Push Diagram Streams | Arc Docs',
+    description: 'Send small changes to a diagram and watch it update in place.',
     image: 'og-docs.png',
   },
   {
@@ -277,6 +283,7 @@ const sitemapRoutes = [
   ['/docs/group-layout', '0.6'],
   ['/docs/diff', '0.6'],
   ['/docs/agentic-loop', '0.6'],
+  ['/docs/live-streams', '0.6'],
   ['/docs/mermaid-import', '0.6'],
   ['/docs/agent-mcp', '0.6'],
   ['/docs/skills', '0.6'],

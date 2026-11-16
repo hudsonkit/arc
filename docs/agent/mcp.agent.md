@@ -81,6 +81,9 @@ From a global install (after publish):
 | `update_live_diagram` | `{sessionId, diagram, message?}` → `{ok, sessionId, revision, status}`; full validated replacement |
 | `finish_live_diagram_work` | `{sessionId, workId, message?}` → `{ok, sessionId, workId, revision, status, work}`; completes work and leaves the view reusable |
 | `end_live_diagram` | `{sessionId, message?}` → `{ok, sessionId, revision, status}`; keeps the final snapshot |
+| `arc_live_serve` | `{stream, port?=5190}` → `{stream, port}`; starts one loopback relay per MCP server instance |
+| `arc_live_apply` | `{envelope}` → `{seq, diagnostics, resync?}`; applies a v1 envelope all or nothing |
+| `arc_live_read` | `{}` → current stream state, or `null` before `arc_live_serve` |
 
 ## Live architecture workflow
 

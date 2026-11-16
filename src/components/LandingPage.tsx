@@ -5,6 +5,8 @@ import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { siteVersion as version } from '../utils/siteVersion'
 import { useMeta } from '../hooks/useMeta'
 import ArcMark from './ArcMark'
+import LiveFilm from './LiveFilm'
+import LandingCode, { type CodeBlock } from './LandingCode'
 import { examples } from '../content/examples'
 import '../landing-technical.css'
 
@@ -173,11 +175,23 @@ function editorHref(d: ArcDiagramData, display: Record<string, string> = {}): st
   return `/editor#data=${btoa(json)}`
 }
 
+const embedCode: CodeBlock[] = [
+  { label: 'Install', lines: [[['kw', 'npm'], ['text', ' i '], ['str', '@hudsonkit/arc']]] },
+  {
+    label: 'Render',
+    lines: [
+      [['kw', 'import'], ['punc', ' { '], ['name', 'ArcDiagram'], ['punc', ' } '], ['kw', 'from'], ['text', ' '], ['str', "'@hudsonkit/arc'"]],
+      [],
+      [['punc', '<'], ['tag', 'ArcDiagram'], ['text', ' '], ['attr', 'data'], ['punc', '={'], ['name', 'diagram'], ['punc', '}'], ['text', ' '], ['attr', 'theme'], ['punc', '='], ['str', '"cool"'], ['text', ' '], ['punc', '/>']],
+    ],
+  },
+]
+
 const features = [
   { n: '01', h: 'Lives in the repo', p: 'A diagram is a JSON or TypeScript file next to the code it describes.' },
-  { n: '02', h: 'Changes show in the diff', p: 'Move a service and the review shows the edge that moved, line by line.' },
-  { n: '03', h: 'Checked like code', p: 'arc check validates a diagram in CI, so a broken reference fails the build.' },
-  { n: '04', h: 'Kept current by agents', p: 'The MCP server lets the agent that changes the system update its picture.' },
+  { n: '02', h: 'Shows changes in the diff', p: 'Move a service and the review shows the edge that moved, line by line.' },
+  { n: '03', h: 'Passes checks like code', p: 'arc check validates a diagram in CI, so a broken reference fails the build.' },
+  { n: '04', h: 'Stays current through agents', p: 'The MCP server lets the agent that changes the system update its picture.' },
 ]
 
 const docs = [
@@ -190,14 +204,15 @@ const docs = [
   { n: 'EXP.01', h: 'Connection pool explainer', p: 'A live model of borrow, wait, reuse.', to: '/examples/connection-pool' },
   { n: 'EXP.02', h: 'Player showcase', p: 'Every renderer option, live on the canvas.', to: '/showcase' },
   { n: 'GUIDE.03', h: 'Field guide', p: 'How the architecture-diagram tools compare.', to: '/architecture-diagram-software' },
+  { n: 'GUIDE.04', h: 'Push diagram streams', p: 'Send small changes and watch the diagram update.', to: '/docs/live-streams' },
   { n: 'AGENT.01', h: 'MCP server', p: 'Give agents tools to validate, lay out, and render.', to: '/mcp' },
   { n: 'AGENT.02', h: 'Agent skills', p: 'Reusable diagram authoring and repair playbooks.', to: '/skills' },
 ]
 
 const loopBeats = [
-  { n: 'NUDGE', h: 'Updated in the loop', p: 'A changed file claims a diagram — the agent touches the *.arc.json in the same commit it edits the code.' },
-  { n: 'CHECK', h: 'Verified mechanically', p: 'arc check returns coded diagnostics with supportedFixes — an instruction list to converge on, not output to parse.' },
-  { n: 'DIFF', h: 'Reviewed as a delta', p: 'arc diff renders added, removed, moved, changed next to the code diff — drift becomes a review artifact.' },
+  { n: 'NUDGE', h: 'The agent updates the diagram', p: 'A changed file claims a diagram. The agent edits the *.arc.json in the same commit as the code.' },
+  { n: 'CHECK', h: 'arc check verifies the diagram', p: 'arc check returns coded diagnostics with supportedFixes: a list of instructions to follow, not output to parse.' },
+  { n: 'DIFF', h: 'Reviewers see the change as a delta', p: 'arc diff shows what was added, removed, moved or changed next to the code diff, so drift shows up in review.' },
 ]
 
 /** SMIL flow markers keep moving under `prefers-reduced-motion`, so the page
@@ -409,20 +424,15 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
             </p>
           </div>
           <figure className="tl-live-film">
-            <video
-              className="tl-live-video"
-              controls
-              playsInline
-              preload="none"
+            <LiveFilm
+              src={`${import.meta.env.BASE_URL}arc-live-review.mp4`}
+              poster={`${import.meta.env.BASE_URL}arc-live-review-poster.jpg`}
               width={1280}
               height={960}
-              poster={`${import.meta.env.BASE_URL}arc-live-review-poster.jpg`}
-              aria-label="Arc live collaboration preview"
-              aria-describedby="live-review-caption"
-            >
-              <source src={`${import.meta.env.BASE_URL}arc-live-review.mp4`} type="video/mp4" />
-              <a href={`${import.meta.env.BASE_URL}arc-live-review.mp4`}>Download the Arc live preview video.</a>
-            </video>
+              label="Arc live collaboration preview"
+              describedBy="live-review-caption"
+              still={reducedMotion}
+            />
             <figcaption id="live-review-caption" className="tl-live-caption">
               <span>Real MCP calls add a router, a review store, and a saved review. The shared canvas moves and reframes with each change.</span>
               <span className="tl-live-duration">22 seconds · silent · 60 fps export</span>
@@ -493,7 +503,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
           <div className="tl-head">
             <div>
               <Tag n="02">ARCHITECTURE</Tag>
-              <h2 id="pipeline-heading" className="tl-h2">From editor to everywhere.</h2>
+              <h2 id="pipeline-heading" className="tl-h2">Draw it once, then export it to images, video and apps.</h2>
             </div>
             <div className="tl-pipeline-id">ARC.ARCH.001<br />editor → model → exporters</div>
           </div>
@@ -518,14 +528,10 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
           </div>
           <div className="tl-embed">
             <p className="tl-section-p">
-              The same component renders in your app, your docs, or your README —
-              one typed config, zero runtime deps.
+              The same component renders in your app, your docs and your README from
+              one typed config. The package has no runtime dependencies.
             </p>
-            <pre className="tl-embed-code" aria-label="Embedding Arc in a React app"><code>{`npm i @hudsonkit/arc
-
-import { ArcDiagram } from '@hudsonkit/arc'
-
-<ArcDiagram data={diagram} theme="cool" />`}</code></pre>
+            <LandingCode label="Embedding Arc in a React app" blocks={embedCode} />
           </div>
         </section>
 
@@ -534,7 +540,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="03">ISOMETRIC</Tag>
-              <h2 id="isometric-heading" className="tl-h2">The same model, on the drafting table.</h2>
+              <h2 id="isometric-heading" className="tl-h2">Draw the same model in isometric.</h2>
               <p className="tl-section-p">
                 One typed config in isometric view — toggle the ink between sepia
                 blueprint and cyanotype.
@@ -555,7 +561,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="04">SEQUENCE</Tag>
-              <h2 id="sequence-heading" className="tl-h2">Interaction, rendered in sequence.</h2>
+              <h2 id="sequence-heading" className="tl-h2">Render the interaction as a sequence.</h2>
               <p className="tl-section-p">
                 Keep Mermaid as the reviewable source while Arc owns the typed interaction model,
                 theme, renderer, and playback controls.
@@ -577,7 +583,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="05">AGENTIC LOOP</Tag>
-              <h2 id="agentic-heading" className="tl-h2">Diagrams maintained by the agents that change the code.</h2>
+              <h2 id="agentic-heading" className="tl-h2">The agents that change the code keep the diagram current.</h2>
               <p className="tl-section-p">
                 The author is a model now. Typed JSON, coded diagnostics, and structural
                 diffs mean the agent that edits the system updates the picture in the
@@ -608,7 +614,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-examples-head">
             <div>
               <Tag n="06" invert>EXAMPLES</Tag>
-              <h2 id="examples-heading" className="tl-h2">Real diagrams. Any theme.</h2>
+              <h2 id="examples-heading" className="tl-h2">Apply any theme to a real diagram.</h2>
               <p className="tl-section-p">
                 Three entries from the examples gallery, each in a different theme. Open one
                 for its source, or take it into the editor.

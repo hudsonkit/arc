@@ -348,15 +348,41 @@
 
 /* ---- embed card ---- */
 .tl-embed {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: flex-start; justify-content: space-between;
   gap: 32px; margin-top: 30px;
 }
-.tl-embed .tl-section-p { max-width: 22em; }
-.tl-embed-code {
-  flex: 0 1 376px; min-width: 0; margin: 0; overflow-x: auto;
-  padding: 12px 14px; border: 1px solid var(--tl-line); background: var(--tl-card);
-  font-family: var(--arc-font-mono); font-size: 11.5px; line-height: 1.6; color: var(--tl-ink-2);
+.tl-embed .tl-section-p { max-width: 22em; margin-top: 0; }
+.tl-embed .tl-code { flex: 0 1 400px; }
+
+/* ---- code: one card, blocks joined by a hairline seam ---- */
+.tl-code { min-width: 0; border: 1px solid var(--tl-line-2); background: var(--tl-card); }
+.tl-code-block + .tl-code-block { border-top: 1px solid var(--tl-line); }
+.tl-code-head {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 30px; padding: 0 6px 0 14px;
+  color: var(--tl-faint); font-family: var(--arc-font-mono); font-size: 10.5px;
 }
+.tl-code-copy {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 22px; padding: 0 8px; border: 0; border-radius: 3px; background: transparent;
+  color: var(--tl-faint); font: inherit; cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+.tl-code-copy:hover { color: var(--tl-ink); background: var(--tl-line); }
+.tl-code-copy:focus-visible { outline: 1px solid var(--acc); outline-offset: 1px; }
+.tl-code-copy svg { width: 13px; height: 13px; }
+.tl-code-pre {
+  margin: 0; padding: 2px 14px 14px; overflow-x: auto;
+  font-family: var(--arc-font-mono); font-size: 12px; line-height: 1.7; color: var(--tl-ink-2);
+  tab-size: 2;
+}
+.tl-code-line { display: block; min-height: 1.7em; white-space: pre; }
+.tl-tok-kw { color: var(--acc); }
+.tl-tok-str { color: var(--tl-string); }
+.tl-tok-tag { color: var(--tl-ink); font-weight: 500; }
+.tl-tok-attr { color: var(--tl-muted); }
+.tl-tok-name { color: var(--tl-ink); }
+.tl-tok-punc { color: var(--tl-faint); }
 
 /* On this page the diagrams are illustrations inside a drafted sheet, so they
  * take the sheet's line weight: hairline outlines, no tinted fills, no glow.
@@ -459,15 +485,76 @@
   font-size: 13px;
 }
 .tl-live-film { margin: 0; }
+.tl-film { border: 1px solid var(--tl-line-2); background: var(--tl-card); }
+.tl-film-screen { position: relative; }
 .tl-live-video {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--tl-line-2);
+  border: 0;
   border-radius: 0;
   background: var(--tl-card);
+  cursor: pointer;
 }
+.tl-film-start {
+  position: absolute; left: 50%; top: 50%;
+  display: grid; place-items: center;
+  width: 56px; height: 56px; margin: -28px 0 0 -28px; padding: 0 0 0 3px;
+  border: 1px solid var(--tl-line-2); border-radius: 50%;
+  background: color-mix(in srgb, var(--tl-card) 88%, transparent);
+  color: var(--tl-ink); cursor: pointer;
+  box-shadow: var(--tl-shadow);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+.tl-film-start svg { width: 20px; height: 20px; }
+.tl-film-start:hover { transform: scale(1.05); background: var(--tl-card); }
+.tl-film-start:focus-visible { outline: 1px solid var(--acc); outline-offset: 3px; }
+
+/* the control bar: one seam under the film, the landing's mono type, a hairline track */
+.tl-film-bar {
+  display: flex; align-items: center; gap: 12px;
+  height: 40px; padding: 0 8px;
+  border-top: 1px solid var(--tl-line);
+}
+.tl-film-button {
+  display: grid; place-items: center; flex: none;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 3px;
+  background: transparent; color: var(--tl-ink-2); cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.tl-film-button:hover { background: var(--tl-line); color: var(--tl-ink); }
+.tl-film-button:focus-visible { outline: 1px solid var(--acc); outline-offset: 1px; }
+.tl-film-clock {
+  flex: none; min-width: 9ch; text-align: right;
+  color: var(--tl-faint); font-family: var(--arc-font-mono); font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+.tl-film-track {
+  --tl-film-progress: 0%;
+  flex: 1; min-width: 0; height: 20px; margin: 0;
+  appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer;
+}
+.tl-film-track::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(to right, var(--tl-ink) var(--tl-film-progress), var(--tl-line-2) var(--tl-film-progress));
+}
+.tl-film-track::-moz-range-track { height: 2px; background: var(--tl-line-2); }
+.tl-film-track::-moz-range-progress { height: 2px; background: var(--tl-ink); }
+.tl-film-track::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 10px; margin-top: -4px; border: 0; border-radius: 50%;
+  background: var(--tl-ink); opacity: 0; transition: opacity 120ms ease;
+}
+.tl-film-track::-moz-range-thumb {
+  width: 10px; height: 10px; border: 0; border-radius: 50%;
+  background: var(--tl-ink); opacity: 0; transition: opacity 120ms ease;
+}
+.tl-film-track:hover::-webkit-slider-thumb,
+.tl-film-track:focus-visible::-webkit-slider-thumb { opacity: 1; }
+.tl-film-track:hover::-moz-range-thumb,
+.tl-film-track:focus-visible::-moz-range-thumb { opacity: 1; }
+.tl-film-track:focus-visible { outline: 1px solid var(--acc); outline-offset: 2px; }
 .tl-live-caption {
   display: flex;
   align-items: baseline;
@@ -855,6 +942,7 @@
   .tl-sequence-links { align-items: flex-start; flex-direction: column; gap: 8px; }
   .tl-embed { flex-direction: column; align-items: stretch; }
   .tl-embed .tl-section-p { max-width: none; }
+  .tl-embed .tl-code { flex: none; }
   .tl-head { grid-template-columns: minmax(0, 1fr); }
   .tl-head .tl-pipeline-id { text-align: left; justify-self: start; }
 }
