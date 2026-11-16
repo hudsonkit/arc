@@ -74,10 +74,22 @@ devin mcp add arc -- npx -y @hudsonkit/arc-mcp
 | `update_live_diagram` | Publish a complete validated diagram revision to that view |
 | `finish_live_diagram_work` | Finish the current work ID and leave the view idle for the next task |
 | `end_live_diagram` | Mark the diagram complete and retain the final view |
+| `arc_live_serve` | Start a loopback push stream (SSE, WebSocket and RPC) for one stream ID |
+| `arc_live_apply` | Apply one v1 envelope of operations to that stream, all or nothing |
+| `arc_live_read` | Read the current stream state |
 | `open_architecture_review` | Save a baseline and open a durable architecture review |
 | `update_architecture_review` | Save findings, evidence, decisions, questions, and summary |
 | `resume_architecture_review` | Resume an interrupted review with its author capability |
 | `revoke_architecture_review_share` | Invalidate the old viewer link and return a new capability |
+
+## Push diagram streams
+
+`arc_live_serve`, `arc_live_apply` and `arc_live_read` send small changes to a
+diagram that a host page shows live. Use them when an agent edits in small
+steps. Use the live architecture tools below when an agent publishes whole
+revisions to a view in the Arc studio.
+[Push diagram streams](../../docs/live-streams.md) has the envelope format and
+the operations.
 
 ## Live architecture
 

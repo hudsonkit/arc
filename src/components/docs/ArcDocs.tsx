@@ -278,6 +278,7 @@ import focusStoriesMd from '../../../docs/focus-stories.md?raw'
 import groupLayoutMd from '../../../docs/group-layout.md?raw'
 import diffMd from '../../../docs/diff.md?raw'
 import agenticLoopMd from '../../../docs/agentic-loop.md?raw'
+import liveStreamsMd from '../../../docs/live-streams.md?raw'
 
 // Import agent-optimized markdown files
 import overviewAgentMd from '../../../docs/agent/overview.agent.md?raw'
@@ -333,6 +334,7 @@ const pageTree: PageNode[] = [
       { type: 'page', id: 'group-layout', name: 'Group Layout', icon: 'LayoutGrid', description: 'Align nodes inside boundaries' },
       { type: 'page', id: 'diff', name: 'Diagram Diffs', icon: 'GitCompare', description: 'Added, removed, moved, changed' },
       { type: 'page', id: 'agentic-loop', name: 'The Agentic Loop', icon: 'Repeat', description: 'Agents keep diagrams current' },
+      { type: 'page', id: 'live-streams', name: 'Push Streams', icon: 'Radio', description: 'Send small changes live' },
     ],
   },
   {
@@ -806,6 +808,12 @@ Return the complete config with:
     content: stripFrontmatter(diffMd),
     title: 'Diagram diffs',
     description: 'Diff two diagrams and render the change set — added, removed, moved, changed.',
+    badge: 'Guides',
+  },
+  'live-streams': {
+    content: stripFrontmatter(liveStreamsMd),
+    title: 'Push diagram streams',
+    description: 'Send small changes to a diagram and watch it update in place.',
     badge: 'Guides',
   },
   'agentic-loop': {

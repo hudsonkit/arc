@@ -221,6 +221,12 @@ const sharePages = [
     image: 'og-docs.png',
   },
   {
+    path: 'docs/live-streams',
+    title: 'Push Diagram Streams | Arc Docs',
+    description: 'Send small changes to a diagram and watch it update in place.',
+    image: 'og-docs.png',
+  },
+  {
     path: 'docs/mermaid-import',
     title: 'Mermaid Import | Arc Docs',
     description: 'Project Mermaid flowcharts and state diagrams into positioned Arc data.',
@@ -277,6 +283,7 @@ const sitemapRoutes = [
   ['/docs/group-layout', '0.6'],
   ['/docs/diff', '0.6'],
   ['/docs/agentic-loop', '0.6'],
+  ['/docs/live-streams', '0.6'],
   ['/docs/mermaid-import', '0.6'],
   ['/docs/agent-mcp', '0.6'],
   ['/docs/skills', '0.6'],

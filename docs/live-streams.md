@@ -1,3 +1,10 @@
+---
+title: Push diagram streams
+description: Send small changes to a diagram and watch it update in place.
+section: Guides
+order: 39
+---
+
 # Push diagram streams
 
 Arc 0.15.0 can draw a diagram from a stream of small changes. A host sends
@@ -63,7 +70,7 @@ Entity IDs are stable.
 
 This example sends five envelopes to new stream state:
 
-```jsonl
+```json
 {"v":1,"stream":"architecture","seq":1,"base":0,"ops":[{"op":"reset","diagram":{"layout":{"width":1000,"height":700},"nodes":{},"nodeData":{},"connectors":[],"connectorStyles":{}}}]}
 {"v":1,"stream":"architecture","seq":2,"base":1,"ops":[{"op":"node.add","id":"api","data":{"name":"API","kind":"service"}},{"op":"node.add","id":"db","data":{"name":"Database","kind":"database"}}]}
 {"v":1,"stream":"architecture","seq":3,"base":2,"ops":[{"op":"node.add","id":"cache","data":{"name":"Cache","kind":"cache"}}]}

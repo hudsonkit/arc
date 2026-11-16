@@ -5,6 +5,8 @@ import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { siteVersion as version } from '../utils/siteVersion'
 import { useMeta } from '../hooks/useMeta'
 import ArcMark from './ArcMark'
+import LiveFilm from './LiveFilm'
+import LandingCode, { type CodeBlock } from './LandingCode'
 import { examples } from '../content/examples'
 import '../landing-technical.css'
 
@@ -173,6 +175,18 @@ function editorHref(d: ArcDiagramData, display: Record<string, string> = {}): st
   return `/editor#data=${btoa(json)}`
 }
 
+const embedCode: CodeBlock[] = [
+  { label: 'Install', lines: [[['kw', 'npm'], ['text', ' i '], ['str', '@hudsonkit/arc']]] },
+  {
+    label: 'Render',
+    lines: [
+      [['kw', 'import'], ['punc', ' { '], ['name', 'ArcDiagram'], ['punc', ' } '], ['kw', 'from'], ['text', ' '], ['str', "'@hudsonkit/arc'"]],
+      [],
+      [['punc', '<'], ['tag', 'ArcDiagram'], ['text', ' '], ['attr', 'data'], ['punc', '={'], ['name', 'diagram'], ['punc', '}'], ['text', ' '], ['attr', 'theme'], ['punc', '='], ['str', '"cool"'], ['text', ' '], ['punc', '/>']],
+    ],
+  },
+]
+
 const features = [
   { n: '01', h: 'Lives in the repo', p: 'A diagram is a JSON or TypeScript file next to the code it describes.' },
   { n: '02', h: 'Shows changes in the diff', p: 'Move a service and the review shows the edge that moved, line by line.' },
@@ -190,6 +204,7 @@ const docs = [
   { n: 'EXP.01', h: 'Connection pool explainer', p: 'A live model of borrow, wait, reuse.', to: '/examples/connection-pool' },
   { n: 'EXP.02', h: 'Player showcase', p: 'Every renderer option, live on the canvas.', to: '/showcase' },
   { n: 'GUIDE.03', h: 'Field guide', p: 'How the architecture-diagram tools compare.', to: '/architecture-diagram-software' },
+  { n: 'GUIDE.04', h: 'Push diagram streams', p: 'Send small changes and watch the diagram update.', to: '/docs/live-streams' },
   { n: 'AGENT.01', h: 'MCP server', p: 'Give agents tools to validate, lay out, and render.', to: '/mcp' },
   { n: 'AGENT.02', h: 'Agent skills', p: 'Reusable diagram authoring and repair playbooks.', to: '/skills' },
 ]
@@ -409,20 +424,15 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
             </p>
           </div>
           <figure className="tl-live-film">
-            <video
-              className="tl-live-video"
-              controls
-              playsInline
-              preload="none"
+            <LiveFilm
+              src={`${import.meta.env.BASE_URL}arc-live-review.mp4`}
+              poster={`${import.meta.env.BASE_URL}arc-live-review-poster.jpg`}
               width={1280}
               height={960}
-              poster={`${import.meta.env.BASE_URL}arc-live-review-poster.jpg`}
-              aria-label="Arc live collaboration preview"
-              aria-describedby="live-review-caption"
-            >
-              <source src={`${import.meta.env.BASE_URL}arc-live-review.mp4`} type="video/mp4" />
-              <a href={`${import.meta.env.BASE_URL}arc-live-review.mp4`}>Download the Arc live preview video.</a>
-            </video>
+              label="Arc live collaboration preview"
+              describedBy="live-review-caption"
+              still={reducedMotion}
+            />
             <figcaption id="live-review-caption" className="tl-live-caption">
               <span>Real MCP calls add a router, a review store, and a saved review. The shared canvas moves and reframes with each change.</span>
               <span className="tl-live-duration">22 seconds · silent · 60 fps export</span>
@@ -518,14 +528,10 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
           </div>
           <div className="tl-embed">
             <p className="tl-section-p">
-              The same component renders in your app, your docs, or your README —
-              one typed config, zero runtime deps.
+              The same component renders in your app, your docs and your README from
+              one typed config. The package has no runtime dependencies.
             </p>
-            <pre className="tl-embed-code" aria-label="Embedding Arc in a React app"><code>{`npm i @hudsonkit/arc
-
-import { ArcDiagram } from '@hudsonkit/arc'
-
-<ArcDiagram data={diagram} theme="cool" />`}</code></pre>
+            <LandingCode label="Embedding Arc in a React app" blocks={embedCode} />
           </div>
         </section>
 

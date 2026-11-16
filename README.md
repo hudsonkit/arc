@@ -378,6 +378,8 @@ npx arc diff base.json head.json --summary
 npx arc render diagram.json --out diagram.svg
 npx arc render diagram.json --out flow.mp4 --duration 4 --fps 12
 npx arc schema
+npx arc live serve architecture --port 5190
+npx arc apply architecture --ops commands.json --port 5190
 npx arc-ascii diagram.json --charset ascii --max-width 80
 ```
 
@@ -412,6 +414,7 @@ and [import guide](https://github.com/hudsonkit/arc/blob/main/docs/mermaid-impor
 | Tiered scenes, materials, and spatial interaction | [Isometric API](https://github.com/hudsonkit/arc/blob/main/src/iso/types.ts) |
 | Visual identity and output formats | [Themes](https://github.com/hudsonkit/arc/blob/main/docs/themes.md) · [Exports](https://github.com/hudsonkit/arc/blob/main/docs/exports.md) |
 | Source references, diagnostics, and change review | [Schema](https://github.com/hudsonkit/arc/blob/main/schemas/arc-diagram.schema.json) · [Diffs](https://github.com/hudsonkit/arc/blob/main/docs/diff.md) |
+| Live updates from a stream of small changes | [Push diagram streams](https://github.com/hudsonkit/arc/blob/main/docs/live-streams.md) |
 | Agent authoring and verification | [MCP](https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md) · [Benchmarks](https://github.com/hudsonkit/arc/blob/main/benchmarks/README.md) |
 
 ## Where we're going

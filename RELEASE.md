@@ -17,7 +17,7 @@ Publish `@hudsonkit/arc`, `@hudsonkit/arc-viewer`, `@hudsonkit/arc-iso`, and `@h
   - A loopback SSE, WebSocket and RPC relay.
   - The CLI commands `serve` and `apply`.
   - The MCP tools `arc_live_serve`, `arc_live_apply` and `arc_live_read`.
-  - `LIVE_STREAMS.md` has the wire contract and the Scout integration steps.
+  - `docs/live-streams.md` has the wire contract and the Scout integration steps.
 
 ## Compatibility
 
