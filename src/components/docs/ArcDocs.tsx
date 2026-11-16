@@ -332,7 +332,7 @@ const pageTree: PageNode[] = [
       { type: 'page', id: 'focus-stories', name: 'Focus Stories', icon: 'Focus', description: 'Explain a path on selection' },
       { type: 'page', id: 'group-layout', name: 'Group Layout', icon: 'LayoutGrid', description: 'Align nodes inside boundaries' },
       { type: 'page', id: 'diff', name: 'Diagram Diffs', icon: 'GitCompare', description: 'Added, removed, moved, changed' },
-      { type: 'page', id: 'agentic-loop', name: 'The Agentic Loop', icon: 'Repeat', description: 'Diagrams maintained by agents' },
+      { type: 'page', id: 'agentic-loop', name: 'The Agentic Loop', icon: 'Repeat', description: 'Agents keep diagrams current' },
     ],
   },
   {
@@ -811,7 +811,7 @@ Return the complete config with:
   'agentic-loop': {
     content: stripFrontmatter(agenticLoopMd),
     title: 'The agentic loop',
-    description: 'Diagrams maintained by the same agents that change the code.',
+    description: 'The agents that change the code keep the diagrams current.',
     badge: 'Guides',
   },
   themes: {

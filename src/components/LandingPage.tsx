@@ -175,9 +175,9 @@ function editorHref(d: ArcDiagramData, display: Record<string, string> = {}): st
 
 const features = [
   { n: '01', h: 'Lives in the repo', p: 'A diagram is a JSON or TypeScript file next to the code it describes.' },
-  { n: '02', h: 'Changes show in the diff', p: 'Move a service and the review shows the edge that moved, line by line.' },
-  { n: '03', h: 'Checked like code', p: 'arc check validates a diagram in CI, so a broken reference fails the build.' },
-  { n: '04', h: 'Kept current by agents', p: 'The MCP server lets the agent that changes the system update its picture.' },
+  { n: '02', h: 'Shows changes in the diff', p: 'Move a service and the review shows the edge that moved, line by line.' },
+  { n: '03', h: 'Passes checks like code', p: 'arc check validates a diagram in CI, so a broken reference fails the build.' },
+  { n: '04', h: 'Stays current through agents', p: 'The MCP server lets the agent that changes the system update its picture.' },
 ]
 
 const docs = [
@@ -195,9 +195,9 @@ const docs = [
 ]
 
 const loopBeats = [
-  { n: 'NUDGE', h: 'Updated in the loop', p: 'A changed file claims a diagram — the agent touches the *.arc.json in the same commit it edits the code.' },
-  { n: 'CHECK', h: 'Verified mechanically', p: 'arc check returns coded diagnostics with supportedFixes — an instruction list to converge on, not output to parse.' },
-  { n: 'DIFF', h: 'Reviewed as a delta', p: 'arc diff renders added, removed, moved, changed next to the code diff — drift becomes a review artifact.' },
+  { n: 'NUDGE', h: 'The agent updates the diagram', p: 'A changed file claims a diagram. The agent edits the *.arc.json in the same commit as the code.' },
+  { n: 'CHECK', h: 'arc check verifies the diagram', p: 'arc check returns coded diagnostics with supportedFixes: a list of instructions to follow, not output to parse.' },
+  { n: 'DIFF', h: 'Reviewers see the change as a delta', p: 'arc diff shows what was added, removed, moved or changed next to the code diff, so drift shows up in review.' },
 ]
 
 /** SMIL flow markers keep moving under `prefers-reduced-motion`, so the page
@@ -493,7 +493,7 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
           <div className="tl-head">
             <div>
               <Tag n="02">ARCHITECTURE</Tag>
-              <h2 id="pipeline-heading" className="tl-h2">From editor to everywhere.</h2>
+              <h2 id="pipeline-heading" className="tl-h2">Draw it once, then export it to images, video and apps.</h2>
             </div>
             <div className="tl-pipeline-id">ARC.ARCH.001<br />editor → model → exporters</div>
           </div>
@@ -534,7 +534,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="03">ISOMETRIC</Tag>
-              <h2 id="isometric-heading" className="tl-h2">The same model, on the drafting table.</h2>
+              <h2 id="isometric-heading" className="tl-h2">Draw the same model in isometric.</h2>
               <p className="tl-section-p">
                 One typed config in isometric view — toggle the ink between sepia
                 blueprint and cyanotype.
@@ -555,7 +555,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="04">SEQUENCE</Tag>
-              <h2 id="sequence-heading" className="tl-h2">Interaction, rendered in sequence.</h2>
+              <h2 id="sequence-heading" className="tl-h2">Render the interaction as a sequence.</h2>
               <p className="tl-section-p">
                 Keep Mermaid as the reviewable source while Arc owns the typed interaction model,
                 theme, renderer, and playback controls.
@@ -577,7 +577,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-head">
             <div>
               <Tag n="05">AGENTIC LOOP</Tag>
-              <h2 id="agentic-heading" className="tl-h2">Diagrams maintained by the agents that change the code.</h2>
+              <h2 id="agentic-heading" className="tl-h2">The agents that change the code keep the diagram current.</h2>
               <p className="tl-section-p">
                 The author is a model now. Typed JSON, coded diagnostics, and structural
                 diffs mean the agent that edits the system updates the picture in the
@@ -608,7 +608,7 @@ import { ArcDiagram } from '@hudsonkit/arc'
           <div className="tl-examples-head">
             <div>
               <Tag n="06" invert>EXAMPLES</Tag>
-              <h2 id="examples-heading" className="tl-h2">Real diagrams. Any theme.</h2>
+              <h2 id="examples-heading" className="tl-h2">Apply any theme to a real diagram.</h2>
               <p className="tl-section-p">
                 Three entries from the examples gallery, each in a different theme. Open one
                 for its source, or take it into the editor.

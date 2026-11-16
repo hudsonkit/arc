@@ -217,7 +217,7 @@ const sharePages = [
   {
     path: 'docs/agentic-loop',
     title: 'The Agentic Loop | Arc Docs',
-    description: 'Diagrams maintained by the same agents that change the code.',
+    description: 'The agents that change the code keep the diagrams current.',
     image: 'og-docs.png',
   },
   {

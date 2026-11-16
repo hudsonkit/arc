@@ -21,7 +21,7 @@ interface ArcDiagramProps {
   maxFitZoom?: number           // Cap applied when defaultZoom='fit' (default: 1)
   zoomLevels?: number[]         // Zoom steps for the +/- controls
   fitKey?: string | number      // Refit when this value changes (the first value does not refit)
-  fitMeasure?: 'screen' | 'layout' // How the container is measured for centring (default: 'screen')
+  fitMeasure?: 'screen' | 'layout' // How Arc measures the container to center the drawing (default: 'screen')
 
   // Chrome
   showControls?: boolean   // Zoom controls (default: follows `interactive`)
@@ -62,14 +62,14 @@ the diagram fits again in place. It keeps its state, and it does not remount.
   `onViewChange`. `view`, `defaultViewId` and `onViewChange` work as before.
 - The first `fitKey` value does not refit, so a stable key costs nothing.
 
-`fitMeasure` chooses how Arc measures the container when it centres the
+`fitMeasure` chooses how Arc measures the container when it centers the
 drawing:
 
 - `'screen'` (the default) uses `getBoundingClientRect()`, the on-screen size.
 - `'layout'` uses `clientWidth` and `clientHeight`, the layout size without
   CSS transforms. Use it when an ancestor is scaled, for example a zoomed
   canvas or a scaled preview. The on-screen size of that container is not its
-  layout size, so a fit that uses it centres the drawing in the wrong place.
+  layout size, so a fit that uses it centers the drawing in the wrong place.
 
 ## Embedding in a host page
 

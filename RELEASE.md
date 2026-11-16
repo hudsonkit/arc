@@ -31,9 +31,11 @@ The local checks ran on the release commit: install, typecheck, lint, the full B
 
 ## Ship procedure
 
-1. A push to `main` starts the GitHub Pages workflow.
-2. Run the npm publish workflow with version `0.15.0`, scope `all`, and dry run enabled. Confirm that all four packages pack from the release commit.
-3. Publish from the same commit through the workflow, or push tag `v0.15.0` when publication is authorized. The tag starts publication automatically.
-4. Verify the registry tarballs, package versions and entrypoints, and the MCP runtime version.
+The release commit (`59d9330`) is on `main`. Its GitHub Pages deploy succeeded on 2026-11-16. Publish through GitHub Actions to keep npm provenance.
 
-Publish through GitHub Actions to keep npm provenance.
+1. Run the npm publish workflow with version `0.15.0`, scope `all`, and dry run on. Expected result: all four packages pack from the release commit.
+2. When publication is authorized, publish from the same commit. Use one of these:
+   - Run the npm publish workflow again with dry run off.
+   - Push the tag `v0.15.0`. The tag starts the npm publish workflow.
+3. Verify the registry tarballs, the package versions and entrypoints, and the MCP runtime version.
+4. Redeploy the site. The site reads the Arc version from npm when it builds, so it shows v0.15.0 only after step 2.

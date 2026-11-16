@@ -1,6 +1,6 @@
 ---
 title: The agentic loop
-description: Diagrams maintained by the same agents that change the code — nudged in-loop, verified mechanically, diffed in review
+description: The agents that change the code keep the diagrams current. Arc checks each diagram, and review shows each change as a diff.
 order: 40
 ---
 
