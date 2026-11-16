@@ -18,6 +18,12 @@
   --radius-2xl: 0.5rem;   /* 8px  (was 16px) */
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;

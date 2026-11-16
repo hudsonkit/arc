@@ -28,6 +28,7 @@ import { isoContentBounds, isoPlateBounds, buildNodeIndex, isoNodeDims, nearestI
 import type { EmbedConfig, ZoomConfig, NodePosition } from '../../types/editor'
 import { CanvasContextMenu, type CtxMenuState, type CtxTarget } from './CanvasContextMenu'
 import { IsoOriginHud } from './IsoOriginEditor'
+import { ARC_ROOT_CLASS } from '../../utils/cssScope'
 
 // Default embed configuration
 const DEFAULT_EMBED_CONFIG: Required<EmbedConfig> = {
@@ -889,7 +890,7 @@ export default function DiagramCanvas({ onViewportChange, embedConfig, zoomConfi
     (diagram.images || []).length === 0
 
   return (
-    <div className={`arc-canvas-frame relative w-full h-full${isNarrow ? ' is-narrow' : ''} ${themeColors?.background.container.startsWith('arc-inherit-') ? themeColors.background.container : ''}`}>
+    <div className={`${ARC_ROOT_CLASS} arc-canvas-frame relative w-full h-full${isNarrow ? ' is-narrow' : ''} ${themeColors?.background.container.startsWith('arc-inherit-') ? themeColors.background.container : ''}`}>
       {themeColors?.background.container.startsWith('arc-inherit-') && <style>{HOST_THEME_CSS}</style>}
       {/* Transform container - handles wheel/pan events */}
       <div

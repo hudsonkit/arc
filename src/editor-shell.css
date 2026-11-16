@@ -44,11 +44,8 @@
   --default-mono-font-family: var(--arc-font-mono);
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+/* Page sizing (html, body, #root) belongs to the host page. The studio sets it
+   in src/index.css; it is not here because this file ships in lib/arc.css. */
 
 /* Hudson semantic tokens — light */
 .arc-editor-root [data-hudson-template="hudson"][data-hudson-theme="light"] {

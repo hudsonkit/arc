@@ -82,8 +82,25 @@ function markerMarkup(marker: ResolvedFlow['marker'], size: number, color: strin
   return `<circle r="${r * 1.45}" fill="${color}" opacity="0.16"/><circle r="${r}" fill="${color}"/>`
 }
 
+/**
+ * The SMIL `repeatCount` for a flow's `repeat`. Validation rejects anything
+ * but a positive integer or "indefinite", but the renderer also receives
+ * unvalidated documents, so the raw value is never written into the markup:
+ * a finite number (or numeric string) becomes a whole count of at least one,
+ * matching `flowPositionAt`'s `Math.floor`; everything else, including
+ * Infinity, plays as "indefinite", the default for an unset `repeat`.
+ */
+export function smilRepeatCount(repeat: unknown): string {
+  if (repeat === 'indefinite') return 'indefinite'
+  const count = typeof repeat === 'number' ? repeat
+    : typeof repeat === 'string' && repeat.trim() !== '' ? Number(repeat)
+      : Number.NaN
+  if (!Number.isFinite(count)) return 'indefinite'
+  return String(Math.max(1, Math.floor(count)))
+}
+
 function repeatCount(flow: ResolvedFlow): string {
-  return flow.repeat === 'indefinite' ? 'indefinite' : String(flow.repeat)
+  return smilRepeatCount(flow.repeat)
 }
 
 function motionKeys(flow: ResolvedFlow): { keyTimes: string; keyPoints: string; keySplines: string } {

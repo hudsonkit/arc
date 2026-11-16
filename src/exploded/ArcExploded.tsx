@@ -2,6 +2,7 @@ import { createElement, useMemo, type CSSProperties, type ReactNode } from 'reac
 import { layoutExploded } from './layout'
 import { createExplodedScene, type ExplodedSvgNode } from './scene'
 import type { ExplodedDocument, ExplodedRenderOptions } from './types'
+import { withArcRoot } from '../utils/cssScope'
 
 export interface ArcExplodedProps extends ExplodedRenderOptions {
   document: ExplodedDocument
@@ -20,5 +21,5 @@ function renderNode(node: ExplodedSvgNode, key = 'root'): ReactNode {
 export function ArcExploded({ document, progress = 1, mode = 'light', labels = true, guides = true, className, style }: ArcExplodedProps) {
   const layout = useMemo(() => layoutExploded(document, labels), [document, labels])
   const scene = useMemo(() => createExplodedScene(document, { progress, mode, labels, guides }, layout), [document, progress, mode, labels, guides, layout])
-  return <div className={className} style={style}>{renderNode({ ...scene, attrs: { ...scene.attrs, width: '100%', height: '100%' } })}</div>
+  return <div className={withArcRoot(className)} style={style}>{renderNode({ ...scene, attrs: { ...scene.attrs, width: '100%', height: '100%' } })}</div>
 }

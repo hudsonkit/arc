@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { AppShell } from 'hudsonkit/app-shell'
 import { createArcEditorApp } from '../../apps/arc-editor/createArcApp'
 import type { ArcEditorInit } from '../../apps/arc-editor/ArcEditorContext'
+import { ARC_ROOT_CLASS } from '../../utils/cssScope'
 import '../../editor-shell.css'
 
 // Sample diagram to start with - Arc's own architecture (mirrors src/components/diagrams/architecture.diagram.ts)
@@ -63,7 +64,7 @@ export default function DiagramEditor({
   )
 
   return (
-    <div className="arc-editor-root">
+    <div className={`arc-editor-root ${ARC_ROOT_CLASS}`}>
       <AppShell
         app={app}
         assistant={false}
