@@ -85,7 +85,7 @@
     },
     "packages/iso": {
       "name": "@hudsonkit/arc-iso",
-      "version": "0.14.0",
+      "version": "0.15.0",
       "peerDependencies": {
         "react": "^18.0.0 || ^19.0.0",
         "react-dom": "^18.0.0 || ^19.0.0",
@@ -97,7 +97,7 @@
     },
     "packages/mcp": {
       "name": "@hudsonkit/arc-mcp",
-      "version": "0.14.1",
+      "version": "0.15.0",
       "bin": {
         "arc-mcp": "./dist/arc-mcp.mjs",
         "arc-mcp-http": "./dist/arc-mcp-http.mjs",
@@ -109,7 +109,7 @@
     },
     "packages/viewer": {
       "name": "@hudsonkit/arc-viewer",
-      "version": "0.14.0",
+      "version": "0.15.0",
       "devDependencies": {
         "@types/react": "^19.2.5",
         "@types/react-dom": "^19.2.3",
