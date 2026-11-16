@@ -343,37 +343,41 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
       <div className="tl-hero-band">
         <div className="tl-shell">
           <header className="tl-header">
-            <div className="tl-brand-cluster">
-              <Link className="tl-brand" to="/" aria-label="Arc home">
-                <ArcMark className="tl-brand-mark" />
-                <span className="tl-brand-lockup">
-                  <span className="tl-brand-name">Arc</span>
-                  <span className="tl-brand-descriptor">diagrams as code</span>
-                </span>
-              </Link>
-              <span className="tl-brand-ver">v{version}</span>
+            <div className="tl-header-bar">
+              <div className="tl-brand-cluster">
+                <Link className="tl-brand" to="/" aria-label="Arc home">
+                  <ArcMark className="tl-brand-mark" />
+                  <span className="tl-brand-lockup">
+                    <span className="tl-brand-name">Arc</span>
+                    <span className="tl-brand-descriptor">diagrams as code</span>
+                  </span>
+                </Link>
+                <span className="tl-brand-ver">v{version}</span>
+              </div>
+              <nav className="tl-nav" aria-label="Primary">
+                <Link to="/examples">Examples</Link>
+                <Link to="/docs">Docs</Link>
+                <a className="tl-nav-blog" href={`${import.meta.env.BASE_URL}blog/`}>Blog</a>
+                <a className="tl-nav-accent" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true"> ↗</span></a>
+              </nav>
+              <button
+                type="button"
+                className="tl-mode-toggle"
+                aria-label={`Switch the hero sheet to ${mode === 'light' ? 'cyanotype' : 'paper'}`}
+                onClick={toggleMode}
+              >
+                {mode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+                <span className="tl-mode-label">{mode === 'light' ? 'Cyanotype' : 'Paper'}</span>
+              </button>
             </div>
-            <nav className="tl-nav" aria-label="Primary">
-              <a href="#formats"><span className="tl-nav-n">01</span>FORMATS</a>
-              <a href="#pipeline"><span className="tl-nav-n">02</span>ARCHITECTURE</a>
-              <a href="#isometric"><span className="tl-nav-n">03</span>ISOMETRIC</a>
-              <a href="#sequence"><span className="tl-nav-n">04</span>SEQUENCE</a>
-              <a href="#agentic"><span className="tl-nav-n">05</span>AGENTS</a>
-              <Link to="/examples">EXAMPLES</Link>
-              <a href={`${import.meta.env.BASE_URL}blog/`}>BLOG</a>
-              <Link to="/docs">DOCS</Link>
-              <a className="tl-nav-accent" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
+            {/* The page's own sections, as a sheet index under the bar. */}
+            <nav className="tl-index" aria-label="On this page">
+              <a href="#formats"><span className="tl-index-n">01</span>Formats</a>
+              <a href="#pipeline"><span className="tl-index-n">02</span>Architecture</a>
+              <a href="#isometric"><span className="tl-index-n">03</span>Isometric</a>
+              <a href="#sequence"><span className="tl-index-n">04</span>Sequence</a>
+              <a href="#agentic"><span className="tl-index-n">05</span>Agents</a>
             </nav>
-            <Link className="tl-nav-mobile" to="/examples">Examples →</Link>
-            <button
-              type="button"
-              className="tl-mode-toggle"
-              aria-label={`Switch the hero sheet to ${mode === 'light' ? 'cyanotype' : 'paper'}`}
-              onClick={toggleMode}
-            >
-              {mode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
-              {mode === 'light' ? 'Cyanotype' : 'Paper'}
-            </button>
           </header>
 
           <section className="tl-hero" aria-labelledby="tl-hero-title">
