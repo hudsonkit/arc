@@ -1,3 +1,4 @@
+import { serveArcLive } from './arc-live.ts'
 import { createHash, randomBytes } from 'node:crypto'
 import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -18,6 +19,8 @@ Usage:
   arc diff <base> <head> [--format json|summary] [--json] [--summary]
   arc render <file|-> --out <file> [--format svg|png|gif|mp4] [--theme <id>] [--mode light|dark] [--scale <n>] [--flow-time <s>] [--duration <s>] [--fps <n>] [--padding <px>] [--background <color>] [--grid] [--strict] [--json]
   arc bench <case-dir|suite-dir> [candidate.json ...] [--strict] [--json]
+  arc live serve <stream> [--port <port>]
+  arc apply <stream> --ops <file|-> [--port <port>]
   arc schema
 
 Commands:
@@ -631,6 +634,27 @@ async function main(): Promise<void> {
   let exitCode: number
 
   switch (command) {
+    case 'live': {
+      if (args[0] !== 'serve' || !args[1]) fail('Expected arc live serve <stream> [--port <port>]', 2)
+      const port = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : 5190
+      await serveArcLive(args[1], port, args.includes('--origin') ? args[args.indexOf('--origin') + 1] : undefined).ready
+      console.log(`Arc stream ${args[1]} at http://127.0.0.1:${port} (/events, /socket, /apply, /state)`)
+      return
+    }
+    case 'apply': {
+      const stream = args[0]
+      const file = args[args.indexOf('--ops') + 1]
+      if (!stream || !args.includes('--ops') || !file) fail('Expected arc apply <stream> --ops <file|->', 2)
+      const port = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : 5190
+      const baseUrl = `http://127.0.0.1:${port}`
+      const input = parseJson(file === '-' ? await readStdin() : readFileSync(file, 'utf8'), file)
+      const state = await (await fetch(baseUrl + '/state')).json() as { seq: number }
+      const envelope = Array.isArray(input) ? { v: 1, stream, base: state.seq, seq: state.seq + 1, ops: input } : input
+      const response = await fetch(baseUrl + '/apply', { method: 'POST', body: JSON.stringify(envelope) })
+      console.log(await response.text())
+      exitCode = response.ok ? 0 : 1
+      break
+    }
     case 'check':
       exitCode = await checkCommand(args)
       break

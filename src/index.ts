@@ -103,7 +103,7 @@ export type { DiagramDelta, RemovedNode, MovedNode, ChangedNode, ConnectorDelta,
 // =============================================================================
 // Session Persistence
 // =============================================================================
-export { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession, listDiagramSessions, deleteDiagramSession } from './utils/sessionStorage'
+export { generateSessionId, deriveSessionId, saveDiagramSession, loadDiagramSession, listDiagramSessions, deleteDiagramSession, subscribeDiagramSession, publishDiagramSession } from './utils/sessionStorage'
 export type { DiagramSession } from './utils/sessionStorage'
 export type { DiagramConfig, DiagramNode, TierConfig } from './iso/types'
 
@@ -112,3 +112,8 @@ export * from './exploded'
 
 // Floating shell panels with a controlled reveal and standalone SVG export.
 export * from './panel-cube'
+
+// Push-based, transport-neutral diagram streams.
+export * from './live/protocol'
+export * from './live/react'
+export * from './live/adapters'

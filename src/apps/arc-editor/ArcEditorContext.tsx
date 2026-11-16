@@ -19,7 +19,7 @@ import {
 import ShareSheet from '../../components/dialogs/ShareSheet'
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts'
 import { useMeta as usePageMeta } from '../../hooks/useMeta'
-import { saveDiagramSession, loadDiagramSession, rememberLastSession } from '../../utils/sessionStorage'
+import { saveDiagramSession, publishDiagramSession, loadDiagramSession, rememberLastSession } from '../../utils/sessionStorage'
 import { saveDiagram, loadDiagram } from '../../utils/fileOperations'
 
 export interface ArcEditorInit {
@@ -143,6 +143,12 @@ function ArcEditorSession({
 
   useEffect(() => {
     if (!sessionId) return
+    publishDiagramSession(sessionId, {
+      diagram: state.diagram, originalDiagram,
+      themeId: state.editor.themeId,
+      colorMode: state.editor.colorMode as 'light' | 'dark',
+      diagramMeta: state.meta.diagramMeta || {},
+    })
     unsaved.current = true
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = window.setTimeout(() => {
