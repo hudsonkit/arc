@@ -36,7 +36,7 @@ and switch between light and dark.*
 
 ## Review the diagram as your agent works
 
-**Private preview.** Bring the diagram into a live architecture review in the
+Bring the diagram into a live architecture review in the
 Hudson Kit studio. An agent adds and moves nodes through MCP while you watch
 the canvas update. A marked work region shows where the agent is working.
 Nodes and connections transition smoothly as the view fits the changing diagram.
@@ -54,8 +54,8 @@ Nodes and connections transition smoothly as the view fits the changing diagram.
 - **Keep the source.** Live changes use the same declarative Arc data as the
   renderers. Refine the definition, present it, and produce your final output.
 
-The video shows the private preview, which is not yet included in the published
-MCP package. The setup below covers the released diagram tools.
+The review tools ship in `@hudsonkit/arc-mcp`. Saved reviews run on a host you
+control: see [hosting saved reviews](https://github.com/hudsonkit/arc/blob/main/docs/saved-reviews.md).
 
 ## Bring your source. Choose your output.
 
@@ -362,8 +362,8 @@ Add the MCP server to a client that supports stdio:
 The published MCP server provides validation, structural diff, automatic
 layout, ASCII/SVG/PNG/animation/HTML rendering, TypeScript generation, and editor
 handoff. It also serves the schema, authoring skill, and LLM guide as resources.
-Use `bun run mcp` to run the server from a source checkout. The live review
-workflow shown above is a separate private preview.
+It includes the live review tools shown above. Use `bun run mcp` to run the
+server from a source checkout.
 
 [MCP setup and tool reference](https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md)
 

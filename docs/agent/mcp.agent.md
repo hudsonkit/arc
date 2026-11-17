@@ -155,11 +155,11 @@ Completed diagrams expire one hour after completion. All sessions disappear on
 server shutdown. At most 100 live diagrams are retained per relay. Diagrams are
 limited to 2 MiB. Export a completed diagram from the studio for durable storage.
 
-## Saved architecture reviews (private preview)
+## Saved architecture reviews
 
-The matching preview MCP and Hudson Kit studio add durable reviews. See
-[private preview setup](../private-preview.md) for private hosting and restart
-verification. This is a checkout preview, not a claim about the deployed site.
+The MCP server and the Hudson Kit studio add durable reviews. See
+[hosting saved reviews](../saved-reviews.md) to serve them from a private
+address and verify restarts.
 
 - `open_architecture_review({diagram,title,question,repository?,agent?,baseUrl?})`
   saves the baseline and returns `sessionId`, viewer URLs, and an author

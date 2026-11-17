@@ -418,8 +418,9 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               </p>
             </div>
             <p className="tl-live-availability">
-              <strong>Private preview</strong>
-              This live workflow is not included in the published MCP package.
+              <strong>In arc-mcp 0.15.0</strong>
+              Saved reviews run on a host you control.{' '}
+              <a href="https://github.com/hudsonkit/arc/blob/main/docs/saved-reviews.md" target="_blank" rel="noopener noreferrer">Set one up ↗</a>
             </p>
           </div>
           <figure className="tl-live-film">

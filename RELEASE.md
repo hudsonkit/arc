@@ -1,6 +1,6 @@
 # Arc 0.15.0 release
 
-Prepared locally on 2026-11-16. The version is set in source. Nothing has been published to npm.
+Published to npm on 2026-11-17 from `aefbd25`, tag `v0.15.0`. The MCP Registry lists `io.github.hudsonkit/arc` 0.15.0.
 
 ## Release scope
 

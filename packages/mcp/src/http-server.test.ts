@@ -7,7 +7,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { createArcHttpHandler } from './http-server.ts'
 
 const publicBaseUrl = 'http://127.0.0.1:5190'
-const token = 'private-preview-test-token-not-a-real-secret'
+const token = 'http-server-test-token-not-a-real-secret'
 const cleanup: Array<() => void | Promise<void>> = []
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close() })
 
@@ -18,12 +18,12 @@ function app(options: Partial<Parameters<typeof createArcHttpHandler>[0]> = {}) 
 }
 
 function studio(base = '/') {
-  const directory = mkdtempSync(join(tmpdir(), 'arc-private-preview-'))
+  const directory = mkdtempSync(join(tmpdir(), 'arc-http-server-'))
   cleanup.push(() => rmSync(directory, { recursive: true, force: true }))
   const build = join(directory, 'dist')
   mkdirSync(join(build, 'assets'), { recursive: true })
   mkdirSync(join(build, 'src'))
-  writeFileSync(join(build, 'index.html'), `<!doctype html><title>Arc private preview</title><script type="module" src="${base}assets/main-test.js"></script>`)
+  writeFileSync(join(build, 'index.html'), `<!doctype html><title>Arc studio fixture</title><script type="module" src="${base}assets/main-test.js"></script>`)
   writeFileSync(join(build, 'assets/main-test.js'), 'export const studio = true;')
   writeFileSync(join(build, 'assets/main-test.css'), 'body { margin: 0 }')
   writeFileSync(join(build, 'arc-mark.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>')
@@ -41,7 +41,7 @@ function studio(base = '/') {
 }
 
 async function connect(handler: ReturnType<typeof createArcHttpHandler>) {
-  const client = new Client({ name: 'Private preview verification', version: '1' }, { capabilities: {} })
+  const client = new Client({ name: 'HTTP server verification', version: '1' }, { capabilities: {} })
   const transport = new StreamableHTTPClientTransport(new URL(`${publicBaseUrl}/mcp`), {
     requestInit: { headers: { authorization: `Bearer ${token}` } },
     fetch: (input, init) => handler.fetch(new Request(input, init)),
@@ -56,7 +56,7 @@ function resultJson(result: Awaited<ReturnType<Client['callTool']>>) {
   return JSON.parse(result.content[0].text)
 }
 
-describe('private preview authorization', () => {
+describe('HTTP server authorization', () => {
   test('requires a token outside loopback and rejects unsafe configuration', () => {
     for (const bindHost of ['0.0.0.0', '::', '192.168.1.20']) {
       expect(() => app({ bindHost })).toThrow('required when binding outside loopback')
@@ -118,7 +118,7 @@ describe('production studio hosting', () => {
       expect(response.status).toBe(200)
       expect(response.headers.get('content-type')).toStartWith('text/html')
       expect(response.headers.get('cache-control')).toBe('no-store')
-      expect(await response.text()).toContain('<title>Arc private preview</title>')
+      expect(await response.text()).toContain('<title>Arc studio fixture</title>')
     }
     const js = await handler.fetch(new Request(`${publicBaseUrl}/assets/main-test.js`))
     expect(js.headers.get('content-type')).toContain('javascript')
@@ -170,7 +170,7 @@ describe('production studio hosting', () => {
     const stream = await handler.fetch(new Request(opened.streamUrl, { headers: { origin: publicBaseUrl } }))
     expect(stream.status).toBe(200)
     const reader = stream.body!.getReader()
-    expect(new TextDecoder().decode((await reader.read()).value)).toContain('Private preview verification')
+    expect(new TextDecoder().decode((await reader.read()).value)).toContain('HTTP server verification')
     await reader.cancel()
     const withoutReadCapability = new URL(opened.streamUrl)
     withoutReadCapability.search = ''
