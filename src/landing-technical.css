@@ -216,6 +216,8 @@
 }
 .tl-nav a { color: inherit; text-decoration: none; transition: color 0.15s ease; padding: 6px 0; }
 .tl-nav a:hover { color: var(--tl-sheet-ink); }
+.tl-nav .tl-nav-icon { display: inline-flex; align-items: center; padding: 6px 2px; }
+.tl-nav .tl-nav-icon svg { width: 15px; height: 15px; stroke-width: 1.5; }
 /* A bare icon: the sheet name lives in its title and aria-label. */
 .tl-mode-toggle {
   display: inline-flex; align-items: center; justify-content: center;

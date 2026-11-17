@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Moon, Sun } from 'lucide-react'
+import { Github, Moon, Sun } from 'lucide-react'
 import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
 import { siteVersion as version } from '../utils/siteVersion'
 import { useMeta } from '../hooks/useMeta'
@@ -357,7 +357,9 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               <nav className="tl-nav" aria-label="Primary">
                 <Link to="/docs">Docs</Link>
                 <Link to="/examples">Examples</Link>
-                <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true"> ↗</span></a>
+                <a className="tl-nav-icon" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer" aria-label="Arc on GitHub" title="GitHub">
+                  <Github aria-hidden="true" />
+                </a>
               </nav>
               <button
                 type="button"
