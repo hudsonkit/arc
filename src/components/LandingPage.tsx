@@ -385,10 +385,11 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
                 the explanation in your app.
               </p>
               <div className="tl-actions">
-                <button type="button" className="tl-btn tl-btn-signal" onClick={onLaunchEditor}>Launch the editor →</button>
-                <Link className="tl-btn tl-btn-line" to="/examples">Examples</Link>
-                <Link className="tl-btn tl-btn-quiet" to="/docs">Docs</Link>
-                <a className="tl-btn tl-btn-quiet" href={`${import.meta.env.BASE_URL}blog/`}>Blog</a>
+                <Link className="tl-btn tl-btn-signal" to="/docs/quickstart">Get started →</Link>
+                <a className="tl-btn tl-btn-line" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">
+                  <Github aria-hidden="true" />GitHub
+                </a>
+                <button type="button" className="tl-btn tl-btn-quiet" onClick={onLaunchEditor}>Open the editor</button>
               </div>
               <dl className="tl-specbar">
                 <div><dt>IN</dt><dd>Arc + Mermaid source</dd></div>

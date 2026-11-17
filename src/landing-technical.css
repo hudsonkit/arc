@@ -252,6 +252,7 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .tl-btn:active { transform: translateY(1px); }
+.tl-btn svg { width: 14px; height: 14px; stroke-width: 1.5; flex-shrink: 0; }
 .tl-btn-primary { background: var(--acc); color: #fff; }
 .tl-btn-primary:hover { background: var(--acc-hover); }
 .tl-btn-ghost { background: transparent; color: var(--tl-ink); border-color: rgba(17, 23, 32, 0.2); }
@@ -945,7 +946,7 @@
 @media (max-width: 420px) {
   .tl-header-bar { height: 56px; gap: 14px; }
   .tl-nav { gap: 14px; font-size: 13px; }
-  .tl-nav-blog { display: none; }
+  .tl-nav-start { display: none; } /* the hero's Get started sits right below */
 }
 @media (max-width: 920px) {
   .tl-live-intro { grid-template-columns: minmax(0, 1fr); gap: 16px; }
