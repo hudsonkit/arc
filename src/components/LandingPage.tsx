@@ -355,29 +355,20 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
                 <span className="tl-brand-ver">v{version}</span>
               </div>
               <nav className="tl-nav" aria-label="Primary">
-                <Link to="/examples">Examples</Link>
                 <Link to="/docs">Docs</Link>
-                <a className="tl-nav-blog" href={`${import.meta.env.BASE_URL}blog/`}>Blog</a>
-                <a className="tl-nav-accent" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true"> ↗</span></a>
+                <Link to="/examples">Examples</Link>
+                <a href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true"> ↗</span></a>
               </nav>
               <button
                 type="button"
                 className="tl-mode-toggle"
                 aria-label={`Switch the hero sheet to ${mode === 'light' ? 'cyanotype' : 'paper'}`}
+                title={mode === 'light' ? 'Cyanotype' : 'Paper'}
                 onClick={toggleMode}
               >
                 {mode === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
-                <span className="tl-mode-label">{mode === 'light' ? 'Cyanotype' : 'Paper'}</span>
               </button>
             </div>
-            {/* The page's own sections, as a sheet index under the bar. */}
-            <nav className="tl-index" aria-label="On this page">
-              <a href="#formats"><span className="tl-index-n">01</span>Formats</a>
-              <a href="#pipeline"><span className="tl-index-n">02</span>Architecture</a>
-              <a href="#isometric"><span className="tl-index-n">03</span>Isometric</a>
-              <a href="#sequence"><span className="tl-index-n">04</span>Sequence</a>
-              <a href="#agentic"><span className="tl-index-n">05</span>Agents</a>
-            </nav>
           </header>
 
           <section className="tl-hero" aria-labelledby="tl-hero-title">

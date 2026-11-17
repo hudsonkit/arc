@@ -48,12 +48,25 @@
 .tl-root[data-mode="light"] {
   --tl-sheet: #f6f4ee;
   --tl-sheet-2: #e9eef3;
-  --tl-sheet-ink: #172b42;
-  --tl-sheet-muted: #41536a;
-  --tl-sheet-line: rgba(46, 75, 110, 0.14);
-  --tl-cyan: #285c99;
+  --tl-sheet-ink: #0d1d31;
+  --tl-sheet-muted: #2b3c51;
+  --tl-sheet-line: rgba(46, 75, 110, 0.20);
+  --tl-cyan: #1f4f8a;
   --tl-sheet-dot: rgba(46, 75, 110, 0.16);
+  /* Paper sets lighter type, so the ink goes darker to hold contrast. */
+  --tl-ink: #0a1018;
+  --tl-ink-2: #1c2530;
+  --tl-muted: #37414c;
+  --tl-faint: #4a5460;
+  --tl-line: rgba(17, 23, 32, 0.14);
+  --tl-line-2: rgba(17, 23, 32, 0.20);
 }
+/* Thinner type on paper: display and body text drop to 300, labels to 400.
+ * Mono stays at 400 — JetBrains Mono at 300 breaks up at 9–10px. */
+.tl-root[data-mode="light"] :is(.tl-h1, .tl-h2, .tl-lead, .tl-nav, .tl-section-p,
+  .tl-feature-p, .tl-format-list dd, .tl-specs dd) { font-weight: 300; }
+.tl-root[data-mode="light"] :is(.tl-brand-name, .tl-format-title, .tl-format-list dt,
+  .tl-feature-h, .tl-doc-h, .tl-sample-name) { font-weight: 400; }
 .tl-root[data-mode="light"] .tl-hero-band,
 .tl-root[data-mode="light"] .tl-examples-band { background: var(--tl-sheet); }
 .tl-root[data-mode="light"] .tl-plate {
@@ -162,16 +175,15 @@
 }
 
 /* ---- top bar ----
- * Two rows: the bar (brand, site links, sheet toggle) and a sheet index of
- * the page's own sections. Everything used to share one row, which ran out of
- * room well before the hero did — the index hides first as the page narrows,
- * then the descriptor, version and Blog (the hero buttons repeat Blog). */
+ * One quiet row: the brand on the left, three site links and the sheet toggle
+ * on the right. The page's sections and Blog are reached from the hero, so the
+ * header doesn't repeat them. The descriptor and version hide on phones. */
 .tl-header { border-bottom: 1px solid var(--tl-sheet-line); }
 .tl-header-bar {
   display: flex;
-  gap: 28px;
+  gap: 24px;
   align-items: center;
-  height: 64px;
+  height: 60px;
 }
 .tl-brand-cluster { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .tl-brand {
@@ -198,36 +210,22 @@
 }
 .tl-nav {
   margin-left: auto;
-  display: flex; align-items: center; gap: 24px;
+  display: flex; align-items: center; gap: 20px;
   font-size: 13.5px; font-weight: 400; letter-spacing: -0.005em;
   color: var(--tl-sheet-muted); white-space: nowrap;
 }
 .tl-nav a { color: inherit; text-decoration: none; transition: color 0.15s ease; padding: 6px 0; }
 .tl-nav a:hover { color: var(--tl-sheet-ink); }
-.tl-nav .tl-nav-accent { color: var(--tl-cyan); }
+/* A bare icon: the sheet name lives in its title and aria-label. */
 .tl-mode-toggle {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  flex-shrink: 0; min-height: 30px; min-width: 30px; padding: 0 10px;
-  border: 1px solid var(--tl-sheet-line); border-radius: 4px;
-  background: transparent; color: var(--tl-sheet-muted);
-  font-family: var(--arc-font-mono); font-size: 10.5px; font-weight: 400; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; width: 28px; height: 28px; padding: 0; margin-right: -6px;
+  border: 0; border-radius: 4px;
+  background: transparent; color: var(--tl-sheet-muted); cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.tl-mode-toggle svg { width: 13px; height: 13px; stroke-width: 1.5; flex-shrink: 0; }
+.tl-mode-toggle svg { width: 14px; height: 14px; stroke-width: 1.5; flex-shrink: 0; }
 .tl-mode-toggle:hover { background: var(--tl-sheet-2); color: var(--tl-sheet-ink); }
-
-.tl-index {
-  display: flex; align-items: center; gap: 28px;
-  height: 38px;
-  border-top: 1px dashed var(--tl-sheet-line);
-  font-size: 12.5px; color: var(--tl-sheet-muted); white-space: nowrap;
-}
-.tl-index a { color: inherit; text-decoration: none; transition: color 0.15s ease; padding: 6px 0; }
-.tl-index a:hover { color: var(--tl-sheet-ink); }
-.tl-index-n {
-  font-family: var(--arc-font-mono); font-size: 10px;
-  color: var(--tl-signal); opacity: 0.85; margin-right: 7px;
-}
 
 /* ---- buttons ---- */
 .tl-btn {
@@ -927,19 +925,12 @@
   .tl-h1 { max-width: 13em; }
   .tl-plate-stage { height: 380px; }
 }
-@media (max-width: 760px) {
-  .tl-header-bar { gap: 20px; }
-  .tl-nav { gap: 20px; }
+@media (max-width: 560px) {
+  .tl-brand-descriptor, .tl-brand-ver { display: none; }
 }
-@media (max-width: 640px) {
-  .tl-index { display: none; }
-  .tl-brand-descriptor, .tl-brand-ver, .tl-nav-blog { display: none; }
-}
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .tl-header-bar { height: 56px; gap: 16px; }
   .tl-nav { gap: 16px; font-size: 13px; }
-  .tl-mode-toggle { padding: 0; }
-  .tl-mode-label { display: none; }
 }
 @media (max-width: 920px) {
   .tl-live-intro { grid-template-columns: minmax(0, 1fr); gap: 16px; }
