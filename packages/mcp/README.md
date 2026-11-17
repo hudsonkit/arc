@@ -88,7 +88,7 @@ devin mcp add arc -- npx -y @hudsonkit/arc-mcp
 diagram that a host page shows live. Use them when an agent edits in small
 steps. Use the live architecture tools below when an agent publishes whole
 revisions to a view in the Arc studio.
-[Push diagram streams](../../docs/live-streams.md) has the envelope format and
+[Push diagram streams](https://github.com/hudsonkit/arc/blob/main/docs/live-streams.md) has the envelope format and
 the operations.
 
 ## Live architecture
@@ -173,7 +173,7 @@ with `bun run dev`.
 ## Saved architecture reviews
 
 Saved reviews add a durable review to the same Hudson Kit canvas. Follow
-[hosting saved reviews](../../docs/saved-reviews.md) to build the studio and
+[hosting saved reviews](https://github.com/hudsonkit/arc/blob/main/docs/saved-reviews.md) to build the studio and
 serve it with the MCP server from one private address.
 
 Open with `open_architecture_review({diagram,title,question,repository?,agent?})`.
@@ -244,7 +244,7 @@ at [github.com/hudsonkit/arc](https://github.com/hudsonkit/arc/issues).
 ## MCP Registry
 
 Arc's registry identity is `io.github.hudsonkit/arc`. The install metadata lives
-in [`server.json`](./server.json), and the npm package declares the same
+in [`server.json`](https://github.com/hudsonkit/arc/blob/main/packages/mcp/server.json), and the npm package declares the same
 `mcpName` so the registry can verify ownership.
 
 Maintainers can run the **Publish to npm** GitHub Actions workflow with package

@@ -320,7 +320,7 @@ so it does not restyle the host page. When the host resizes the container,
 pass a new `fitKey` to fit the diagram again without a remount. Inside a scaled
 ancestor, add `fitMeasure="layout"`. To validate diagram JSON on a server or in
 a CLI without React, import from `@hudsonkit/arc/validate`. The
-[API reference](docs/api.md#embedding-in-a-host-page) has the details.
+[API reference](https://github.com/hudsonkit/arc/blob/main/docs/api.md#embedding-in-a-host-page) has the details.
 
 ### Start with a Mermaid sequence
 
