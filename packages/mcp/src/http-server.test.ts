@@ -212,12 +212,15 @@ for (const expiryPath of ['maintenance', 'late request'] as const) {
     const hour = 60 * 60_000
     const start = Date.now()
     const time = spyOn(Date, 'now').mockReturnValue(start)
-    cleanup.push(() => { time.mockRestore() })
     const reviewDir = mkdtempSync(join(tmpdir(), 'arc-author-lease-'))
     cleanup.push(() => rmSync(reviewDir, { recursive: true, force: true }))
     let handler: ReturnType<typeof createArcHttpHandler>
     const server = Bun.serve({ hostname: '127.0.0.1', port: 0, fetch: request => handler.fetch(request) })
     cleanup.push(() => server.stop(true))
+    // Cleanup runs in reverse, so the real clock returns before the server
+    // stops. On Bun 1.3.11 (the publish workflow's pin), server.stop(true)
+    // never settles while Date.now is frozen, and the hook times out.
+    cleanup.push(() => { time.mockRestore() })
     const base = `http://127.0.0.1:${server.port}`
     const intervals = spyOn(globalThis, 'setInterval')
     let expire!: () => void
