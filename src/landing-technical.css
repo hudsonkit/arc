@@ -48,12 +48,25 @@
 .tl-root[data-mode="light"] {
   --tl-sheet: #f6f4ee;
   --tl-sheet-2: #e9eef3;
-  --tl-sheet-ink: #172b42;
-  --tl-sheet-muted: #41536a;
-  --tl-sheet-line: rgba(46, 75, 110, 0.14);
-  --tl-cyan: #285c99;
+  --tl-sheet-ink: #0d1d31;
+  --tl-sheet-muted: #2b3c51;
+  --tl-sheet-line: rgba(46, 75, 110, 0.20);
+  --tl-cyan: #1f4f8a;
   --tl-sheet-dot: rgba(46, 75, 110, 0.16);
+  /* Paper sets lighter type, so the ink goes darker to hold contrast. */
+  --tl-ink: #0a1018;
+  --tl-ink-2: #1c2530;
+  --tl-muted: #37414c;
+  --tl-faint: #4a5460;
+  --tl-line: rgba(17, 23, 32, 0.14);
+  --tl-line-2: rgba(17, 23, 32, 0.20);
 }
+/* Thinner type on paper: display and body text drop to 300, labels to 400.
+ * Mono stays at 400 — JetBrains Mono at 300 breaks up at 9–10px. */
+.tl-root[data-mode="light"] :is(.tl-h1, .tl-h2, .tl-lead, .tl-nav, .tl-section-p,
+  .tl-feature-p, .tl-format-list dd, .tl-specs dd) { font-weight: 300; }
+.tl-root[data-mode="light"] :is(.tl-brand-name, .tl-format-title, .tl-format-list dt,
+  .tl-feature-h, .tl-doc-h, .tl-sample-name) { font-weight: 400; }
 .tl-root[data-mode="light"] .tl-hero-band,
 .tl-root[data-mode="light"] .tl-examples-band { background: var(--tl-sheet); }
 .tl-root[data-mode="light"] .tl-plate {
@@ -75,7 +88,6 @@
 }
 .tl-root[data-mode="light"] .tl-plate-source { color: #29445f; }
 .tl-root[data-mode="light"] .tl-btn-line,
-.tl-root[data-mode="light"] .tl-nav-mobile,
 .tl-root[data-mode="light"] .tl-sample { border-color: #9bafc3; }
 .tl-root[data-mode="light"] .tl-sample-meta { border-top-color: #c3d0dd; }
 .tl-root[data-mode="light"] .tl-btn-line:hover,
@@ -162,58 +174,72 @@
   background-repeat: no-repeat;
 }
 
-/* ---- top bar ---- */
-.tl-header {
+/* ---- top bar ----
+ * One quiet row: the brand on the left, three site links and the sheet toggle
+ * on the right. The page's sections and Blog are reached from the hero, so the
+ * header doesn't repeat them. The descriptor and version hide on phones. */
+.tl-header { border-bottom: 1px solid var(--tl-sheet-line); }
+.tl-header-bar {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
-  justify-content: space-between;
   height: 60px;
-  border-bottom: 1px solid var(--tl-sheet-line);
 }
-.tl-brand-cluster { display: flex; align-items: center; gap: 12px; }
+.tl-brand-cluster { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .tl-brand {
   display: flex; align-items: center; gap: 11px;
   color: inherit; text-decoration: none;
 }
 .tl-hero-band .arc-mark { color: var(--tl-sheet-ink); }
-.tl-brand-mark { width: 22px; height: 22px; }
+.tl-brand-mark { width: 22px; height: 22px; flex-shrink: 0; }
 .tl-brand-mark .arc-mark__terminal { transition: transform 260ms cubic-bezier(.3, 1.6, .5, 1); transform-box: fill-box; transform-origin: center; }
 .tl-brand:hover .tl-brand-mark .arc-mark__terminal { transform: scale(1.25); }
-.tl-brand-lockup { display: grid; line-height: 1; gap: 3px; }
+.tl-brand-lockup { display: grid; line-height: 1; gap: 4px; white-space: nowrap; }
 .tl-brand-name { font-weight: 500; font-size: 15px; letter-spacing: -0.02em; }
 .tl-brand-descriptor {
   font-family: var(--arc-font-mono);
-  font-size: 7.5px; line-height: 1;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 10px; line-height: 1;
+  letter-spacing: 0.01em;
   color: var(--tl-sheet-muted);
 }
 .tl-brand-ver {
   font-family: var(--arc-font-mono);
-  font-size: 9.5px; color: var(--tl-sheet-muted);
+  font-size: 10px; color: var(--tl-sheet-muted);
   border: 1px solid var(--tl-sheet-line); border-radius: 999px;
-  padding: 1px 7px; letter-spacing: 0.02em;
+  padding: 1px 7px; letter-spacing: 0.01em; white-space: nowrap;
 }
 .tl-nav {
   margin-left: auto;
-  display: flex; align-items: center; gap: 22px;
-  font-family: var(--arc-font-mono); font-weight: 400;
-  font-size: 10px; letter-spacing: 0.1em; color: var(--tl-sheet-muted);
+  display: flex; align-items: center; gap: 20px;
+  font-size: 13.5px; font-weight: 400; letter-spacing: -0.005em;
+  color: var(--tl-sheet-muted); white-space: nowrap;
 }
 .tl-nav a { color: inherit; text-decoration: none; transition: color 0.15s ease; padding: 6px 0; }
 .tl-nav a:hover { color: var(--tl-sheet-ink); }
-.tl-nav .tl-nav-accent { color: var(--tl-cyan); }
-.tl-nav-n { color: var(--tl-signal); margin-right: 5px; opacity: 0.8; }
-.tl-nav-mobile { display: none; }
-.tl-mode-toggle {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  flex-shrink: 0; min-height: 30px; padding: 0 10px;
-  border: 1px solid var(--tl-sheet-line); border-radius: 4px;
-  background: transparent; color: var(--tl-sheet-ink);
-  font-family: var(--arc-font-mono); font-size: 10.5px; font-weight: 400; cursor: pointer;
+.tl-nav .tl-nav-icon { display: inline-flex; align-items: center; padding: 6px 2px; }
+.tl-nav .tl-nav-icon svg { width: 15px; height: 15px; stroke-width: 1.5; }
+/* The header's one call to action. Outlined, so the hero's orange
+ * "Launch the editor" stays the loudest thing on the page. */
+.tl-nav-start {
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  height: 30px; padding: 0 12px; margin-left: -4px;
+  border: 1px solid var(--tl-sheet-line-strong, var(--tl-sheet-muted)); border-radius: 4px;
+  color: var(--tl-sheet-ink); text-decoration: none; white-space: nowrap;
+  font-size: 13px; font-weight: 400; letter-spacing: -0.005em;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.tl-mode-toggle svg { width: 13px; height: 13px; stroke-width: 1.5; }
-.tl-mode-toggle:hover { background: var(--tl-sheet-2); }
+.tl-nav-start:hover { background: var(--tl-sheet-2); border-color: var(--tl-sheet-ink); }
+.tl-root[data-mode="light"] .tl-nav-start { font-weight: 300; }
+/* A bare icon: the sheet name lives in its title and aria-label. */
+.tl-mode-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; width: 28px; height: 28px; padding: 0; margin-right: -6px;
+  border: 0; border-radius: 4px;
+  background: transparent; color: var(--tl-sheet-muted); cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.tl-mode-toggle svg { width: 14px; height: 14px; stroke-width: 1.5; flex-shrink: 0; }
+.tl-mode-toggle:hover { background: var(--tl-sheet-2); color: var(--tl-sheet-ink); }
 
 /* ---- buttons ---- */
 .tl-btn {
@@ -226,6 +252,7 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .tl-btn:active { transform: translateY(1px); }
+.tl-btn svg { width: 14px; height: 14px; stroke-width: 1.5; flex-shrink: 0; }
 .tl-btn-primary { background: var(--acc); color: #fff; }
 .tl-btn-primary:hover { background: var(--acc-hover); }
 .tl-btn-ghost { background: transparent; color: var(--tl-ink); border-color: rgba(17, 23, 32, 0.2); }
@@ -909,20 +936,17 @@
 
 /* ---- responsive ---- */
 @media (max-width: 1080px) {
-  .tl-nav { gap: 18px; }
   .tl-hero { grid-template-columns: minmax(0, 1fr); gap: 48px; padding: 56px 0 72px; }
   .tl-h1 { max-width: 13em; }
   .tl-plate-stage { height: 380px; }
 }
-@media (max-width: 1080px) {
-  .tl-nav { display: none; }
-  .tl-nav-mobile {
-    margin-left: auto;
-    display: inline-flex; align-items: center; min-height: 30px;
-    font-family: var(--arc-font-mono); font-size: 10.5px; letter-spacing: 0.04em;
-    color: var(--tl-sheet-ink); text-decoration: none;
-    border: 1px solid rgba(200, 220, 255, 0.28); border-radius: 4px; padding: 0 12px;
-  }
+@media (max-width: 560px) {
+  .tl-brand-descriptor, .tl-brand-ver { display: none; }
+}
+@media (max-width: 420px) {
+  .tl-header-bar { height: 56px; gap: 14px; }
+  .tl-nav { gap: 14px; font-size: 13px; }
+  .tl-nav-start { display: none; } /* the hero's Get started sits right below */
 }
 @media (max-width: 920px) {
   .tl-live-intro { grid-template-columns: minmax(0, 1fr); gap: 16px; }
@@ -948,7 +972,6 @@
 }
 @media (max-width: 560px) {
   .tl-shell { padding: 0 16px; }
-  .tl-brand-descriptor, .tl-brand-ver { display: none; }
   .tl-hero { padding: 40px 0 60px; }
   .tl-lead { font-size: 14.5px; margin-bottom: 22px; }
   .tl-h1 { font-size: clamp(30px, 8.6vw, 36px); }
