@@ -1,6 +1,6 @@
 {
   "name": "@hudsonkit/arc-mcp",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "mcpName": "io.github.hudsonkit/arc",
   "type": "module",
   "description": "MCP server for Arc — AI agents author, validate, render, and diff architecture diagrams as code",
