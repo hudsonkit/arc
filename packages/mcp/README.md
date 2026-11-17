@@ -164,17 +164,17 @@ expire one hour after completion; unfinished diagrams expire one hour after
 their owner disconnects. Stopping the MCP process discards ordinary in-memory live sessions.
 Save/export a diagram from the studio when it needs to outlive that process.
 
-Live tools require a matching MCP build and studio build. During development,
-build this checkout with `bun run build:mcp` and configure the client to run
-`node /absolute/path/to/arc/packages/mcp/dist/arc-mcp.mjs`; run its studio with
-`bun run dev`. Listing a tool here does not mean an older published package or
-the currently deployed Hudson Kit website already includes it.
+Live tools need an MCP server and a studio from the same release. Releases
+before 0.15.0 do not include them. To try unreleased changes, build this
+checkout with `bun run build:mcp`, configure the client to run
+`node /absolute/path/to/arc/packages/mcp/dist/arc-mcp.mjs`, and run its studio
+with `bun run dev`.
 
-## Saved architecture reviews (private preview)
+## Saved architecture reviews
 
-The private preview adds a durable review to the same Hudson Kit canvas. Follow
-[the private preview setup](../../docs/private-preview.md) to build matching
-studio and MCP artifacts and serve them from one private address.
+Saved reviews add a durable review to the same Hudson Kit canvas. Follow
+[hosting saved reviews](../../docs/saved-reviews.md) to build the studio and
+serve it with the MCP server from one private address.
 
 Open with `open_architecture_review({diagram,title,question,repository?,agent?})`.
 Repository metadata is `{name,url?,revision?}`. The result includes a private

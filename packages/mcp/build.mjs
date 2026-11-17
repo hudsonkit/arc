@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Bundle the Node stdio and Bun private-preview HTTP bins.
+ * Bundle the Node stdio and Bun HTTP bins.
  * Dev: `bun src/server.ts` or `bun run dev`
  */
 import { chmodSync } from 'node:fs'

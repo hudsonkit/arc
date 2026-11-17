@@ -1,9 +1,9 @@
 ---
-title: Private architecture reviews
+title: Hosting saved architecture reviews
 description: Run the Hudson Kit Arc studio and authenticated MCP on one private host
 ---
 
-# Private architecture reviews
+# Hosting saved architecture reviews
 
 Run the built Hudson Kit Arc studio and MCP server on one loopback address. An
 agent writes through authenticated MCP. Reviewers open a read-only capability
@@ -31,7 +31,7 @@ requires Bun; the existing `arc-mcp` stdio bin continues to use Node.
    Keep this value in the agent's secret or environment configuration. Do not
    put it in a viewer link, checked-in configuration, or browser code.
 
-3. Start the private preview:
+3. Start the server:
 
    ```sh
    ARC_MCP_HOST=127.0.0.1 \
@@ -246,5 +246,5 @@ Keep `ARC_REVIEW_DIR` on storage available to the server and preserve it across
 restarts. Stopping the server ends its network streams and MCP connections.
 Persisted review records and ordinary in-memory live sessions have different
 lifetimes; use the review tools when the result must remain available after a
-restart. This preview does not provide an account directory, public discovery,
+restart. This setup does not provide an account directory, public discovery,
 concurrent writers, or a cloud deployment.

@@ -122,12 +122,12 @@ authentication; see [MCP setup](https://github.com/hudsonkit/arc/blob/main/packa
 Do not claim hosted-site or published-package support until the matching build
 has actually been deployed or released.
 
-## Run a saved architecture review (private preview)
+## Run a saved architecture review
 
-Use a matching private preview server and Hudson Kit studio. Confirm the tools
+Use an Arc MCP server and Hudson Kit studio from the same release. Confirm the tools
 `open_architecture_review`, `update_architecture_review`,
 `resume_architecture_review`, and `revoke_architecture_review_share` are present.
-The preview supports one lead author per review. The MCP endpoint requires the
+A review has one lead author. The MCP endpoint requires the
 deployment's bearer credential; viewer links are separate read capabilities.
 
 1. Inspect the repository and record its revision. Open a review with
@@ -161,7 +161,7 @@ The studio's Save review action exports a portable JSON artifact without read
 or author secrets. Source references are evidence supplied by the reviewing
 agent, not independently verified by Arc. Revoking a share invalidates the old
 viewer capability. Keep the server at a stable private address, or use the
-supported private tunnel setup in `docs/private-preview.md`; do not expose an
+supported private tunnel setup in `docs/saved-reviews.md`; do not expose an
 unauthenticated MCP endpoint. A saved review is not a claim that the referenced
 repository is unchanged or that the review has been accepted.
 

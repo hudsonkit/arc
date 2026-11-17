@@ -12,7 +12,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 
 async function main() {
   const endpoint = process.env.ARC_MCP_URL
-  if (!endpoint) throw new Error('Set ARC_MCP_URL to the private preview MCP endpoint')
+  if (!endpoint) throw new Error('Set ARC_MCP_URL to the Arc MCP HTTP endpoint')
   const url = new URL(endpoint)
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.hash || url.search) {
     throw new Error('ARC_MCP_URL must be an HTTP(S) endpoint without credentials, query, or fragment')
