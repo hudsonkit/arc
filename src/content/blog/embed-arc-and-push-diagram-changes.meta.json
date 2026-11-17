@@ -1,0 +1,20 @@
+{
+  "title": "Embed Arc and push diagram changes in 0.15.0",
+  "slug": "embed-arc-and-push-diagram-changes",
+  "description": "Arc 0.15.0 scopes its stylesheet to the diagram, refits in place, and applies command envelopes from a host page, the CLI, or an agent.",
+  "readerQuestion": "How do I embed Arc 0.15.0 in a host page and update the diagram from a stream of small changes?",
+  "searchIntent": "Release guide for embedding Arc, push diagram streams, and saved architecture reviews.",
+  "date": "2026-11-17",
+  "sources": [
+    "https://hudsonkit.com/arc/docs/diagram-format",
+    "https://hudsonkit.com/arc/docs/live-streams",
+    "https://hudsonkit.com/arc/docs/agent-mcp",
+    "https://github.com/hudsonkit/arc/blob/main/docs/api.md",
+    "https://github.com/hudsonkit/arc/blob/main/docs/live-streams.md",
+    "https://github.com/hudsonkit/arc/blob/main/packages/mcp/README.md",
+    "https://github.com/hudsonkit/arc/pull/47",
+    "https://github.com/hudsonkit/arc/pull/49",
+    "https://www.npmjs.com/package/@hudsonkit/arc/v/0.15.0",
+    "https://www.npmjs.com/package/@hudsonkit/arc-mcp/v/0.15.0"
+  ]
+}

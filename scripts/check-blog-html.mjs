@@ -9,7 +9,7 @@ const base = (process.env.ARC_BASE || '/').replace(/\/?$/, '/')
 const site = (process.env.SITE_URL || 'https://hudsonkit.com/arc').replace(/\/$/, '')
 const escape = text => text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char])
 const posts = readdirSync(path.join(root, 'src/content/blog')).filter(file => file.endsWith('.meta.json')).map(file => JSON.parse(readFileSync(path.join(root, 'src/content/blog', file), 'utf8')))
-assert.equal(posts.length, 4)
+assert.equal(posts.length, 5)
 const pages = ['blog', ...posts.map(post => `blog/${post.slug}`), 'blog/native-mermaid-sequences']
 const sitemap = readFileSync(path.join(dist, 'sitemap.xml'), 'utf8')
 for (const route of pages) {
