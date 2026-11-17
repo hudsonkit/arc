@@ -90,6 +90,13 @@ export function Sequence() {
 | `theme` | `ThemeId` | `'default'` | Color palette (`default`, `warm`, `cool`, `mono`, `inherit`) |
 | `interactive` | `boolean` | `true` | Enable zoom/pan controls |
 | `className` | `string` | `''` | Additional CSS classes |
+| `showArcToggle` | `boolean` | `true` | Show the source toggle button |
+| `showAutoLayout` | `boolean` | `false` | Show the auto-layout button |
+| `editable` | `boolean` | `false` | Drag nodes to reposition them |
+| `editorUrl` | `string` | | Arc editor URL. With `editable`, shows an Edit button |
+| `editorMeta` | `{ viewport?, theme?, mode? }` | | Settings passed to the editor |
+| `hoverEffects` | `boolean \| HoverEffectsConfig` | `true` | All hover effects, none, or a chosen set |
+| `onNodeHover` | `(nodeId: string \| null) => void` | | Called when a node is hovered or clicked, and with `null` on release |
 
 ## Themes
 
@@ -97,19 +104,7 @@ export function Sequence() {
 - **warm** - Soft, editorial warmth
 - **cool** - Crisp, modern blues
 - **mono** - Elegant grayscale
-
-## Requirements
-
-- React 18+
-- Tailwind CSS (for styling classes)
-
-## Editor
-
-To visually design diagrams, use [@hudsonkit/arc-editor](https://www.npmjs.com/package/@hudsonkit/arc-editor).
-
-## License
-
-MIT
+- **inherit** - Colors from the host page, below
 
 ### Host theme
 
@@ -120,5 +115,59 @@ surface, border, line, accent, success, warning, and danger colors on an ancesto
 Use `--arc-diagram-font` and `--arc-diagram-font-mono` for label fonts.
 
 Unset colors use the selected mode's defaults. Existing presets are unchanged.
-See [the host theme contract](../../docs/themes.md#inherit-from-the-host-page)
+See [the host theme contract](https://github.com/hudsonkit/arc/blob/main/docs/themes.md#inherit-from-the-host-page)
 for the full mapping, example, and export behavior.
+
+## Auto-layout
+
+`createAutoLayout()` places the nodes for you when you have only node data and
+connections. It returns a complete `ArcDiagramData`.
+
+```tsx
+import { ArcDiagram, createAutoLayout } from '@hudsonkit/arc-viewer'
+
+const diagram = createAutoLayout({
+  nodeData: {
+    web: { icon: 'Monitor', name: 'Web', color: 'violet' },
+    api: { icon: 'Server', name: 'API', color: 'emerald' },
+    db: { icon: 'Database', name: 'Postgres', color: 'blue' },
+  },
+  connectors: [
+    { from: 'web', to: 'api', style: 'http' },
+    { from: 'api', to: 'db', style: 'sql' },
+  ],
+  connectorStyles: {
+    http: { color: 'violet', strokeWidth: 2 },
+    sql: { color: 'blue', strokeWidth: 2 },
+  },
+})
+
+<ArcDiagram data={diagram} mode="light" />
+```
+
+`autoLayout(data, options)` re-places the nodes of an existing diagram. The
+spacing options are `columnGap`, `nodeGap`, `rowGap` and `padding`. Pass them
+as the second argument to `autoLayout`, or as `layout` to `createAutoLayout`.
+
+## Requirements
+
+- React 18+
+- Tailwind CSS (for styling classes)
+
+## Editor
+
+Design a diagram visually in the studio at [hudsonkit.com/arc](https://hudsonkit.com/arc),
+then export its JSON and pass it to `ArcDiagram`.
+
+## Related packages
+
+- [`@hudsonkit/arc`](https://www.npmjs.com/package/@hudsonkit/arc): the main
+  package. Studio components, themes, auto-layout and the export CLI.
+- [`@hudsonkit/arc-iso`](https://www.npmjs.com/package/@hudsonkit/arc-iso):
+  isometric diagrams of stacked tiers, for React or plain SVG.
+- [`@hudsonkit/arc-mcp`](https://www.npmjs.com/package/@hudsonkit/arc-mcp):
+  an MCP server so agents can author and render Arc diagrams.
+
+## License
+
+MIT
