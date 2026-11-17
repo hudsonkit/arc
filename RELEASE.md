@@ -1,41 +1,37 @@
-# Arc 0.15.0 release
+# Arc 0.15.1 release
 
-Published to npm on 2026-11-17 from `aefbd25`, tag `v0.15.0`. The MCP Registry lists `io.github.hudsonkit/arc` 0.15.0.
+Prepared on 2026-11-17. The version is set in source.
 
 ## Release scope
 
-Publish `@hudsonkit/arc`, `@hudsonkit/arc-viewer`, `@hudsonkit/arc-iso`, and `@hudsonkit/arc-mcp` at **0.15.0**. The editor workspace keeps its existing version. MCP moves from 0.14.1 to 0.15.0 to rejoin the other packages.
+Publish `@hudsonkit/arc`, `@hudsonkit/arc-viewer`, `@hudsonkit/arc-iso`, and `@hudsonkit/arc-mcp` at **0.15.1**. The editor workspace keeps its existing version.
 
-- **Host embedding (#47).** `arc.css` is scoped to Arc's root (`:where(.arc-root)`), so a host page no longer needs a shadow root to contain it. `ARC_ROOT_CLASS` is exported for portal targets.
-  - `fitKey` refits a diagram in place, without a remount.
-  - `fitMeasure: 'layout'` measures a container inside a scaled ancestor.
-  - `@hudsonkit/arc/validate` is a validator entry with no React.
-  - Flow `repeat` values are clamped to a whole number or `indefinite`.
-- **Push-based diagram command streams (#49).**
-  - v1 command envelopes and a pure `applyOps` reducer.
-  - `ArcLiveDiagram` and `useArcLive`.
-  - A loopback SSE, WebSocket and RPC relay.
-  - The CLI commands `serve` and `apply`.
-  - The MCP tools `arc_live_serve`, `arc_live_apply` and `arc_live_read`.
-  - `docs/live-streams.md` has the wire contract and the Scout integration steps.
+This is a documentation release. The library, viewer, isometric and MCP code is unchanged from 0.15.0.
 
-## Compatibility
+- **npm READMEs (#55).**
+  - `@hudsonkit/arc-iso` has a README for the first time, with an example image, the YAML format, both renderers, the config and the `/slim` entry.
+  - The `@hudsonkit/arc-viewer` README lists every `ArcDiagram` prop, shows auto-layout, and no longer links to the unpublished `arc-editor` package.
+  - Relative links in every package README are absolute, so they work on npm.
+  - The `arc-iso` and `arc-viewer` homepages point to https://hudsonkit.com/arc.
+- **Saved review wording (#53).** The MCP README, agent docs and skill no longer call the live and saved review tools a private preview. `docs/private-preview.md` is now `docs/saved-reviews.md`.
 
-- Inside a host page, Arc now uses its own base font and line height instead of inheriting the host body's. This matches the standalone page.
-- `html, body, #root { height: 100% }` is no longer in `arc.css`. Page sizing belongs to the host.
-- The live relay is a loopback development reference. It is not an authenticated hosted service.
+## Known issues
+
+These are documented in the `arc-iso` README and are not fixed in 0.15.1.
+
+- `arc-iso` lists React as an optional peer, but every entry point imports it. Install `react` and `react-dom`.
+- `parseYamlConfig` does not resolve `*alias` color references in node lines. Write the key without `*`.
+- `renderToString` and `renderToElement` ignore `style` and do not draw `pillars`.
 
 ## Verification
 
-The local checks ran on the release commit: install, typecheck, lint, the full Bun test suite, the library, CLI, MCP and site builds, and `check:dist`. The pull requests #47 and #49 have the per-change results. Browser visual checks were not done.
+The local checks ran on the release commit: typecheck, lint, the full Bun test suite, and the release version tests.
 
 ## Ship procedure
 
-The release commit (`59d9330`) is on `main`. Its GitHub Pages deploy succeeded on 2026-11-16. Publish through GitHub Actions to keep npm provenance.
+Publish through GitHub Actions to keep npm provenance.
 
-1. Run the npm publish workflow with version `0.15.0`, scope `all`, and dry run on. Expected result: all four packages pack from the release commit.
-2. When publication is authorized, publish from the same commit. Use one of these:
-   - Run the npm publish workflow again with dry run off.
-   - Push the tag `v0.15.0`. The tag starts the npm publish workflow.
-3. Verify the registry tarballs, the package versions and entrypoints, and the MCP runtime version.
-4. Redeploy the site. The site reads the Arc version from npm when it builds, so it shows v0.15.0 only after step 2.
+1. Run the npm publish workflow with version `0.15.1`, scope `all`, and dry run on. Expected result: all four packages pack from the release commit.
+2. Push the tag `v0.15.1` on the same commit. The tag starts the npm publish workflow.
+3. Verify the registry versions, the READMEs on npm, the entrypoints, and the MCP runtime version.
+4. Redeploy arc.jdi.sh (GitHub Pages) and hudsonkit.com/arc (the `hudsonkit-arc` worker). Both read the Arc version from npm when they build.
