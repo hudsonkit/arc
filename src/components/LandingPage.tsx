@@ -356,11 +356,12 @@ export default function LandingPage({ onLaunchEditor }: LandingPageProps) {
               </div>
               <nav className="tl-nav" aria-label="Primary">
                 <Link to="/docs">Docs</Link>
-                <Link to="/examples">Examples</Link>
+                <a className="tl-nav-blog" href={`${import.meta.env.BASE_URL}blog/`}>Blog</a>
                 <a className="tl-nav-icon" href="https://github.com/hudsonkit/arc" target="_blank" rel="noopener noreferrer" aria-label="Arc on GitHub" title="GitHub">
                   <Github aria-hidden="true" />
                 </a>
               </nav>
+              <Link className="tl-nav-start" to="/docs/quickstart">Get started</Link>
               <button
                 type="button"
                 className="tl-mode-toggle"

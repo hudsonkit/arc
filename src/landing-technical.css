@@ -218,6 +218,18 @@
 .tl-nav a:hover { color: var(--tl-sheet-ink); }
 .tl-nav .tl-nav-icon { display: inline-flex; align-items: center; padding: 6px 2px; }
 .tl-nav .tl-nav-icon svg { width: 15px; height: 15px; stroke-width: 1.5; }
+/* The header's one call to action. Outlined, so the hero's orange
+ * "Launch the editor" stays the loudest thing on the page. */
+.tl-nav-start {
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  height: 30px; padding: 0 12px; margin-left: -4px;
+  border: 1px solid var(--tl-sheet-line-strong, var(--tl-sheet-muted)); border-radius: 4px;
+  color: var(--tl-sheet-ink); text-decoration: none; white-space: nowrap;
+  font-size: 13px; font-weight: 400; letter-spacing: -0.005em;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.tl-nav-start:hover { background: var(--tl-sheet-2); border-color: var(--tl-sheet-ink); }
+.tl-root[data-mode="light"] .tl-nav-start { font-weight: 300; }
 /* A bare icon: the sheet name lives in its title and aria-label. */
 .tl-mode-toggle {
   display: inline-flex; align-items: center; justify-content: center;
@@ -930,9 +942,10 @@
 @media (max-width: 560px) {
   .tl-brand-descriptor, .tl-brand-ver { display: none; }
 }
-@media (max-width: 400px) {
-  .tl-header-bar { height: 56px; gap: 16px; }
-  .tl-nav { gap: 16px; font-size: 13px; }
+@media (max-width: 420px) {
+  .tl-header-bar { height: 56px; gap: 14px; }
+  .tl-nav { gap: 14px; font-size: 13px; }
+  .tl-nav-blog { display: none; }
 }
 @media (max-width: 920px) {
   .tl-live-intro { grid-template-columns: minmax(0, 1fr); gap: 16px; }
