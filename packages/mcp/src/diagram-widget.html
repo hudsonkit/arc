@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Arc diagram</title>
+  <style>
+    :root { color-scheme: light dark; font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: CanvasText; background: Canvas; }
+    header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid color-mix(in srgb, CanvasText 16%, transparent); }
+    header strong { flex: 1; }
+    button { font: inherit; color: inherit; border: 1px solid color-mix(in srgb, CanvasText 20%, transparent); border-radius: 7px; padding: 5px 9px; background: color-mix(in srgb, CanvasText 6%, Canvas); cursor: pointer; }
+    button.primary { color: white; border-color: #6d5ce7; background: #6d5ce7; }
+    button:disabled { opacity: .5; cursor: default; }
+    #status { color: color-mix(in srgb, CanvasText 62%, transparent); font-size: 12px; }
+    #canvas { display: block; width: 100%; min-height: 220px; background: color-mix(in srgb, CanvasText 3%, Canvas); }
+    details { border-top: 1px solid color-mix(in srgb, CanvasText 16%, transparent); }
+    summary { padding: 8px 12px; cursor: pointer; user-select: none; }
+    textarea { display: block; width: calc(100% - 24px); min-height: 180px; margin: 0 12px 10px; resize: vertical; border: 1px solid color-mix(in srgb, CanvasText 18%, transparent); border-radius: 7px; padding: 9px; color: inherit; background: color-mix(in srgb, CanvasText 4%, Canvas); font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .error { color: #d43b55 !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Arc diagram</strong>
+    <span id="status">Waiting for host…</span>
+    <button id="refresh" type="button">Refresh</button>
+    <button id="save" class="primary" type="button">Save edit</button>
+  </header>
+  <svg id="canvas" role="img" aria-label="Arc diagram"></svg>
+  <details>
+    <summary>Edit diagram JSON</summary>
+    <textarea id="source" spellcheck="false" aria-label="Diagram JSON"></textarea>
+  </details>
+  <script>
+    (() => {
+      const PROTOCOL = 1;
+      const state = { documentId: '', doc: null, rev: 0, readOnly: false, host: 'unknown' };
+      const status = document.querySelector('#status');
+      const source = document.querySelector('#source');
+      const canvas = document.querySelector('#canvas');
+      const save = document.querySelector('#save');
+      const refresh = document.querySelector('#refresh');
+      const openai = window.openai;
+
+      function setStatus(text, error = false) {
+        status.textContent = text;
+        status.classList.toggle('error', error);
+      }
+
+      function sizeOf(position) {
+        const sizes = { xs: [80, 36], s: [110, 48], m: [160, 75], l: [220, 90] };
+        return [position.width, position.height].every(Number.isFinite)
+          ? [position.width, position.height]
+          : (sizes[position.size] || sizes.m);
+      }
+
+      function render() {
+        const doc = state.doc;
+        source.value = doc ? JSON.stringify(doc, null, 2) : '';
+        save.disabled = state.readOnly || !doc;
+        refresh.disabled = !state.documentId || state.host !== 'chatgpt';
+        while (canvas.firstChild) canvas.removeChild(canvas.firstChild);
+        if (!doc) return;
+        const layout = doc.layout || { width: 800, height: 420 };
+        canvas.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+        canvas.style.aspectRatio = `${layout.width} / ${layout.height}`;
+        const ns = 'http://www.w3.org/2000/svg';
+        const centers = {};
+        for (const [id, position] of Object.entries(doc.nodes || {})) {
+          const [width, height] = sizeOf(position);
+          centers[id] = [position.x + width / 2, position.y + height / 2];
+        }
+        for (const connector of doc.connectors || []) {
+          if (!centers[connector.from] || !centers[connector.to]) continue;
+          const line = document.createElementNS(ns, 'line');
+          line.setAttribute('x1', centers[connector.from][0]);
+          line.setAttribute('y1', centers[connector.from][1]);
+          line.setAttribute('x2', centers[connector.to][0]);
+          line.setAttribute('y2', centers[connector.to][1]);
+          line.setAttribute('stroke', 'currentColor');
+          line.setAttribute('stroke-opacity', '.36');
+          line.setAttribute('stroke-width', '2');
+          canvas.append(line);
+        }
+        for (const [id, position] of Object.entries(doc.nodes || {})) {
+          const [width, height] = sizeOf(position);
+          const group = document.createElementNS(ns, 'g');
+          const rect = document.createElementNS(ns, 'rect');
+          rect.setAttribute('x', position.x); rect.setAttribute('y', position.y);
+          rect.setAttribute('width', width); rect.setAttribute('height', height);
+          rect.setAttribute('rx', '10'); rect.setAttribute('fill', 'Canvas');
+          rect.setAttribute('stroke', 'currentColor'); rect.setAttribute('stroke-opacity', '.28');
+          const text = document.createElementNS(ns, 'text');
+          text.setAttribute('x', position.x + width / 2); text.setAttribute('y', position.y + height / 2);
+          text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
+          text.setAttribute('fill', 'currentColor'); text.setAttribute('font-size', '14');
+          text.textContent = doc.nodeData?.[id]?.name || id;
+          group.append(rect, text); canvas.append(group);
+        }
+        setStatus(`rev ${state.rev}${state.readOnly ? ' · read only' : ''}`);
+      }
+
+      function apply(snapshot) {
+        const doc = snapshot.diagram || snapshot.doc;
+        if (!doc) return;
+        state.documentId = snapshot.documentId || state.documentId;
+        state.doc = doc;
+        state.rev = Number(snapshot.rev ?? state.rev);
+        state.readOnly = Boolean(snapshot.readOnly);
+        render();
+      }
+
+      function toolSnapshot(result) {
+        return result?.structuredContent || result?.toolOutput || result;
+      }
+
+      async function callTool(name, args) {
+        if (!openai?.callTool) throw new Error('This host does not expose tool calls');
+        return toolSnapshot(await openai.callTool(name, args));
+      }
+
+      async function refreshFromServer() {
+        if (state.host !== 'chatgpt' || !state.documentId) return;
+        try { apply(await callTool('read_diagram', { documentId: state.documentId })); }
+        catch (error) { setStatus(error.message || String(error), true); }
+      }
+
+      save.addEventListener('click', async () => {
+        let doc;
+        try { doc = JSON.parse(source.value); }
+        catch (error) { setStatus(`Invalid JSON: ${error.message}`, true); return; }
+        setStatus('Saving…'); save.disabled = true;
+        if (state.host === 'chatgpt') {
+          try {
+            const next = await callTool('update_diagram', { documentId: state.documentId, baseRev: state.rev, diagram: doc, actor: 'person' });
+            apply(next);
+            openai?.setWidgetState?.({ documentId: state.documentId, rev: state.rev, humanEdited: true });
+          } catch (error) { setStatus(error.message || String(error), true); save.disabled = false; }
+        } else {
+          parent.postMessage({ type: 'arc:edit', protocol: PROTOCOL, doc, baseRev: state.rev }, '*');
+          setStatus('Edit sent to Canvas…');
+          save.disabled = false;
+        }
+      });
+      refresh.addEventListener('click', refreshFromServer);
+
+      window.addEventListener('message', event => {
+        const message = event.data;
+        if (event.source !== parent || !message || typeof message !== 'object' || message.protocol !== PROTOCOL) return;
+        if (message.type === 'arc:load' || message.type === 'arc:external') apply(message);
+      });
+
+      if (openai) {
+        state.host = 'chatgpt';
+        if (openai.toolOutput) apply(openai.toolOutput);
+      } else {
+        state.host = 'canvas';
+        parent.postMessage({ type: 'arc:ready', protocol: PROTOCOL }, '*');
+      }
+    })();
+  </script>
+</body>
+</html>
