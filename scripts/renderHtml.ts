@@ -1,6 +1,6 @@
 import { buildEditorHandoff } from './diagramHandoff.ts'
-import { assertRenderTheme, renderDiagramSvg, RenderError, resolveRenderMode, type RenderSvgOptions } from './renderImage.ts'
-import { THEMES, themeCanvas, type ThemeId } from '../src/utils/themes.ts'
+import { assertRenderStyle, assertRenderTheme, renderDiagramSvg, RenderError, resolveRenderMode, type RenderSvgOptions } from './renderImage.ts'
+import { themeCanvas, type ThemeId } from '../src/utils/themes.ts'
 import type { ArcDiagramData } from '../src/types/diagram.ts'
 
 export type RenderHtmlFormat = 'component' | 'iframe' | 'html'
@@ -70,12 +70,13 @@ function componentSource(diagram: ArcDiagramData, options: RenderHtmlOptions): s
   const props = [`data={${dataName}}`]
   if (mode) props.push(`mode="${mode}"`)
   if (theme) props.push(`theme="${theme}"`)
+  if (options.style) props.push('style={style}')
   if (options.interactive !== undefined) props.push(`interactive={${options.interactive}}`)
 
-  return `import { ArcDiagram, type ArcDiagramData } from '@hudsonkit/arc'
+  return `import { ArcDiagram, type ArcDiagramData${options.style ? ', type ArcStyle' : ''} } from '@hudsonkit/arc'
 
 const ${dataName}: ArcDiagramData = ${JSON.stringify(diagram, null, 2)}
-
+${options.style ? `\nconst style: ArcStyle = ${JSON.stringify(options.style, null, 2)}\n` : ''}
 export function ${componentName}() {
   return <ArcDiagram ${props.join(' ')} />
 }
@@ -102,8 +103,8 @@ function iframeSource(diagram: ArcDiagramData, options: RenderHtmlOptions): { co
 function htmlSource(diagram: ArcDiagramData, options: RenderHtmlOptions): string {
   const rendered = renderDiagramSvg(diagram, options)
   const title = options.title ?? diagram.id ?? 'Arc diagram'
-  const background = rendered.theme ? themeCanvas(rendered.theme, rendered.mode ?? 'light') : '#fafafa'
-  const fontImport = rendered.theme ? THEMES[rendered.theme].brand?.fontImport : undefined
+  const background = rendered.style ? rendered.backgroundColor : rendered.theme ? themeCanvas(rendered.theme, rendered.mode ?? 'light') : '#fafafa'
+  const fontImport = rendered.fontImport
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -125,9 +126,13 @@ ${rendered.svg}
 
 export function renderDiagramHtml(diagram: ArcDiagramData, options: RenderHtmlOptions = {}): RenderedHtml {
   const format = options.format ?? 'html'
-  const theme = assertRenderTheme(options.theme)
-  const mode = resolveRenderMode(theme, options.mode)
-  const resolvedOptions: RenderHtmlOptions = { ...options, theme, mode }
+  const style = assertRenderStyle(options.style)
+  const theme = style ? undefined : assertRenderTheme(options.theme)
+  const mode = style ? (options.mode ?? 'light') : resolveRenderMode(theme, options.mode)
+  const resolvedOptions: RenderHtmlOptions = { ...options, style, theme, mode }
+  if (style && format === 'iframe') {
+    throw new RenderError('render/invalid-option', 'format=iframe cannot carry a host style: the player link has no style slot', ['use format=html or format=component with style'])
+  }
   if (format === 'component') {
     return { format, code: componentSource(diagram, resolvedOptions), mimeType: 'text/tsx', theme, mode }
   }

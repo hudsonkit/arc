@@ -97,6 +97,52 @@ export interface Theme {
   brand?: BrandSpec
 }
 
+/** Logical node colors a style can paint. */
+export type ArcStyleColor = 'violet' | 'emerald' | 'blue' | 'amber' | 'sky' | 'zinc' | 'rose' | 'orange'
+
+/** One color mode of a host style. Tokens are CSS colors. */
+export interface ArcStyleMode {
+  background: string
+  foreground: string
+  muted: string
+  surface: string
+  border: string
+  line: string
+  accent: string
+  success: string
+  warning: string
+  danger: string
+  /** Per-color overrides. A missing color falls back through HOST_COLOR_ROLES. */
+  colors?: Partial<Record<ArcStyleColor, string>>
+}
+
+/**
+ * A host-owned style, passed to Arc as a value (`<ArcDiagram style>`,
+ * `arc render --style`). Arc never looks a style up by name. With a style
+ * present, the diagram's own `_meta.themeId` does not paint the drawing.
+ */
+export interface ArcStyle {
+  /** The host's name for this style; Arc only reports it. */
+  id: string
+  /** The host's revision of this style. */
+  version: string
+  modes: { light: ArcStyleMode; dark: ArcStyleMode }
+  type?: {
+    /** Font stack for node names and labels. */
+    font?: string
+    /** Monospace stack for subtitles and connector labels. */
+    mono?: string
+  }
+  /** Drawing language: node shape, decor, frame, grid, arrowheads. Fonts come from `type`. */
+  brand?: BrandSpec
+  perspective?: {
+    /** Used when the diagram has no `_meta.viewMode`. */
+    default?: '2d' | 'isometric'
+    /** Used when the diagram has no `_meta.isoStyle`. */
+    isoStyle?: 'solid' | 'blueprint' | 'cyanotype'
+  }
+}
+
 // Default theme - clean and neutral
 const defaultTheme: Theme = {
   id: 'default',

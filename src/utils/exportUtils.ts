@@ -6,7 +6,8 @@ import { anchorOnNode, arrowShape, centeredLabelBaseline, connectorEndAngle, con
 import { renderFlowLayer } from './flowSvg'
 import { resolveNodeColor, resolveNodeIcon } from './nodeKinds'
 import { resolveNodeDecor, resolveNodeShape, shapeCut, shapeFillPath } from './nodeShape'
-import { getTheme, resolveNodeRadius, themeCanvas, type BrandSpec, type Theme, type ThemeId } from './themes'
+import { getTheme, resolveNodeRadius, themeCanvas, type ArcStyle, type BrandSpec, type Theme, type ThemeId } from './themes'
+import { arcStyleTheme, resolveStyleTokens } from './arcStyle'
 
 // Anchor position on a node box — the same geometry the editor and player use.
 function getAnchorPosition(x: number, y: number, width: number, height: number, position: AnchorPosition) {
@@ -55,6 +56,8 @@ function classColor(className: string | undefined, fallback: string): string {
 
 function hexWithAlpha(color: string, alpha: number): string {
   if (color.startsWith('var(')) return colorAlpha(color, Math.round(alpha * 255).toString(16).padStart(2, '0'))
+  // Host styles may hand over any CSS color; mix those instead of dropping alpha.
+  if (!color.startsWith('#')) return `color-mix(in srgb, ${color} ${alpha * 100}%, transparent)`
   const hex = color.replace('#', '')
   if (hex.length !== 3 && hex.length !== 6) return color
   return `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`
@@ -211,16 +214,37 @@ function svgTitleBlock(theme: Theme | undefined, drawing: string, right: number,
 /**
  * Generate SVG string from diagram data
  */
+/** Host-token shape for a style: literal values, or each wrapped in its variable. */
+function styleHostTokens(style: ArcStyle, mode: ExportMode, literal: boolean) {
+  const r = resolveStyleTokens(style, mode)
+  const wrap = (name: string, value: string) => literal ? value : `var(--arc-diagram-${name}, ${value})`
+  return {
+    background: wrap('background', r.tokens.background),
+    foreground: wrap('foreground', r.tokens.foreground),
+    muted: wrap('muted', r.tokens.muted),
+    surface: wrap('surface', r.tokens.surface),
+    border: wrap('border', r.tokens.border),
+  }
+}
+
 export function generateSVG(diagram: any, options: any = {}) {
   const { padding = 20 } = options
-  const theme = options.theme ? getTheme(options.theme as ThemeId) : undefined
+  // A host style replaces the theme outright. Standalone output is literal;
+  // `inlineVars` keeps `var(--arc-diagram-*, literal)` for SVG inlined in a page.
+  const style = options.style as ArcStyle | undefined
+  const styleOptions = { literal: !options.inlineVars }
+  const theme = style
+    ? arcStyleTheme(style, styleOptions)
+    : options.theme ? getTheme(options.theme as ThemeId) : undefined
   const mode = (options.mode ?? theme?.defaultMode ?? 'light') as ExportMode
   const themeColors = theme?.[mode]
   const brand = theme?.brand
-  const host = theme?.id === 'inherit' ? hostThemeTokens(mode) : undefined
-  const fontFamily = (host ? 'var(--arc-diagram-font, ui-sans-serif, system-ui, sans-serif)' : brand?.fontFamily) || 'ui-sans-serif, system-ui, sans-serif'
+  const host = style
+    ? styleHostTokens(style, mode, styleOptions.literal)
+    : theme?.id === 'inherit' ? hostThemeTokens(mode) : undefined
+  const fontFamily = (style ? brand?.fontFamily : host ? 'var(--arc-diagram-font, ui-sans-serif, system-ui, sans-serif)' : brand?.fontFamily) || 'ui-sans-serif, system-ui, sans-serif'
   const monoFamily = brand?.monoFamily || fontFamily
-  const backgroundColor = options.backgroundColor ?? (theme ? themeCanvas(theme.id, mode) : '#ffffff')
+  const backgroundColor = options.backgroundColor ?? (style ? themeColors!.background.canvas! : theme ? themeCanvas(theme.id, mode) : '#ffffff')
   const ink = host?.foreground ?? (themeColors ? classColor(themeColors.text.primary, mode === 'dark' ? '#f4f4f5' : '#111827') : '#ffffff')
   const mutedInk = host?.muted ?? (themeColors ? classColor(themeColors.text.secondary, mode === 'dark' ? '#a1a1aa' : '#475569') : '#ffffff')
   const accent = themeColors?.palette.zinc.stroke || '#71717a'

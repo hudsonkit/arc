@@ -29,6 +29,87 @@ export const emptyDiagram = (): ArcDiagramData => ({
 })
 export const createArcLiveState = (stream: string): ArcLiveState => ({ stream, seq: 0, diagram: emptyDiagram() })
 
+type FocusOp = Extract<ArcOp, { op: 'focus' }>
+
+/**
+ * Apply one operation list to a diagram. The input diagram is left unchanged.
+ * A failure returns that same diagram and one diagnostic string. `focus` is
+ * viewer state: a list that only focuses is rejected, and a mixed list reports
+ * `focusIgnored` after the diagram operations succeed.
+ */
+export function applyDiagramOps(diagram: ArcDiagramData, ops: unknown): { diagram: ArcDiagramData; diagnostics: string[]; focusIgnored: boolean } {
+  try {
+    if (!Array.isArray(ops) || ops.length === 0) throw Error('Expected a non-empty operations list')
+    const focusIgnored = ops.some(op => !!op && typeof op === 'object' && (op as { op?: unknown }).op === 'focus')
+    const hasDiagramOp = ops.some(op => !op || typeof op !== 'object' || (op as { op?: unknown }).op !== 'focus')
+    if (!hasDiagramOp) throw Error('focus is viewer state and is not stored in a diagram file')
+    return { diagram: runOps(diagram, ops as ArcOp[], undefined).diagram, diagnostics: [], focusIgnored }
+  } catch (error) {
+    return { diagram, diagnostics: [error instanceof Error ? error.message : String(error)], focusIgnored: false }
+  }
+}
+
+function runOps(diagram: ArcDiagramData, ops: ArcOp[], focusIn: FocusOp | undefined): { diagram: ArcDiagramData; focus?: FocusOp } {
+  let next = structuredClone(diagram)
+  let focus = structuredClone(focusIn)
+  for (const op of ops) {
+    if (!op || typeof op !== 'object' || typeof op.op !== 'string') throw Error('Invalid operation')
+    if ('id' in op && (typeof op.id !== 'string' || !op.id || ['__proto__', 'constructor', 'prototype'].includes(op.id))) throw Error('Invalid ID')
+    if ((op.op.endsWith('.add') || op.op.endsWith('.update') || op.op === 'style.set' || op.op === 'layout.set') &&
+      op.op !== 'node.update' && (!('data' in op) || !op.data || typeof op.data !== 'object' || Array.isArray(op.data))) throw Error('Operation needs object data')
+    switch (op.op) {
+      case 'reset': next = structuredClone(op.diagram); focus = undefined; break
+      case 'node.add':
+        if (hasOwn(next.nodes, op.id)) throw Error('Node already exists: ' + op.id)
+        next.nodes[op.id] = op.at ?? { x: (Object.keys(next.nodes).length % 4) * 230 + 30, y: Math.floor(Object.keys(next.nodes).length / 4) * 150 + 30, size: 'm' }
+        next.nodeData[op.id] = structuredClone(op.data)
+        break
+      case 'node.update':
+        if (!hasOwn(next.nodes, op.id)) throw Error('Unknown node: ' + op.id)
+        Object.assign(next.nodes[op.id], op.at)
+        Object.assign(next.nodeData[op.id], op.data)
+        break
+      case 'node.remove':
+        if (!hasOwn(next.nodes, op.id)) throw Error('Unknown node: ' + op.id)
+        focus = undefined
+        delete next.nodes[op.id]; delete next.nodeData[op.id]
+        next.connectors = next.connectors.filter(c => c.from !== op.id && c.to !== op.id)
+        break
+      case 'style.set': next.connectorStyles[op.id] = structuredClone(op.data); break
+      case 'layout.set': Object.assign(next.layout, op.data); break
+      case 'layout.auto': next = autoLayout(next); break
+      case 'focus':
+        if (op.nodes?.some(id => !hasOwn(next.nodes, id))) throw Error('Unknown focus node')
+        if (op.caption !== undefined && typeof op.caption !== 'string') throw Error('Focus caption must be a string')
+        if (op.connectors !== undefined && !Array.isArray(op.connectors)) throw Error('Focus connectors must be an array')
+        {
+          const errors = validateDiagram({ ...next, views: [{ id: '__focus', title: 'Focus', ...op }] }).filter(d => d.severity === 'error')
+          if (errors.length) throw Error(JSON.stringify(errors))
+        }
+        focus = op.nodes?.length || op.connectors?.length || op.caption ? structuredClone(op) : undefined; break
+      default: {
+        const [kind, action] = op.op.split('.')
+        const key = ({ connector: 'connectors', group: 'groups', view: 'views', flow: 'flows' } as const)[kind as 'connector']
+        if (!key || !['add', 'update', 'remove'].includes(action)) throw Error('Unknown operation: ' + op.op)
+        const entity = op as { id: string; data?: object }
+        const items = (next[key] ??= []) as { id?: string }[]
+        const index = items.findIndex(item => item.id === entity.id)
+        if (action === 'add') {
+          if (index !== -1) throw Error('Duplicate ID: ' + entity.id)
+          items.push({ ...structuredClone(entity.data), id: entity.id })
+        } else {
+          if (index === -1) throw Error('Unknown ID: ' + entity.id)
+          if (action === 'remove') items.splice(index, 1)
+          else items[index] = { ...items[index], ...structuredClone(entity.data), id: entity.id }
+        }
+      }
+    }
+    const errors = validateDiagram(next).filter(d => d.severity === 'error')
+    if (errors.length) throw Error(JSON.stringify(errors))
+  }
+  return { diagram: next, focus }
+}
+
 /** Atomic, transport-neutral application. A reset alone can repair a missed base. */
 export function applyOps(state: ArcLiveState, input: unknown): ArcApplyResult {
   try {
@@ -38,64 +119,8 @@ export function applyOps(state: ArcLiveState, input: unknown): ArcApplyResult {
       !Array.isArray(e.ops) || !e.ops.length) throw Error('Invalid envelope or stale sequence')
     const reset = e.ops.length === 1 && e.ops[0]?.op === 'reset'
     if (e.base !== state.seq && !reset) return { state, diagnostics: ['Sequence gap: request reset'], resync: true }
-    let diagram = structuredClone(state.diagram)
-    let focus = structuredClone(state.focus)
-    for (const op of e.ops) {
-      if (!op || typeof op !== 'object' || typeof op.op !== 'string') throw Error('Invalid operation')
-      if ('id' in op && (typeof op.id !== 'string' || !op.id || ['__proto__', 'constructor', 'prototype'].includes(op.id))) throw Error('Invalid ID')
-      if ((op.op.endsWith('.add') || op.op.endsWith('.update') || op.op === 'style.set' || op.op === 'layout.set') &&
-        op.op !== 'node.update' && (!('data' in op) || !op.data || typeof op.data !== 'object' || Array.isArray(op.data))) throw Error('Operation needs object data')
-      switch (op.op) {
-        case 'reset': diagram = structuredClone(op.diagram); focus = undefined; break
-        case 'node.add':
-          if (hasOwn(diagram.nodes, op.id)) throw Error('Node already exists: ' + op.id)
-          diagram.nodes[op.id] = op.at ?? { x: (Object.keys(diagram.nodes).length % 4) * 230 + 30, y: Math.floor(Object.keys(diagram.nodes).length / 4) * 150 + 30, size: 'm' }
-          diagram.nodeData[op.id] = structuredClone(op.data)
-          break
-        case 'node.update':
-          if (!hasOwn(diagram.nodes, op.id)) throw Error('Unknown node: ' + op.id)
-          Object.assign(diagram.nodes[op.id], op.at)
-          Object.assign(diagram.nodeData[op.id], op.data)
-          break
-        case 'node.remove':
-          if (!hasOwn(diagram.nodes, op.id)) throw Error('Unknown node: ' + op.id)
-          focus = undefined
-          delete diagram.nodes[op.id]; delete diagram.nodeData[op.id]
-          diagram.connectors = diagram.connectors.filter(c => c.from !== op.id && c.to !== op.id)
-          break
-        case 'style.set': diagram.connectorStyles[op.id] = structuredClone(op.data); break
-        case 'layout.set': Object.assign(diagram.layout, op.data); break
-        case 'layout.auto': diagram = autoLayout(diagram); break
-        case 'focus':
-          if (op.nodes?.some(id => !hasOwn(diagram.nodes, id))) throw Error('Unknown focus node')
-          if (op.caption !== undefined && typeof op.caption !== 'string') throw Error('Focus caption must be a string')
-          if (op.connectors !== undefined && !Array.isArray(op.connectors)) throw Error('Focus connectors must be an array')
-          {
-            const errors = validateDiagram({ ...diagram, views: [{ id: '__focus', title: 'Focus', ...op }] }).filter(d => d.severity === 'error')
-            if (errors.length) throw Error(JSON.stringify(errors))
-          }
-          focus = op.nodes?.length || op.connectors?.length || op.caption ? structuredClone(op) : undefined; break
-        default: {
-          const [kind, action] = op.op.split('.')
-          const key = ({ connector: 'connectors', group: 'groups', view: 'views', flow: 'flows' } as const)[kind as 'connector']
-          if (!key || !['add', 'update', 'remove'].includes(action)) throw Error('Unknown operation: ' + op.op)
-          const entity = op as { id: string; data?: object }
-          const items = (diagram[key] ??= []) as { id?: string }[]
-          const index = items.findIndex(item => item.id === entity.id)
-          if (action === 'add') {
-            if (index !== -1) throw Error('Duplicate ID: ' + entity.id)
-            items.push({ ...structuredClone(entity.data), id: entity.id })
-          } else {
-            if (index === -1) throw Error('Unknown ID: ' + entity.id)
-            if (action === 'remove') items.splice(index, 1)
-            else items[index] = { ...items[index], ...structuredClone(entity.data), id: entity.id }
-          }
-        }
-      }
-      const errors = validateDiagram(diagram).filter(d => d.severity === 'error')
-      if (errors.length) throw Error(JSON.stringify(errors))
-    }
-    return { state: { stream: state.stream, seq: e.seq, diagram, focus }, diagnostics: [] }
+    const applied = runOps(state.diagram, e.ops, state.focus)
+    return { state: { stream: state.stream, seq: e.seq, diagram: applied.diagram, focus: applied.focus }, diagnostics: [] }
   } catch (error) {
     return { state, diagnostics: [error instanceof Error ? error.message : String(error)] }
   }

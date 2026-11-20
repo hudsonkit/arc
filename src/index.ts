@@ -45,6 +45,14 @@ export {
 // Theme utilities
 export { THEMES, getTheme, getThemeList, type Theme, type ColorPalette } from './utils/themes'
 
+// Host styles: a style value the host passes in (schemas/arc-style.schema.json)
+export { type ArcStyle, type ArcStyleMode, type ArcStyleColor } from './utils/themes'
+export { ArcStyleProvider, useArcStyle } from './components/ArcStyleProvider'
+export { arcStyleTheme, arcStyleVars, resolveStyleTokens, resolveStylePerspective, validateArcStyle, parseArcStyle } from './utils/arcStyle'
+
+// Fractal altitudes: nodeData.child links between diagrams
+export { altitudeStack, childOf, deepestClaim, type AltitudeStep, type DeepestClaim } from './utils/altitudes'
+
 // The class lib/arc.css is scoped to; every Arc component root carries it.
 export { ARC_ROOT_CLASS } from './utils/cssScope'
 

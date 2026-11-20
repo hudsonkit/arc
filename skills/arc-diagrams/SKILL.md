@@ -165,6 +165,17 @@ supported private tunnel setup in `docs/saved-reviews.md`; do not expose an
 unauthenticated MCP endpoint. A saved review is not a claim that the referenced
 repository is unchanged or that the review has been accepted.
 
+## When the code changes
+
+Before finishing a change that edits source files, run `arc impacted` on those
+paths (`bun scripts/arc-cli.ts impacted <path>...` from a checkout). It scans
+`*.arc.json` and reports diagrams whose `watches` globs, or a node's
+`source.path`, claim a path you changed. Update each claimed diagram in the
+same change. For a small edit, `arc apply <diagram.arc.json> --ops <file>`
+writes one operation list and leaves the file untouched if any operation
+fails. The same tools over MCP are `arc_impacted` and `apply_diagram_file`.
+An empty impact report means nothing in the tree claims those files.
+
 ## Render and review
 
 A valid document is not evidence of a good illustration. Complete this loop:

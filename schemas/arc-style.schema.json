@@ -1,0 +1,275 @@
+{
+  "$ref": "#/definitions/ArcStyle",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ArcStyle": {
+      "additionalProperties": false,
+      "description": "A host-owned style, passed to Arc as a value (`<ArcDiagram style>`, `arc render --style`). Arc never looks a style up by name. With a style present, the diagram's own `_meta.themeId` does not paint the drawing.",
+      "properties": {
+        "brand": {
+          "$ref": "#/definitions/BrandSpec",
+          "description": "Drawing language: node shape, decor, frame, grid, arrowheads. Fonts come from `type`."
+        },
+        "id": {
+          "description": "The host's name for this style; Arc only reports it.",
+          "type": "string"
+        },
+        "modes": {
+          "additionalProperties": false,
+          "properties": {
+            "dark": {
+              "$ref": "#/definitions/ArcStyleMode"
+            },
+            "light": {
+              "$ref": "#/definitions/ArcStyleMode"
+            }
+          },
+          "required": [
+            "light",
+            "dark"
+          ],
+          "type": "object"
+        },
+        "perspective": {
+          "additionalProperties": false,
+          "properties": {
+            "default": {
+              "description": "Used when the diagram has no `_meta.viewMode`.",
+              "enum": [
+                "2d",
+                "isometric"
+              ],
+              "type": "string"
+            },
+            "isoStyle": {
+              "description": "Used when the diagram has no `_meta.isoStyle`.",
+              "enum": [
+                "solid",
+                "blueprint",
+                "cyanotype"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "additionalProperties": false,
+          "properties": {
+            "font": {
+              "description": "Font stack for node names and labels.",
+              "type": "string"
+            },
+            "mono": {
+              "description": "Monospace stack for subtitles and connector labels.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "version": {
+          "description": "The host's revision of this style.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "modes"
+      ],
+      "type": "object"
+    },
+    "ArcStyleMode": {
+      "additionalProperties": false,
+      "description": "One color mode of a host style. Tokens are CSS colors.",
+      "properties": {
+        "accent": {
+          "type": "string"
+        },
+        "background": {
+          "type": "string"
+        },
+        "border": {
+          "type": "string"
+        },
+        "colors": {
+          "additionalProperties": false,
+          "description": "Per-color overrides. A missing color falls back through HOST_COLOR_ROLES.",
+          "properties": {
+            "amber": {
+              "type": "string"
+            },
+            "blue": {
+              "type": "string"
+            },
+            "emerald": {
+              "type": "string"
+            },
+            "orange": {
+              "type": "string"
+            },
+            "rose": {
+              "type": "string"
+            },
+            "sky": {
+              "type": "string"
+            },
+            "violet": {
+              "type": "string"
+            },
+            "zinc": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "danger": {
+          "type": "string"
+        },
+        "foreground": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        },
+        "muted": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        },
+        "surface": {
+          "type": "string"
+        },
+        "warning": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "background",
+        "foreground",
+        "muted",
+        "surface",
+        "border",
+        "line",
+        "accent",
+        "success",
+        "warning",
+        "danger"
+      ],
+      "type": "object"
+    },
+    "BrandSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "accentBar": {
+          "description": "Colored accent stripe on the node shell.",
+          "enum": [
+            "left",
+            "top",
+            "none"
+          ],
+          "type": "string"
+        },
+        "arrowhead": {
+          "description": "Arrowhead shape at connector ends.",
+          "enum": [
+            "triangle",
+            "chevron"
+          ],
+          "type": "string"
+        },
+        "connectorGlow": {
+          "description": "Soft bloom on connector strokes.",
+          "type": "boolean"
+        },
+        "fontFamily": {
+          "description": "Font stack for the whole diagram (node names inherit this).",
+          "type": "string"
+        },
+        "fontImport": {
+          "description": "Stylesheet URL injected once so the families load (e.g. Google Fonts).",
+          "type": "string"
+        },
+        "frame": {
+          "description": "Edge/frame treatment at the diagram boundary.",
+          "enum": [
+            "hairline",
+            "inset",
+            "brackets",
+            "ticks",
+            "cropmarks",
+            "corners",
+            "sheet",
+            "reticle",
+            "none"
+          ],
+          "type": "string"
+        },
+        "gridType": {
+          "description": "Background grid system.",
+          "enum": [
+            "dots",
+            "lines",
+            "crosshair",
+            "none"
+          ],
+          "type": "string"
+        },
+        "monoFamily": {
+          "description": "Monospace stack for subtitles + connector labels.",
+          "type": "string"
+        },
+        "nodeBorderWidth": {
+          "description": "Node border width (CSS length), overrides the default 2px.",
+          "type": "string"
+        },
+        "nodeDecor": {
+          "description": "Ornament on the node shell — supersedes accentBar, which still works.",
+          "enum": [
+            "none",
+            "bar-left",
+            "bar-top",
+            "ticks",
+            "rule",
+            "dot",
+            "stripe"
+          ],
+          "type": "string"
+        },
+        "nodeGlass": {
+          "description": "Frosted glass backdrop on nodes.",
+          "type": "boolean"
+        },
+        "nodeOpacity": {
+          "description": "Overall node opacity (0–1).",
+          "type": "number"
+        },
+        "nodeRadius": {
+          "description": "Node + icon corner radius (CSS length). '0px' = square tiles.",
+          "type": "string"
+        },
+        "nodeShape": {
+          "description": "Node silhouette. 'chamfer' cuts all four corners, 'notch' cuts the top-right; both are drawn with clip-path, not rounding. See utils/nodeShape.ts.",
+          "enum": [
+            "rounded",
+            "square",
+            "chamfer",
+            "notch",
+            "pill"
+          ],
+          "type": "string"
+        },
+        "titleBlock": {
+          "description": "Render an engineering-drawing title block in the bottom-right corner.",
+          "type": "boolean"
+        },
+        "upperLabels": {
+          "description": "Uppercase + letter-space the subtitle and connector labels.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  }
+}

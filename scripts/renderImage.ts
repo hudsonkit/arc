@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { generateSVG } from '../src/utils/exportUtils.ts'
-import { THEMES, themeCanvas, type ThemeId } from '../src/utils/themes.ts'
+import { THEMES, themeCanvas, type ArcStyle, type ThemeId } from '../src/utils/themes.ts'
+import { resolveStyleTokens, validateArcStyle } from '../src/utils/arcStyle.ts'
 import type { ArcDiagramData } from '../src/types/diagram.ts'
 
 export type RenderMode = 'light' | 'dark'
@@ -14,6 +15,10 @@ export interface RenderSvgOptions {
   includeGrid?: boolean
   padding?: number
   theme?: string
+  /** Host style value. Replaces `theme`; resolved to literal colors and fonts. */
+  style?: unknown
+  /** Keep `var(--arc-diagram-*, literal)` in styled output, for SVG inlined in a page. */
+  inlineVars?: boolean
   mode?: RenderMode
   /** Render flow markers as a deterministic still at this time (seconds). */
   flowTime?: number
@@ -27,7 +32,11 @@ export interface RenderedSvg {
   height: number
   backgroundColor: string
   theme?: ThemeId
+  /** The host style that painted the render, when one was passed. */
+  style?: { id: string; version: string }
   mode?: RenderMode
+  /** Font stylesheet the PNG page should load, from the theme or style brand. */
+  fontImport?: string
 }
 
 export interface RenderPngOptions extends RenderSvgOptions {
@@ -43,6 +52,7 @@ export interface RenderedPng {
   scale: number
   chrome: string
   theme?: ThemeId
+  style?: { id: string; version: string }
   mode?: RenderMode
 }
 
@@ -99,6 +109,16 @@ export function assertRenderMode(value: string | undefined): RenderMode | undefi
   return value
 }
 
+/** Validate a host style value; `undefined` means no style. */
+export function assertRenderStyle(value: unknown): ArcStyle | undefined {
+  if (value === undefined || value === null) return undefined
+  const problems = validateArcStyle(value)
+  if (problems.length) {
+    throw new RenderError('render/invalid-style', `Invalid Arc style: ${problems.join('; ')}`, ['fix the style file against schemas/arc-style.schema.json'])
+  }
+  return value as ArcStyle
+}
+
 export function resolveRenderMode(theme: ThemeId | undefined, mode: string | undefined): RenderMode | undefined {
   return assertRenderMode(mode) ?? (theme ? THEMES[theme].defaultMode : undefined)
 }
@@ -117,12 +137,16 @@ function exportBounds(diagram: ArcDiagramData): ExportZone {
 
 export function renderDiagramSvg(diagram: ArcDiagramData, options: RenderSvgOptions = {}): RenderedSvg {
   const padding = assertPadding(options.padding)
-  const theme = assertRenderTheme(options.theme)
-  const mode = resolveRenderMode(theme, options.mode)
+  const style = assertRenderStyle(options.style)
+  // A style replaces the theme; the host still picks the mode.
+  const theme = style ? undefined : assertRenderTheme(options.theme)
+  const mode = style ? (assertRenderMode(options.mode) ?? 'light') : resolveRenderMode(theme, options.mode)
   if (options.flowTime !== undefined && (!Number.isFinite(options.flowTime) || options.flowTime < 0)) {
     throw new RenderError('render/invalid-option', 'flowTime must be a non-negative finite number', ['use seconds, e.g. --flow-time 1.25'])
   }
-  const themeBackground = theme ? themeCanvas(theme, mode ?? 'light') : undefined
+  const themeBackground = style
+    ? resolveStyleTokens(style, mode ?? 'light').tokens.background
+    : theme ? themeCanvas(theme, mode ?? 'light') : undefined
   const backgroundColor = options.backgroundColor ?? themeBackground ?? '#ffffff'
   // Theme-owned CSS variable expressions are trusted; user input stays restricted.
   if (options.backgroundColor !== undefined && (typeof backgroundColor !== 'string' || !/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(backgroundColor))) {
@@ -131,12 +155,14 @@ export function renderDiagramSvg(diagram: ArcDiagramData, options: RenderSvgOpti
 
   const bounds = exportBounds(diagram)
   return {
-    svg: generateSVG(diagram, { ...options, theme, mode, backgroundColor, padding }),
+    svg: generateSVG(diagram, { ...options, style, theme, mode, backgroundColor, padding }),
     width: Math.round(bounds.width + padding * 2),
     height: Math.round(bounds.height + padding * 2),
     backgroundColor,
     theme,
+    ...(style ? { style: { id: style.id, version: style.version } } : {}),
     mode,
+    fontImport: style ? style.brand?.fontImport : theme ? THEMES[theme].brand?.fontImport : undefined,
   }
 }
 
@@ -390,8 +416,8 @@ export async function renderDiagramPng(diagram: ArcDiagramData, options: RenderP
     writeFileSync(svgPath, rendered.svg, 'utf8')
     // Brand fonts ride the document <link> — inline SVG text inherits document
     // fonts, and the embedded @import in the SVG is the standalone-view fallback.
-    const fontLink = rendered.theme && THEMES[rendered.theme].brand?.fontImport
-      ? `<link rel="stylesheet" href="${THEMES[rendered.theme].brand!.fontImport}">`
+    const fontLink = rendered.fontImport
+      ? `<link rel="stylesheet" href="${rendered.fontImport.replace(/"/g, '&quot;')}">`
       : ''
     writeFileSync(htmlPath, `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${rendered.backgroundColor}}svg{display:block}</style>${fontLink}${rendered.svg}`, 'utf8')
     const png = options.runChrome
@@ -426,7 +452,7 @@ export async function renderDiagramPng(diagram: ArcDiagramData, options: RenderP
         ['rerun the render', 'set ARC_CHROME to a different Chrome or Chromium executable'],
       )
     }
-    return { png, width: rendered.width, height: rendered.height, scale, chrome, theme: rendered.theme, mode: rendered.mode }
+    return { png, width: rendered.width, height: rendered.height, scale, chrome, theme: rendered.theme, ...(rendered.style ? { style: rendered.style } : {}), mode: rendered.mode }
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

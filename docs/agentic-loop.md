@@ -83,22 +83,39 @@ agent edits code
   → drift net (CI) catches edits that bypassed the loop
 ```
 
-Each stage exists except the nudge and the net.
+The nudge is `arc impacted`. The net is still open.
 
-## Gap list
+## What the nudge uses
 
-| Missing piece | Shape | Why it is the atom |
+A diagram or a node carries `watches`, a list of repo-relative globs
+(`src/auth/**`, `*.ts`). A node also claims the exact file in `source.path`.
+`arc impacted <paths...>` scans `*.arc.json` under `--root` (default: the
+working directory) and prints the diagrams and nodes that claim those paths.
+The same query is the MCP tool `arc_impacted`. An empty result is a successful
+answer: nothing in the tree claims the change.
+
+```sh
+arc impacted src/auth/session.ts src/billing/invoice.ts
+arc impacted src/auth/session.ts --root . --json
+```
+
+A small edit to the claimed file uses the same operations as a push stream:
+
+```sh
+arc apply docs/services.arc.json --ops commands.json
+```
+
+A target that ends in `.json` is the file. Any other target is a live stream
+name. The file write is all or nothing. `focus` is viewer state and is not
+stored. The MCP tool is `apply_diagram_file`. The skill tells an agent to run
+`arc impacted` on the files it changed before it finishes.
+
+## Still open
+
+| Missing piece | Shape | Why it is still open |
 |---|---|---|
-| `watches` | glob list on the diagram or per-node | the minimal claim "this diagram describes these paths" — powers both the nudge and the net |
-| `arc impacted <paths...>` | CLI/MCP: changed files → affected diagrams+nodes | the nudge as a query; one tool, three consumers (skill prompt, agent hook, CI) |
-| mutation ops | `node/upsert`, `connector/upsert` via MCP or `arc apply --ops` | surgical edits without rewriting the file — less token, fewer corrupt writes |
-| skill wiring | `skills/` rule: "before finishing, run `arc impacted` on your changed files" | installs the nudge into the agent session — the "like docs" part |
-| `arc drift` | CI-side: watches ∩ PR files, diagram unmoved → sticky comment | the net; silent unless relevant, never blocking |
-| `arc scan` | optional v2: `@arc` annotations in code → `source` refs | makes B self-populating; also repairs line-number rot |
-
-`arc impacted` is the one to build first — everything else is a consumer of
-that answer. A skill file can nudge agents with it today; `watches` formalizes
-what it queries; `drift` reuses it verbatim in CI.
+| `arc drift` | CI-side: watches ∩ PR files, diagram unmoved → sticky comment | the net; silent unless relevant, never blocking. It is `arc impacted` run on the pull request's files |
+| `arc scan` | optional v2: `@arc` annotations in code → `source` refs | makes the citations self-populating; also repairs line-number rot |
 
 ## What this does not do
 

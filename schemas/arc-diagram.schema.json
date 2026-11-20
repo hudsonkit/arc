@@ -83,6 +83,13 @@
             "$ref": "#/definitions/DiagramView"
           },
           "type": "array"
+        },
+        "watches": {
+          "description": "Repo-relative globs this diagram claims. See `arc impacted`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -740,6 +747,10 @@
     "NodeData": {
       "additionalProperties": false,
       "properties": {
+        "child": {
+          "description": "Id of a child diagram that zooms into this node. The id names an entry in the diagram set the host passes; the child carries no style of its own.",
+          "type": "string"
+        },
         "color": {
           "$ref": "#/definitions/DiagramColor",
           "description": "Palette color. Omit when `kind` supplies the default color."
@@ -768,6 +779,13 @@
         },
         "subtitle": {
           "type": "string"
+        },
+        "watches": {
+          "description": "Repo-relative globs this node claims, such as `src/auth/**`. `arc impacted` matches changed paths against these globs and against `source.path`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [

@@ -11,7 +11,7 @@
 - **Output**: JSON / TypeScript configs plus SVG/PNG/ASCII exports — diffable source first
 - **Stack**: React 19, Vite 7, TailwindCSS 4, Hudson shell (editor chrome)
 - **Package manager**: bun (`bun install`, `bun run dev`)
-- **CLI**: `arc` bin — `schema`, `check`, `diff`, `render`, `bench`
+- **CLI**: `arc` bin — `schema`, `check`, `diff`, `render`, `bench`, `impacted`, `apply`
 - **MCP**: `arc-mcp` bin on `@hudsonkit/arc-mcp` — see `docs/agent/mcp.agent.md`
 
 ## Which Package?
@@ -64,7 +64,9 @@ interface ArcDiagramData {
     kind?: NodeKind                  // semantic role — supplies default icon + color
     shape?: NodeShape                // per-node silhouette override
     source?: DiagramSource             // {path, line?, endLine?, commit?} evidence link
+    watches?: string[]                 // repo-relative globs this node claims
   }>
+  watches?: string[]                   // repo-relative globs the diagram claims when no node does
   connectors: Array<{
     from: string; to: string
     fromAnchor: AnchorPosition; toAnchor: AnchorPosition

@@ -3,9 +3,10 @@ export const HOST_TOKEN_NAMES = ['background', 'foreground', 'muted', 'surface',
 export type HostTokenName = typeof HOST_TOKEN_NAMES[number]
 export type HostThemeTokens = Record<HostTokenName, string>
 
-export function hostThemeTokens(mode: 'light' | 'dark'): HostThemeTokens {
+/** The literal neutral values behind each `var(--arc-diagram-*, …)` token. */
+export function hostFallbackTokens(mode: 'light' | 'dark'): HostThemeTokens {
   const dark = mode === 'dark'
-  const fallback: HostThemeTokens = {
+  return {
     background: dark ? '#09090b' : '#ffffff',
     foreground: dark ? '#fafafa' : '#18181b',
     muted: dark ? '#a1a1aa' : '#52525b',
@@ -19,6 +20,10 @@ export function hostThemeTokens(mode: 'light' | 'dark'): HostThemeTokens {
     font: 'inherit',
     'font-mono': 'ui-monospace, monospace',
   }
+}
+
+export function hostThemeTokens(mode: 'light' | 'dark'): HostThemeTokens {
+  const fallback = hostFallbackTokens(mode)
   return Object.fromEntries(HOST_TOKEN_NAMES.map(name => [name, `var(--arc-diagram-${name}, ${fallback[name]})`])) as HostThemeTokens
 }
 

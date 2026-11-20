@@ -84,6 +84,8 @@ From a global install (after publish):
 | `arc_live_serve` | `{stream, port?=5190}` → `{stream, port}`; starts one loopback relay per MCP server instance |
 | `arc_live_apply` | `{envelope}` → `{seq, diagnostics, resync?}`; applies a v1 envelope all or nothing |
 | `arc_live_read` | `{}` → current stream state, or `null` before `arc_live_serve` |
+| `arc_impacted` | `{paths, root?}` → `*.arc.json` diagrams and nodes that claim those paths |
+| `apply_diagram_file` | `{file, ops}` → write the operation list into a diagram JSON file, all or nothing |
 
 ## Live architecture workflow
 

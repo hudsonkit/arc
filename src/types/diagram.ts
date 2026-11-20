@@ -79,6 +79,16 @@ export interface NodeData {
   shape?: NodeShape
   /** Code this node describes — see `sourceUrl`/`sourceLabel` in utils/sourceRef. */
   source?: DiagramSource
+  /**
+   * Repo-relative globs this node claims, such as `src/auth/**`.
+   * `arc impacted` matches changed paths against these globs and against `source.path`.
+   */
+  watches?: string[]
+  /**
+   * Id of a child diagram that zooms into this node. The id names an entry in
+   * the diagram set the host passes; the child carries no style of its own.
+   */
+  child?: string
 }
 
 export type ConnectorCurve = 'natural' | 'down' | 'up' | 'step' | 'direct'
@@ -367,6 +377,11 @@ export interface ArcDiagram {
   views?: DiagramView[]
   /** Animated message/packet routes across connectors. */
   flows?: DiagramFlow[]
+  /**
+   * Repo-relative globs this diagram claims. A changed path that matches no
+   * node still selects the diagram. See `arc impacted`.
+   */
+  watches?: string[]
   images?: DiagramImage[]
   exportZone?: ExportZone | null
 }
@@ -388,6 +403,8 @@ export interface ArcDiagramData {
   views?: DiagramView[]
   /** Animated message/packet routes across connectors. */
   flows?: DiagramFlow[]
+  /** Repo-relative globs this diagram claims. See `arc impacted`. */
+  watches?: string[]
   groups?: GroupShape[]
 }
 
@@ -408,6 +425,7 @@ export function toExportFormat(diagram: ArcDiagram): ArcDiagramData {
     focusTargets: diagram.focusTargets,
     views: diagram.views,
     flows: diagram.flows,
+    ...(diagram.watches !== undefined ? { watches: diagram.watches } : {}),
     groups: diagram.groups,
   }
 }

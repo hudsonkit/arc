@@ -77,6 +77,8 @@ devin mcp add arc -- npx -y @hudsonkit/arc-mcp
 | `arc_live_serve` | Start a loopback push stream (SSE, WebSocket and RPC) for one stream ID |
 | `arc_live_apply` | Apply one v1 envelope of operations to that stream, all or nothing |
 | `arc_live_read` | Read the current stream state |
+| `arc_impacted` | List `*.arc.json` diagrams that claim the given paths, through `source.path` or `watches` |
+| `apply_diagram_file` | Apply an operation list to a diagram JSON file, all or nothing |
 | `open_architecture_review` | Save a baseline and open a durable architecture review |
 | `update_architecture_review` | Save findings, evidence, decisions, questions, and summary |
 | `resume_architecture_review` | Resume an interrupted review with its author capability |

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
-import { generateSchemaText, SCHEMA_PATH } from './generate-schema'
+import { generateSchemaText, generateStyleSchemaText, SCHEMA_PATH, STYLE_SCHEMA_PATH } from './generate-schema'
+import { validateArcStyle } from '../src/utils/arcStyle'
 
 type Json = Record<string, unknown>
 
@@ -138,6 +139,22 @@ describe('arc-diagram.schema.json', () => {
     }
   })
 
+  test('accepts diagram and node watches', () => {
+    const diagram = {
+      ...validDiagram,
+      watches: ['src/billing/**', '*.ts'],
+      nodeData: {
+        ...validDiagram.nodeData,
+        api: {
+          ...validDiagram.nodeData.api,
+          source: { path: 'src/api.ts', line: 4, endLine: 20, commit: 'abc' },
+          watches: ['src/api.ts'],
+        },
+      },
+    }
+    expect(validate(diagram, schema, schema)).toEqual([])
+  })
+
   test('accepts a fully-populated valid diagram', () => {
     expect(validate(validDiagram, schema, schema)).toEqual([])
   })
@@ -169,5 +186,39 @@ describe('arc-diagram.schema.json', () => {
     for (const key of ['to', 'fromAnchor', 'toAnchor', 'style']) {
       expect(errors.some((e) => e.includes(`missing required property "${key}"`))).toBe(true)
     }
+  })
+})
+
+describe('arc-style.schema.json', () => {
+  const styleSchema = JSON.parse(readFileSync(STYLE_SCHEMA_PATH, 'utf8')) as Json
+  const mode = { background: '#fff', foreground: '#111', muted: '#666', surface: '#f6f6f6', border: '#ddd', line: '#999', accent: '#36c', success: '#2a6', warning: '#c80', danger: '#c33' }
+  const style = { id: 'linea', version: '1.0.0', modes: { light: { ...mode, colors: { violet: '#639' } }, dark: mode }, type: { font: 'Inter' }, brand: { nodeShape: 'square' }, perspective: { default: 'isometric', isoStyle: 'blueprint' } }
+
+  test('committed artifact matches the generator output byte-for-byte', () => {
+    expect(generateStyleSchemaText()).toBe(readFileSync(STYLE_SCHEMA_PATH, 'utf8'))
+  })
+
+  test('is draft-07 rooted at ArcStyle', () => {
+    expect(styleSchema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(styleSchema.$ref).toBe('#/definitions/ArcStyle')
+  })
+
+  test('accepts a full style, and the runtime check agrees', () => {
+    expect(validate(style, styleSchema, styleSchema)).toEqual([])
+    expect(validateArcStyle(style)).toEqual([])
+  })
+
+  test('rejects what is out of scope: extends, a missing token, an unknown color', () => {
+    const withExtends = { ...style, extends: 'scout' }
+    expect(validate(withExtends, styleSchema, styleSchema).some((e) => e.includes('additional property "extends"'))).toBe(true)
+    expect(validateArcStyle(withExtends)).toContain('unknown field `extends`')
+    const { danger: _danger, ...partial } = mode
+    void _danger
+    const missing = { ...style, modes: { light: partial, dark: mode } }
+    expect(validate(missing, styleSchema, styleSchema).some((e) => e.includes('missing required property "danger"'))).toBe(true)
+    expect(validateArcStyle(missing).some((p) => p.includes('modes.light.danger'))).toBe(true)
+    const badColor = { ...style, modes: { light: { ...mode, colors: { teal: '#0aa' } }, dark: mode } }
+    expect(validate(badColor, styleSchema, styleSchema).some((e) => e.includes('additional property "teal"'))).toBe(true)
+    expect(validateArcStyle(badColor).some((p) => p.includes('colors.teal'))).toBe(true)
   })
 })

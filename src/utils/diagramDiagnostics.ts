@@ -61,6 +61,7 @@ export type Fix =
   | { kind: 'set-anchor'; field: 'fromAnchor' | 'toAnchor'; anchor: AnchorPosition }
   | { kind: 'remove-ref' }
   | { kind: 'remove-source' }
+  | { kind: 'remove-watches' }
   | { kind: 'set-legend'; legend: 'auto' | 'all' | 'hidden' }
   | { kind: 'remove-meta' }
   | { kind: 'remove-flow' }
@@ -96,6 +97,25 @@ const NODE_SHAPE_KEYS = NODE_SHAPES.map(s => s.id)
 type Rec = Record<string, unknown>
 const isObject = (v: unknown): v is Rec =>
   !!v && typeof v === 'object' && !Array.isArray(v)
+
+/** Repo-relative glob list: non-empty strings, no absolute paths, no `..`. */
+function watchProblems(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length === 0) return ['it must be a non-empty array of glob strings']
+  const problems: string[] = []
+  value.forEach((entry, index) => {
+    if (typeof entry !== 'string' || entry.trim() === '') {
+      problems.push(`entry ${index} must be a non-empty string`)
+      return
+    }
+    if (entry.startsWith('/') || /^[A-Za-z]:[\\/]/.test(entry)) {
+      problems.push(`entry ${index} must be a repo-relative glob`)
+    }
+    if (entry.split(/[/\\]/).includes('..')) {
+      problems.push(`entry ${index} must not contain '..'`)
+    }
+  })
+  return problems
+}
 
 function levenshtein(a: string, b: string): number {
   const row = Array.from({ length: b.length + 1 }, (_, j) => j)
@@ -401,6 +421,20 @@ export function validateDiagram(value: unknown): Diagnostic[] {
 
   const LEGEND_MODES = ['auto', 'all', 'hidden'] as const
 
+  if (d.watches !== undefined) {
+    const problems = watchProblems(d.watches)
+    if (problems.length) {
+      push({
+        code: 'semantic/invalid-watches',
+        severity: 'error',
+        subject: { type: 'diagram' },
+        message: `Diagram \`watches\` is invalid — ${problems.join('; ')}`,
+        evidence: { watches: d.watches },
+        supportedFixes: [{ kind: 'remove-watches' }],
+      })
+    }
+  }
+
   if (d.legend !== undefined && !LEGEND_MODES.includes(d.legend as (typeof LEGEND_MODES)[number])) {
     const nearest = typeof d.legend === 'string' ? closest(d.legend, [...LEGEND_MODES]) : undefined
     push({
@@ -491,6 +525,30 @@ export function validateDiagram(value: unknown): Diagnostic[] {
         supportedFixes: typeof raw.shape === 'string' && closest(raw.shape, NODE_SHAPE_KEYS)
           ? [{ kind: 'set-shape', shape: closest(raw.shape, NODE_SHAPE_KEYS)! }]
           : undefined,
+      })
+    }
+
+    if (raw.watches !== undefined) {
+      const problems = watchProblems(raw.watches)
+      if (problems.length) {
+        push({
+          code: 'semantic/invalid-watches',
+          severity: 'error',
+          subject: { type: 'node', id },
+          message: `Node "${id}" has invalid \`watches\` — ${problems.join('; ')}`,
+          evidence: { watches: raw.watches },
+          supportedFixes: [{ kind: 'remove-watches' }],
+        })
+      }
+    }
+
+    if (raw.child !== undefined && (typeof raw.child !== 'string' || raw.child.length === 0)) {
+      push({
+        code: 'semantic/invalid-child',
+        severity: 'error',
+        subject: { type: 'node', id },
+        message: `Node "${id}" has invalid \`child\` — it must be a non-empty diagram id`,
+        evidence: { child: raw.child },
       })
     }
 

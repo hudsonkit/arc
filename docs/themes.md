@@ -114,3 +114,64 @@ materials and editor controls keep their separate styling contracts.
 
 For a working example, run `bun dev` and open
 `http://localhost:5188/examples/host-theme.html`.
+
+## Style files
+
+A style is a value the host passes in. Arc does not look a style up by name. The
+format is `schemas/arc-style.schema.json`:
+
+```json
+{
+  "id": "linea",
+  "version": "1.0.0",
+  "modes": {
+    "light": { "background": "#fbfaf7", "foreground": "#1b1a17", "muted": "#6b665c",
+               "surface": "#ffffff", "border": "#d9d4c7", "line": "#8a8475",
+               "accent": "#2f5bd3", "success": "#2e7d4f", "warning": "#b7791f",
+               "danger": "#c0392b", "colors": { "violet": "#7a3cff" } },
+    "dark":  { "…": "same ten tokens" }
+  },
+  "type": { "font": "Inter, sans-serif", "mono": "JetBrains Mono, monospace" },
+  "brand": { "nodeShape": "square", "nodeDecor": "rule" },
+  "perspective": { "default": "2d", "isoStyle": "blueprint" }
+}
+```
+
+```tsx
+<ArcDiagram data={diagram} style={style} mode="light" />
+// or, for every diagram below it:
+<ArcStyleProvider style={style}>…</ArcStyleProvider>
+```
+
+The host still chooses `mode`. The style writes the `--arc-diagram-*` variables
+from the table above onto the diagram root, plus one per logical color
+(`--arc-diagram-violet`…). The resolution orders are:
+
+| What | Order |
+|---|---|
+| Node color | `modes[mode].colors[color]` → role token → neutral fallback |
+| Shape | `nodeData.shape` → `style.brand` → Arc default |
+| View | `_meta.viewMode` → `perspective.default` |
+| Iso style | `_meta.isoStyle` → `perspective.isoStyle` |
+
+A style replaces the theme. When a style is passed, `_meta.themeId` does not
+paint the drawing. `arc check --style style.json` reports this as
+`style/theme-ignored`, as a warning. `arc render --style style.json` and the MCP
+render tools (`style` argument) resolve the style to literal colors and fonts,
+so a standalone SVG or PNG looks the same without the page CSS.
+
+### Child diagrams
+
+A node can name a child diagram by id with `nodeData.child`. The host passes the
+whole set, and one style paints every level:
+
+```tsx
+<ArcDiagram data={system} diagrams={{ auth, session }} style={style}
+  openPath={deepestClaim('system', set, changedFiles)?.path} />
+```
+
+When the reader clicks a node that has a child, the viewer opens the child and
+shows the path back (System / Auth / Session). `deepestClaim(rootId, diagrams,
+files)` follows child links. It returns the path to the deepest node that claims
+the files, using the same rules as `arc impacted`. A child link is an id only:
+it carries no style or theme of its own.

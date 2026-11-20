@@ -362,6 +362,24 @@ describe('validateDiagram — geometry layer', () => {
       return { d, id }
     }
 
+    test('watches accept repo-relative globs and reject the rest', () => {
+      const ok = base()
+      ok.watches = ['src/billing/**']
+      const id = Object.keys(ok.nodeData)[0]
+      ok.nodeData[id].watches = ['*.ts']
+      expect(validateDiagram(ok)).toEqual([])
+
+      const empty = base()
+      empty.watches = []
+      expect(find(validateDiagram(empty), 'semantic/invalid-watches')?.supportedFixes).toEqual([{ kind: 'remove-watches' }])
+
+      const escaped = base()
+      const nodeId = Object.keys(escaped.nodeData)[0]
+      escaped.nodeData[nodeId].watches = ['../secrets/**']
+      const diag = find(validateDiagram(escaped), 'semantic/invalid-watches')
+      expect(diag?.subject).toEqual({ type: 'node', id: nodeId })
+    })
+
     test('a well-formed source produces no diagnostics', () => {
       for (const source of [
         { path: 'src/foo.ts' },

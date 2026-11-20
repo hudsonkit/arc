@@ -4,7 +4,10 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { motion, useTransform, type MotionStyle, type MotionValue } from 'motion/react'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { getTheme, resolveNodeRadius, type ThemeId, type Theme, type BrandSpec } from '../utils/themes'
+import { getTheme, resolveNodeRadius, type ThemeId, type Theme, type BrandSpec, type ArcStyle } from '../utils/themes'
+import { ARC_STYLE_CSS, arcStyleTheme, arcStyleVars, resolveStylePerspective, type PerspectiveMeta } from '../utils/arcStyle'
+import { altitudeStack, childOf, type AltitudeStep, type DiagramSet } from '../utils/altitudes'
+import { useArcStyle } from './ArcStyleProvider'
 import {
   radiusForShape,
   resolveNodeDecor,
@@ -102,6 +105,10 @@ export interface NodeData {
   shape?: NodeShape
   /** Code this node describes (path + optional line range/commit). */
   source?: DiagramSource
+  /** Repo-relative globs this node claims. `arc impacted` matches changed paths against them. */
+  watches?: string[]
+  /** Id of a child diagram (in the `diagrams` set) this node opens into. */
+  child?: string
 }
 
 export type ConnectorCurve = 'natural' | 'down' | 'up' | 'step' | 'direct'
@@ -262,6 +269,8 @@ export interface ArcDiagramData {
   views?: DiagramView[]
   /** Animated message/packet routes across connectors. */
   flows?: DiagramFlow[]
+  /** Repo-relative globs this diagram claims. See `arc impacted`. */
+  watches?: string[]
   groups?: GroupShape[]
 }
 
@@ -1973,9 +1982,87 @@ interface ArcDiagramProps {
   animateFlows?: boolean
   /** Deterministic flow still time in seconds; disables SMIL when set. */
   flowTime?: number
+  /** Host style (see `schemas/arc-style.schema.json`). Replaces `theme` and
+   *  `_meta.themeId` for the drawing; falls back to an `<ArcStyleProvider>`.
+   *  `mode` still picks light or dark. */
+  style?: ArcStyle
+  /** Every diagram a `nodeData.child` id may name, keyed by id. With it, clicking
+   *  a node that has a child opens that plate, and a trail leads back up. */
+  diagrams?: Record<string, ArcDiagramData>
+  /** Key of `data` in `diagrams`. Default: `data.id`. */
+  rootId?: string
+  /** Steps to open on — e.g. `deepestClaim(...).path`. The last step's node is
+   *  highlighted when it has no child to open. */
+  openPath?: AltitudeStep[]
+  /** Fires with the entered path whenever the reader goes down or back up. */
+  onAltitudeChange?: (path: AltitudeStep[]) => void
 }
 
-export default function ArcDiagram({
+interface PlateProps extends Omit<ArcDiagramProps, 'diagrams' | 'rootId' | 'openPath' | 'onAltitudeChange'> {
+  /** Return true when the click entered a child plate instead. */
+  enterNode?: (nodeId: string) => boolean
+  /** Ancestor trail, root first; the last crumb is the open plate. */
+  trail?: { label: string; onSelect?: () => void }[]
+  /** Node locked on mount. */
+  initialNodeId?: string
+}
+
+const EMPTY_PATH: AltitudeStep[] = []
+
+/**
+ * The viewer. Without `diagrams` it is one plate; with them it walks
+ * `nodeData.child` links, painting every altitude with the same style.
+ */
+export default function ArcDiagram({ diagrams, rootId, openPath, onAltitudeChange, ...props }: ArcDiagramProps) {
+  const rootKey = rootId ?? props.data.id ?? 'root'
+  const set = useMemo<DiagramSet | undefined>(
+    () => diagrams ? { ...diagrams, [rootKey]: props.data } as unknown as DiagramSet : undefined,
+    [diagrams, rootKey, props.data],
+  )
+  const [path, setPath] = useState<AltitudeStep[]>(openPath ?? EMPTY_PATH)
+  const [seed, setSeed] = useState(openPath)
+  if (openPath !== seed) {
+    setSeed(openPath)
+    setPath(openPath ?? EMPTY_PATH)
+  }
+
+  if (!set || !diagrams) return <ArcDiagramPlate {...props} />
+
+  const stack = altitudeStack(rootKey, set, path)
+  const entered = path.slice(0, stack.length - 1)
+  const plateId = stack[stack.length - 1]
+  const plate = plateId === rootKey ? props.data : diagrams[plateId]
+  const last = path[stack.length - 1]
+  const initialNodeId = last && last.diagram === plateId ? last.node : undefined
+  const go = (next: AltitudeStep[]) => {
+    setPath(next)
+    onAltitudeChange?.(next)
+  }
+  const enterNode = (nodeId: string) => {
+    if (!childOf(set, plateId, nodeId)) return false
+    go([...entered, { diagram: plateId, node: nodeId }])
+    return true
+  }
+  const trail = stack.length > 1 ? stack.map((id, i) => {
+    const label = i === 0
+      ? (props.data.id ?? 'System')
+      : (set[entered[i - 1].diagram]?.nodeData?.[entered[i - 1].node]?.name ?? id)
+    return { label, onSelect: i === stack.length - 1 ? undefined : () => go(entered.slice(0, i)) }
+  }) : undefined
+
+  return (
+    <ArcDiagramPlate
+      key={plateId}
+      {...props}
+      data={plate}
+      enterNode={enterNode}
+      trail={trail}
+      initialNodeId={initialNodeId}
+    />
+  )
+}
+
+function ArcDiagramPlate({
   data,
   animateUpdates,
   followUpdates = false,
@@ -2011,12 +2098,25 @@ export default function ArcDiagram({
   fitPadding,
   fitKey,
   fitMeasure = 'screen',
-  defaultViewMode = '2d',
-  defaultIsoStyle = 'solid',
+  defaultViewMode: viewModeProp = '2d',
+  defaultIsoStyle: isoStyleProp = 'solid',
   delta,
   animateFlows = true,
   flowTime,
-}: ArcDiagramProps) {
+  style: styleProp,
+  enterNode,
+  trail,
+  initialNodeId,
+}: PlateProps) {
+  const contextStyle = useArcStyle()
+  const style = styleProp ?? contextStyle
+  // Perspective: `_meta` first, then the style, then the props. Without a
+  // style the props alone decide, as before.
+  const perspective = style
+    ? resolveStylePerspective(data._meta as PerspectiveMeta | undefined, style, { viewMode: viewModeProp, isoStyle: isoStyleProp })
+    : { viewMode: viewModeProp, isoStyle: isoStyleProp }
+  const defaultViewMode: ViewMode = perspective.viewMode
+  const defaultIsoStyle: IsoStyleId = perspective.isoStyle
   const liveUpdates = animateUpdates !== undefined || autoFrameUpdates
   const isLight = mode === 'light'
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -2037,7 +2137,7 @@ export default function ArcDiagram({
   const [showArc, setShowArc] = useState(false)
   const [useAutoLayout, setUseAutoLayout] = useState(false)
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
-  const [lockedNodeId, setLockedNodeId] = useState<string | null>(null)
+  const [lockedNodeId, setLockedNodeId] = useState<string | null>(initialNodeId ?? null)
   // Measured title-block height, so the zoom controls can slide clear of it.
   const [titleBlockH, setTitleBlockH] = useState(48)
   const fx = useMemo(() => resolveHoverEffects(hoverEffects), [hoverEffects])
@@ -2089,8 +2189,10 @@ export default function ArcDiagram({
     [activeView, activeNodeId, connectors, focusTargets],
   )
 
-  // Resolve theme colors based on mode
-  const themeData = getTheme(theme)
+  // Resolve theme colors based on mode. A style replaces the theme outright.
+  const styleTheme = useMemo(() => style ? arcStyleTheme(style) : undefined, [style])
+  const styleVars = useMemo(() => style ? arcStyleVars(style, isLight ? 'light' : 'dark') : undefined, [style, isLight])
+  const themeData = styleTheme ?? getTheme(theme)
   const themeColors = isLight ? themeData.light : themeData.dark
   const brand = themeData.brand
   const gridId = React.useId()
@@ -2453,13 +2555,14 @@ export default function ArcDiagram({
 
   // Click-to-lock: clicking a node locks the highlight, clicking background or same node unlocks
   const handleNodeClick = useCallback((nodeId: string) => {
+    if (enterNode?.(nodeId)) return
     if (activeView) setActiveView(null)
     setLockedNodeId(prev => {
       const next = prev === nodeId ? null : nodeId
       onNodeHover?.(next)
       return next
     })
-  }, [activeView, onNodeHover, setActiveView])
+  }, [activeView, enterNode, onNodeHover, setActiveView])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!interactive || e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, select, textarea')) return
@@ -2522,14 +2625,16 @@ export default function ArcDiagram({
       data-arc-diagram
       lang={langAttr}
       dir={dirAttr}
-      data-arc-theme={theme}
+      data-arc-theme={style ? 'inherit' : theme}
+      data-arc-style={style?.id}
       // Native focus scrolling must not offset the transform-based camera.
-      className={`${ARC_ROOT_CLASS} ${frameVariant === 'none' ? '' : 'rounded-2xl'} overflow-clip relative ${themeColors.background.container} ${className}`}
+      className={`${ARC_ROOT_CLASS} ${style ? 'arc-styled' : ''} ${frameVariant === 'none' ? '' : 'rounded-2xl'} overflow-clip relative ${themeColors.background.container} ${className}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       style={{
+        ...(styleVars as React.CSSProperties | undefined),
         cursor: interactive ? (isPanning ? 'grabbing' : 'grab') : 'default',
         fontFamily: brand?.fontFamily,
         borderRadius: frameVariant === 'none' ? 0 : brand?.nodeRadius,
@@ -2538,7 +2643,24 @@ export default function ArcDiagram({
         borderColor: frameVariant !== 'hairline' && frameVariant !== 'none' ? 'transparent' : undefined,
       }}
     >
-      {theme === 'inherit' && <style>{HOST_THEME_CSS}</style>}
+      {(style || theme === 'inherit') && <style>{style ? `${HOST_THEME_CSS}\n${ARC_STYLE_CSS}` : HOST_THEME_CSS}</style>}
+      {trail && (
+        <nav
+          aria-label="Diagram altitude"
+          data-arc-altitude-trail
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-md px-2 py-1 text-[11px] backdrop-blur-sm"
+          style={{ background: themeColors.background.canvas ? colorAlpha(themeColors.background.canvas, 'D9') : undefined }}
+        >
+          {trail.map((crumb, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span aria-hidden className={themeColors.text.muted}>/</span>}
+              {crumb.onSelect
+                ? <button type="button" onClick={crumb.onSelect} className={`${themeColors.text.secondary} hover:underline`}>{crumb.label}</button>
+                : <span aria-current="page" className={`${themeColors.text.primary} font-medium`}>{crumb.label}</span>}
+            </React.Fragment>
+          ))}
+        </nav>
+      )}
       {/* Paper stock fills the whole surface for the technical isometric styles;
           its graph grid is pinned to the panned/zoomed drawing underneath. */}
       {isIso && isoStyle.technical && (

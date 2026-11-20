@@ -1,8 +1,12 @@
+import { applyDiagramFile } from './applyDiagramFile.ts'
+import { collectImpacts } from './impactedScan.ts'
 import { serveArcLive } from './arc-live.ts'
 import { createHash, randomBytes } from 'node:crypto'
 import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { validateDiagram } from '../src/utils/diagramDiagnostics.ts'
+import { styleDiagnostics, validateArcStyle } from '../src/utils/arcStyle.ts'
+import type { ArcStyle } from '../src/utils/themes.ts'
 import type { Diagnostic, DiagnosticSeverity, Fix } from '../src/utils/diagramDiagnostics.ts'
 import { diffDiagram } from '../src/utils/diffDiagram.ts'
 import type { ArcDiagramData } from '../src/types/diagram.ts'
@@ -15,20 +19,33 @@ import diagramSchemaJson from '../schemas/arc-diagram.schema.json'
 const USAGE = `arc — Arc diagram CLI
 
 Usage:
-  arc check <file|-> [--severity error|warning|all] [--format text|json] [--json] [--strict]
+  arc check <file|-> [--style <file>] [--severity error|warning|all] [--format text|json] [--json] [--strict]
   arc diff <base> <head> [--format json|summary] [--json] [--summary]
-  arc render <file|-> --out <file> [--format svg|png|gif|mp4] [--theme <id>] [--mode light|dark] [--scale <n>] [--flow-time <s>] [--duration <s>] [--fps <n>] [--padding <px>] [--background <color>] [--grid] [--strict] [--json]
+  arc render <file|-> --out <file> [--format svg|png|gif|mp4] [--theme <id>|--style <file>] [--mode light|dark] [--scale <n>] [--flow-time <s>] [--duration <s>] [--fps <n>] [--padding <px>] [--background <color>] [--grid] [--strict] [--json]
   arc bench <case-dir|suite-dir> [candidate.json ...] [--strict] [--json]
   arc live serve <stream> [--port <port>]
   arc apply <stream> --ops <file|-> [--port <port>]
+  arc apply <diagram.arc.json> --ops <file|-> [--json]
+  arc impacted <path>... [--root <dir>] [--json]
   arc schema
 
 Commands:
-  check    Validate a diagram and print coded diagnostics
-  diff     Print the structural DiagramDelta between two diagrams
-  render   Validate, render an SVG/PNG/GIF/MP4, and atomically replace the output
-  bench    Score diagram candidates against a benchmark case or suite
-  schema   Print the generated draft-07 JSON Schema
+  check     Validate a diagram and print coded diagnostics
+  diff      Print the structural DiagramDelta between two diagrams
+  render    Validate, render an SVG/PNG/GIF/MP4, and atomically replace the output
+  bench     Score diagram candidates against a benchmark case or suite
+  impacted  List *.arc.json diagrams that claim the given paths
+  schema    Print the generated draft-07 JSON Schema
+
+Apply:
+  a target that ends in .json is a diagram file: the operations are written
+  back, all or nothing. Any other target is a live stream name. --port forces
+  the stream. An operations file may be an array or an envelope with ops.
+
+Style:
+  --style <file> takes a host style (schemas/arc-style.schema.json). render
+  paints with it as literal colors and fonts; check reports a _meta.themeId
+  the style overrides (style/theme-ignored). A style replaces --theme.
 
 Input:
   use "-" or pipe JSON on stdin for check/render; diff expects two file paths
@@ -147,8 +164,10 @@ function parseCheckArgs(args: string[]): {
   severity: SeverityFilter
   format: CheckFormat
   strict: boolean
+  style?: string
 } {
   let file: string | undefined
+  let style: string | undefined
   let severity: SeverityFilter = 'all'
   let format: CheckFormat = 'text'
   let strict = false
@@ -165,6 +184,9 @@ function parseCheckArgs(args: string[]): {
       format = 'json'
     } else if (arg === '--strict') {
       strict = true
+    } else if (arg === '--style') {
+      style = args[++i]
+      if (!style) fail('--style requires a style file', 2)
     } else if (arg === '--help' || arg === '-h') {
       console.log(USAGE)
       process.exit(0)
@@ -177,17 +199,32 @@ function parseCheckArgs(args: string[]): {
     }
   }
 
-  return { file, severity, format, strict }
+  return { file, severity, format, strict, style }
 }
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err)
 }
 
-async function checkCommand(args: string[]): Promise<number> {
-  const { file, severity, format, strict } = parseCheckArgs(args)
+/** Read and validate a host style file (`--style`). Throws one readable error. */
+function readStyleFile(path: string): ArcStyle {
   let value: unknown
   try {
+    value = JSON.parse(readFileSync(resolve(path), 'utf8'))
+  } catch (err) {
+    throw new Error(`style: cannot read ${path}: ${errorMessage(err)}`)
+  }
+  const problems = validateArcStyle(value)
+  if (problems.length) throw new Error(`style: ${path} is not a valid Arc style — ${problems.join('; ')}`)
+  return value as ArcStyle
+}
+
+async function checkCommand(args: string[]): Promise<number> {
+  const { file, severity, format, strict, style: stylePath } = parseCheckArgs(args)
+  let value: unknown
+  let style: ArcStyle | undefined
+  try {
+    if (stylePath) style = readStyleFile(stylePath)
     value = await readDiagram(file, 'check')
   } catch (err) {
     if (format === 'json') console.log(JSON.stringify({ ok: false, error: errorMessage(err) }, null, 2))
@@ -195,7 +232,7 @@ async function checkCommand(args: string[]): Promise<number> {
     return 1
   }
 
-  const diagnostics = validateDiagram(value)
+  const diagnostics = [...validateDiagram(value), ...(style ? styleDiagnostics(value, style) : [])]
   const shown = severity === 'all' ? diagnostics : diagnostics.filter(d => d.severity === severity)
   const errors = diagnostics.filter(d => d.severity === 'error')
   const warnings = diagnostics.filter(d => d.severity === 'warning')
@@ -340,6 +377,7 @@ function parseRenderArgs(args: string[]): {
   strict: boolean
   json: boolean
   theme?: string
+  style?: string
   mode?: 'light' | 'dark'
   scale?: number
   flowTime?: number
@@ -360,6 +398,7 @@ function parseRenderArgs(args: string[]): {
   let strict = false
   let json = false
   let theme: string | undefined
+  let style: string | undefined
   let mode: 'light' | 'dark' | undefined
   let scale: number | undefined
   let flowTime: number | undefined
@@ -381,6 +420,9 @@ function parseRenderArgs(args: string[]): {
     } else if (arg === '--theme') {
       theme = args[++i]
       if (!theme) fail('--theme requires a theme id', 2)
+    } else if (arg === '--style') {
+      style = args[++i]
+      if (!style) fail('--style requires a style file', 2)
     } else if (arg === '--mode') {
       mode = args[++i]
       if (mode !== 'light' && mode !== 'dark') fail('--mode must be light or dark', 2)
@@ -444,12 +486,13 @@ function parseRenderArgs(args: string[]): {
   if (backgroundColor !== undefined && !/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(backgroundColor)) {
     fail('--background must be a hex or CSS named color', 2)
   }
+  if (theme !== undefined && style !== undefined) fail('--theme and --style are exclusive: a style replaces the theme', 2)
   if (format === 'svg' && fps !== undefined) fail('--fps only applies to gif/mp4', 2)
   if (format === 'svg' && duration !== undefined) fail('--duration only applies to gif/mp4', 2)
   if (format === 'png' && fps !== undefined) fail('--fps only applies to gif/mp4', 2)
   if (format === 'png' && duration !== undefined) fail('--duration only applies to gif/mp4', 2)
 
-  return { file, out, format, padding, backgroundColor, includeGrid, strict, json, theme, mode, scale, flowTime, duration, fps, animateFlows, chromePath, ffmpegPath }
+  return { file, out, format, padding, backgroundColor, includeGrid, strict, json, theme, style, mode, scale, flowTime, duration, fps, animateFlows, chromePath, ffmpegPath }
 }
 
 async function renderCommand(args: string[]): Promise<number> {
@@ -464,7 +507,9 @@ async function renderCommand(args: string[]): Promise<number> {
 
   let sourceText: string
   let value: unknown
+  let style: ArcStyle | undefined
   try {
+    if (parsed.style) style = readStyleFile(parsed.style)
     sourceText = await readDiagramText(parsed.file, 'render')
     value = parseJson(sourceText, 'render')
   } catch (err) {
@@ -472,7 +517,7 @@ async function renderCommand(args: string[]): Promise<number> {
   }
 
   const sourceHash = sha256Hex(sourceText)
-  const diagnostics = validateDiagram(value)
+  const diagnostics = [...validateDiagram(value), ...(style ? styleDiagnostics(value, style) : [])]
   const errors = diagnostics.filter(d => d.severity === 'error')
   const warnings = diagnostics.filter(d => d.severity === 'warning')
   if (errors.length || (parsed.strict && warnings.length)) {
@@ -490,6 +535,7 @@ async function renderCommand(args: string[]): Promise<number> {
       includeGrid: parsed.includeGrid,
       padding: parsed.padding,
       theme: parsed.theme,
+      style,
       mode: parsed.mode,
       flowTime: parsed.flowTime,
       animateFlows: parsed.animateFlows,
@@ -553,6 +599,7 @@ async function renderCommand(args: string[]): Promise<number> {
       backgroundColor: parsed.backgroundColor,
       includeGrid: parsed.includeGrid,
       theme: parsed.theme,
+      ...(style ? { style: { id: style.id, version: style.version } } : {}),
       mode: parsed.mode,
       scale: parsed.scale,
       flowTime: parsed.flowTime,
@@ -629,6 +676,125 @@ async function benchCommand(args: string[]): Promise<number> {
   return report.ok && report.totals.candidates > 0 ? 0 : 1
 }
 
+function formatApplyDiagnostic(diagnostic: string): string {
+  try {
+    const parsed = JSON.parse(diagnostic) as unknown
+    if (Array.isArray(parsed)) {
+      return parsed.map(entry => {
+        if (entry && typeof entry === 'object' && 'message' in entry) {
+          const record = entry as { code?: unknown; message?: unknown }
+          return `${String(record.code ?? 'error')}: ${String(record.message)}`
+        }
+        return JSON.stringify(entry)
+      }).join('\n')
+    }
+  } catch {
+    // A plain sentence from the operation runner.
+  }
+  return diagnostic
+}
+
+function applyTargetsFile(target: string, explicitPort: boolean): boolean {
+  if (explicitPort || target === '-') return false
+  return target.endsWith('.json')
+}
+
+async function applyCommand(args: string[]): Promise<number> {
+  let json = false
+  const positional: string[] = []
+  let opsFile: string | undefined
+  let port: number | undefined
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (arg === '--json') json = true
+    else if (arg === '--ops') {
+      opsFile = args[++i]
+      if (!opsFile) fail('--ops requires a file path or -', 2)
+    } else if (arg === '--port') {
+      const value = args[++i]
+      port = Number(value)
+      if (!value || !Number.isInteger(port)) fail('--port requires an integer', 2)
+    } else if (arg === '--help' || arg === '-h') {
+      console.log(USAGE)
+      return 0
+    } else if (arg.startsWith('-')) {
+      fail(`unknown option: ${arg}`, 2)
+    } else {
+      positional.push(arg)
+    }
+  }
+  const target = positional[0]
+  if (!target || !opsFile || positional.length !== 1) fail('Expected arc apply <stream|diagram.json> --ops <file|->', 2)
+  const text = opsFile === '-' ? await readStdin() : readFileSync(opsFile, 'utf8')
+  const input = parseJson(text, opsFile)
+
+  if (!applyTargetsFile(target, port !== undefined)) {
+    const streamPort = port ?? 5190
+    const baseUrl = `http://127.0.0.1:${streamPort}`
+    const state = await (await fetch(baseUrl + '/state')).json() as { seq: number }
+    const envelope = Array.isArray(input) ? { v: 1, stream: target, base: state.seq, seq: state.seq + 1, ops: input } : input
+    const response = await fetch(baseUrl + '/apply', { method: 'POST', body: JSON.stringify(envelope) })
+    console.log(await response.text())
+    return response.ok ? 0 : 1
+  }
+
+  let result
+  try {
+    result = applyDiagramFile(target, input)
+  } catch (err) {
+    fail(errorMessage(err), 2)
+  }
+  if (json) {
+    console.log(JSON.stringify(result, null, 2))
+  } else if (result.ok) {
+    const focus = result.focusIgnored ? '; focus was not written' : ''
+    console.log(`updated ${result.file} (${result.ops} operation${result.ops === 1 ? '' : 's'})${focus}`)
+  } else {
+    console.error(result.diagnostics.map(formatApplyDiagnostic).join('\n'))
+  }
+  return result.ok ? 0 : 1
+}
+
+function impactedCommand(args: string[]): number {
+  let json = false
+  let root = process.cwd()
+  const paths: string[] = []
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (arg === '--json') json = true
+    else if (arg === '--root') {
+      const value = args[++i]
+      if (!value) fail('--root requires a directory', 2)
+      root = value
+    } else if (arg === '--help' || arg === '-h') {
+      console.log(USAGE)
+      return 0
+    } else if (arg.startsWith('-')) {
+      fail(`unknown option: ${arg}`, 2)
+    } else {
+      paths.push(arg)
+    }
+  }
+  if (!paths.length) fail('impacted requires at least one path', 2)
+  if (!existsSync(root)) fail(`impacted: directory not found: ${root}`, 2)
+  const report = collectImpacts(root, paths)
+  if (json) {
+    console.log(JSON.stringify({ ok: true, ...report }, null, 2))
+    return 0
+  }
+  if (!report.diagrams.length) console.log('no diagrams claim these paths')
+  for (const diagram of report.diagrams) {
+    console.log(diagram.file)
+    for (const match of diagram.matches) {
+      const who = match.node ?? 'diagram'
+      const watch = match.watch ? ` ${match.watch}` : ''
+      console.log(`  ${who}  ${match.via}${watch}  ${match.path}`)
+    }
+  }
+  for (const skip of report.skipped) console.error(`skipped ${skip.file}: ${skip.message}`)
+  return 0
+}
+
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2)
   let exitCode: number
@@ -641,20 +807,12 @@ async function main(): Promise<void> {
       console.log(`Arc stream ${args[1]} at http://127.0.0.1:${port} (/events, /socket, /apply, /state)`)
       return
     }
-    case 'apply': {
-      const stream = args[0]
-      const file = args[args.indexOf('--ops') + 1]
-      if (!stream || !args.includes('--ops') || !file) fail('Expected arc apply <stream> --ops <file|->', 2)
-      const port = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : 5190
-      const baseUrl = `http://127.0.0.1:${port}`
-      const input = parseJson(file === '-' ? await readStdin() : readFileSync(file, 'utf8'), file)
-      const state = await (await fetch(baseUrl + '/state')).json() as { seq: number }
-      const envelope = Array.isArray(input) ? { v: 1, stream, base: state.seq, seq: state.seq + 1, ops: input } : input
-      const response = await fetch(baseUrl + '/apply', { method: 'POST', body: JSON.stringify(envelope) })
-      console.log(await response.text())
-      exitCode = response.ok ? 0 : 1
+    case 'apply':
+      exitCode = await applyCommand(args)
       break
-    }
+    case 'impacted':
+      exitCode = impactedCommand(args)
+      break
     case 'check':
       exitCode = await checkCommand(args)
       break

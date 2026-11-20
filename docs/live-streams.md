@@ -134,6 +134,20 @@ CLI reads the current sequence, builds the envelope and sends it. Two writers
 can conflict. If the relay rejects a write, read the state again and retry. Do
 not overwrite the other writer.
 
+A target that ends in `.json` is a diagram file rather than a stream name.
+`--port` keeps the target as a stream. The file command uses the same
+operations, checks each one, and replaces the file only when the whole list
+succeeds. A rejected list leaves the bytes on disk unchanged. `focus` is
+viewer state: a list that only focuses is rejected, and a mixed list writes
+the diagram operations and says that focus was not stored.
+
+```sh
+arc apply docs/services.arc.json --ops commands.json
+arc apply docs/services.arc.json --ops - --json <<'EOF'
+[{"op":"node.add","id":"billing","data":{"name":"Billing","kind":"service"}}]
+EOF
+```
+
 The reference relay holds one stream in memory and listens only on loopback:
 
 - `GET /events`: SSE envelopes. The relay sends a reset when each connection

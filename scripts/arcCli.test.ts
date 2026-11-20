@@ -360,6 +360,80 @@ describe('arc CLI', () => {
     expect(missing.status).toBe(1)
   })
 
+  test('apply writes operations into a diagram file and leaves it unchanged when one fails', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'arc-apply-'))
+    try {
+      const file = join(dir, 'services.arc.json')
+      const original = `${JSON.stringify(valid, null, 2)}\n`
+      writeFileSync(file, original)
+      const bad = run(['apply', file, '--ops', '-', '--json'], JSON.stringify([{ op: 'node.remove', id: 'missing' }]))
+      expect(bad.status).toBe(1)
+      expect(JSON.parse(bad.stdout).ok).toBe(false)
+      expect(readFileSync(file, 'utf8')).toBe(original)
+
+      const focus = run(['apply', file, '--ops', '-'], JSON.stringify([{ op: 'focus', nodes: ['a'], caption: 'Working' }]))
+      expect(focus.status).toBe(1)
+      expect(focus.stderr).toContain('focus is viewer state')
+      expect(readFileSync(file, 'utf8')).toBe(original)
+
+      const ops = join(dir, 'ops.json')
+      writeFileSync(ops, JSON.stringify([
+        { op: 'node.add', id: 'db', data: { name: 'DB', kind: 'database' } },
+        { op: 'focus', nodes: ['db'], caption: 'Added' },
+      ]))
+      const good = run(['apply', file, '--ops', ops, '--json'])
+      expect(good.status).toBe(0)
+      const payload = JSON.parse(good.stdout)
+      expect(payload.ok).toBe(true)
+      expect(payload.focusIgnored).toBe(true)
+      const written = JSON.parse(readFileSync(file, 'utf8'))
+      expect(written.nodeData.a.name).toBe('A')
+      expect(written.nodeData.db).toEqual({ name: 'DB', kind: 'database' })
+      expect(written.nodes.db.size).toBe('m')
+
+      const renamed = run(['apply', file, '--ops', '-'], JSON.stringify({
+        v: 1,
+        stream: 'services',
+        seq: 1,
+        base: 0,
+        ops: [{ op: 'node.update', id: 'a', data: { name: 'Renamed' } }],
+      }))
+      expect(renamed.status).toBe(0)
+      expect(renamed.stdout).toContain('updated')
+      expect(JSON.parse(readFileSync(file, 'utf8')).nodeData.a).toMatchObject({ name: 'Renamed', icon: 'Server', color: 'blue' })
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('impacted reports the diagram and node that claim a path', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'arc-impacted-cli-'))
+    try {
+      writeFileSync(join(dir, 'services.arc.json'), JSON.stringify({
+        ...valid,
+        watches: ['src/billing/**'],
+        nodeData: {
+          a: { ...valid.nodeData.a, source: { path: 'src/auth/session.ts' } },
+        },
+      }))
+      const result = run(['impacted', 'src/auth/session.ts', 'src/billing/invoice.ts', 'README.md', '--root', dir, '--json'])
+      expect(result.status).toBe(0)
+      const report = JSON.parse(result.stdout)
+      expect(report.diagrams).toEqual([{
+        file: 'services.arc.json',
+        matches: [
+          { path: 'src/auth/session.ts', via: 'source', node: 'a' },
+          { path: 'src/billing/invoice.ts', via: 'watch', watch: 'src/billing/**' },
+        ],
+      }])
+      const quiet = run(['impacted', 'README.md', '--root', dir])
+      expect(quiet.status).toBe(0)
+      expect(quiet.stdout).toContain('no diagrams claim these paths')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   test('schema prints the generated draft-07 schema', () => {
     const result = run(['schema'])
     expect(result.status).toBe(0)

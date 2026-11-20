@@ -1,4 +1,6 @@
+import { applyDiagramFile } from '../../../scripts/applyDiagramFile.ts'
 import { serveArcLive } from '../../../scripts/arc-live.ts'
+import { collectImpacts } from '../../../scripts/impactedScan.ts'
 /**
  * Arc MCP server — stdio tools for diagram authoring.
  * Run locally: `bun packages/mcp/src/server.ts` or `bun run mcp`
@@ -35,6 +37,7 @@ import skillMarkdown from '../../../skills/arc-diagrams/SKILL.md' with { type: '
 import llmBriefing from '../../../docs/llm.txt' with { type: 'text' }
 
 const diagramSchema = z.record(z.unknown())
+const styleSchema = z.record(z.unknown()).describe('Host ArcStyle object (schemas/arc-style.schema.json). Replaces theme; rendered as literal colors and fonts.')
 const agentLabel = z.string().trim().min(1).max(80).regex(/^[^\u0000-\u001f\u007f]+$/, 'Agent labels must be single-line text without control characters')
 const liveAgentSchema = z.object({
   harness: agentLabel.describe('Caller-declared harness label, for example Codex; not inferred or verified by Arc'),
@@ -99,6 +102,31 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
   server.tool('arc_live_read', 'Read the current command stream state.', {}, async () => ({
     content: [{ type: 'text' as const, text: JSON.stringify(commandRelay?.getState() ?? null) }],
   }))
+  server.tool('arc_impacted', 'List *.arc.json diagrams that claim the given repo-relative paths, through node source.path or watches globs.', {
+    paths: z.array(z.string().min(1)).min(1).describe('Changed file paths, repo-relative or absolute'),
+    root: z.string().min(1).optional().describe('Directory to scan for *.arc.json. Defaults to the process working directory'),
+  }, async ({ paths, root }) => {
+    const report = collectImpacts(root ?? process.cwd(), paths)
+    return { content: [{ type: 'text' as const, text: JSON.stringify({ ok: true, ...report }, null, 2) }] }
+  })
+  server.tool('apply_diagram_file', 'Apply a push-stream operation list to a diagram JSON file. All or nothing: a rejected operation leaves the file unchanged. focus is viewer state and is not stored.', {
+    file: z.string().min(1).describe('Path to the diagram JSON file'),
+    ops: z.array(z.unknown()).min(1).describe('Operation list, the same ops a push-stream envelope carries'),
+  }, async ({ file, ops }) => {
+    try {
+      const result = applyDiagramFile(file, ops)
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+        ...(result.ok ? {} : { isError: true as const }),
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify({ ok: false, error: message }, null, 2) }],
+        isError: true as const,
+      }
+    }
+  })
 
   const connectionId = options.connectionId ?? randomUUID()
   let localService: ReturnType<typeof startLocalLiveService> | undefined
@@ -413,6 +441,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
     {
       diagram: diagramSchema.describe('Valid ArcDiagramData JSON'),
       theme: z.string().optional().describe(themeDescription),
+      style: styleSchema.optional(),
       mode: z.enum(['light', 'dark']).optional().describe('Color mode; defaults to the theme default'),
       backgroundColor: z.string().optional().describe('CSS background color (defaults to the theme canvas)'),
       includeGrid: z.boolean().optional().describe('Render the diagram grid (default: branded themes on, others off)'),
@@ -420,10 +449,10 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       flowTime: z.number().nonnegative().optional().describe('Render flow markers at this route second (disables SMIL animation)'),
       animateFlows: z.boolean().optional().describe('Embed SMIL flow animation in the SVG (default: true; ignored when flowTime is set)'),
     },
-    async ({ diagram, theme, mode, backgroundColor, includeGrid, padding, flowTime, animateFlows }) => {
+    async ({ diagram, theme, style, mode, backgroundColor, includeGrid, padding, flowTime, animateFlows }) => {
       try {
         const data = parseDiagram(diagram)
-        const rendered = renderDiagramSvg(data, { theme, mode, backgroundColor, includeGrid, padding, flowTime, animateFlows })
+        const rendered = renderDiagramSvg(data, { theme, style, mode, backgroundColor, includeGrid, padding, flowTime, animateFlows })
         return { content: [{ type: 'text', text: rendered.svg }] }
       } catch (err) {
         return renderToolError(err)
@@ -437,6 +466,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
     {
       diagram: diagramSchema.describe('Valid ArcDiagramData JSON'),
       theme: z.string().optional().describe(themeDescription),
+      style: styleSchema.optional(),
       mode: z.enum(['light', 'dark']).optional().describe('Color mode; defaults to the theme default'),
       backgroundColor: z.string().optional().describe('CSS background color (defaults to the theme canvas)'),
       includeGrid: z.boolean().optional().describe('Render the diagram grid (default: branded themes on, others off)'),
@@ -444,10 +474,10 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       scale: z.number().positive().max(4).optional().describe('Raster scale factor (default: 2, max: 4)'),
       flowTime: z.number().nonnegative().optional().describe('Flow route second to freeze into the PNG (default: 0)'),
     },
-    async ({ diagram, theme, mode, backgroundColor, includeGrid, padding, scale, flowTime }) => {
+    async ({ diagram, theme, style, mode, backgroundColor, includeGrid, padding, scale, flowTime }) => {
       try {
         const data = parseDiagram(diagram)
-        const rendered = await renderDiagramPng(data, { theme, mode, backgroundColor, includeGrid, padding, scale, flowTime })
+        const rendered = await renderDiagramPng(data, { theme, style, mode, backgroundColor, includeGrid, padding, scale, flowTime })
         return {
           content: [
             { type: 'image', data: rendered.png.toString('base64'), mimeType: 'image/png' },
@@ -461,6 +491,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
                 bytes: rendered.png.length,
                 chrome: rendered.chrome,
                 theme: rendered.theme,
+                ...(rendered.style ? { style: rendered.style } : {}),
                 mode: rendered.mode,
               }, null, 2),
             },
@@ -480,6 +511,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       output: z.string().describe('Destination file path for the GIF or MP4'),
       format: z.enum(['gif', 'mp4']).optional().describe('Output format; inferred from `output` extension when omitted'),
       theme: z.string().optional().describe(themeDescription),
+      style: styleSchema.optional(),
       mode: z.enum(['light', 'dark']).optional().describe('Color mode; defaults to the theme default'),
       backgroundColor: z.string().optional().describe('CSS background color (defaults to the theme canvas)'),
       includeGrid: z.boolean().optional().describe('Render the diagram grid (default: branded themes on, others off)'),
@@ -488,7 +520,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       fps: z.number().positive().max(60).optional().describe('Frames per second (default: 12 for GIF, 30 for MP4)'),
       duration: z.number().positive().max(120).optional().describe('Seconds to render (default: one full flow cycle)'),
     },
-    async ({ diagram, output, format, theme, mode, backgroundColor, includeGrid, padding, scale, fps, duration }) => {
+    async ({ diagram, output, format, theme, style, mode, backgroundColor, includeGrid, padding, scale, fps, duration }) => {
       try {
         const data = parseDiagram(diagram)
         const inferred = output.toLowerCase().endsWith('.mp4') ? 'mp4' : output.toLowerCase().endsWith('.gif') ? 'gif' : undefined
@@ -500,6 +532,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
         const rendered = await renderDiagramAnimation(data, {
           format: resolvedFormat,
           theme,
+          style,
           mode,
           backgroundColor,
           includeGrid,
@@ -547,6 +580,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       componentName: z.string().optional().describe('Component function name for format=component (default: ArcDiagramExample)'),
       dataName: z.string().optional().describe('Diagram const name for format=component (default: diagram)'),
       theme: z.string().optional().describe(themeDescription),
+      style: styleSchema.optional(),
       mode: z.enum(['light', 'dark']).optional().describe('Color mode; defaults to the theme default'),
       interactive: z.boolean().optional().describe('Whether the React component is interactive'),
       baseUrl: z.string().url().optional().describe('Studio base URL for format=iframe (default: ARC_EDITOR_URL or http://localhost:5188)'),
@@ -558,7 +592,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
       includeGrid: z.boolean().optional().describe('Render the diagram grid for format=html (default: branded themes on, others off)'),
       padding: z.number().nonnegative().optional().describe('Padding around the export bounds in px for format=html (default: 20)'),
     },
-    async ({ diagram, format, componentName, dataName, theme, mode, interactive, baseUrl, sessionId, title, width, height, backgroundColor, includeGrid, padding }) => {
+    async ({ diagram, format, componentName, dataName, theme, style, mode, interactive, baseUrl, sessionId, title, width, height, backgroundColor, includeGrid, padding }) => {
       try {
         const data = parseDiagram(diagram)
         const rendered = renderDiagramHtml(data, {
@@ -566,6 +600,7 @@ export function createArcMcpServer(options: { live?: LiveDiagramService; editorU
           componentName,
           dataName,
           theme,
+          style,
           mode,
           interactive,
           baseUrl,

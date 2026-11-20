@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
- * Regenerate `schemas/arc-diagram.schema.json` from the `ArcDiagramData` type.
+ * Regenerate `schemas/arc-diagram.schema.json` from the `ArcDiagramData` type,
+ * and `schemas/arc-style.schema.json` from the host `ArcStyle` type.
  *
  * Uses ts-json-schema-generator (draft-07, `$ref` definitions, JSDoc carried
  * into `description`). The generator already emits `additionalProperties:
@@ -19,7 +20,9 @@ import { createGenerator, type Schema } from 'ts-json-schema-generator'
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 export const SCHEMA_PATH = join(REPO_ROOT, 'schemas', 'arc-diagram.schema.json')
+export const STYLE_SCHEMA_PATH = join(REPO_ROOT, 'schemas', 'arc-style.schema.json')
 const TYPE_PATH = join(REPO_ROOT, 'src', 'types', 'diagram.ts')
+const STYLE_TYPE_PATH = join(REPO_ROOT, 'src', 'utils', 'themes.ts')
 const TSCONFIG_PATH = join(REPO_ROOT, 'tsconfig.json')
 
 interface ObjectDef {
@@ -43,17 +46,16 @@ function sortKeys(value: unknown): unknown {
   )
 }
 
-/** Build the draft-07 JSON Schema object for `ArcDiagramData`. */
-export function buildSchema(): Schema {
+function buildTypeSchema(path: string, type: string): Schema {
   const schema = createGenerator({
-    path: TYPE_PATH,
+    path,
     tsconfig: TSCONFIG_PATH,
-    type: 'ArcDiagramData',
+    type,
     jsDoc: 'extended',
     additionalProperties: false,
     sortProps: true,
     topRef: true,
-  }).createSchema('ArcDiagramData')
+  }).createSchema(type)
 
   // Closed object types reject invented fields; Record maps are index-signature
   // objects (their additionalProperties is a subschema) and stay open.
@@ -66,13 +68,29 @@ export function buildSchema(): Schema {
   return sortKeys(schema) as Schema
 }
 
+/** Build the draft-07 JSON Schema object for `ArcDiagramData`. */
+export function buildSchema(): Schema {
+  return buildTypeSchema(TYPE_PATH, 'ArcDiagramData')
+}
+
+/** Build the draft-07 JSON Schema object for a host `ArcStyle` file. */
+export function buildStyleSchema(): Schema {
+  return buildTypeSchema(STYLE_TYPE_PATH, 'ArcStyle')
+}
+
 /** Canonical serialized form — the committed artifact is exactly this text. */
 export function generateSchemaText(): string {
   return `${JSON.stringify(buildSchema(), null, 2)}\n`
+}
+
+export function generateStyleSchemaText(): string {
+  return `${JSON.stringify(buildStyleSchema(), null, 2)}\n`
 }
 
 if (import.meta.main) {
   mkdirSync(dirname(SCHEMA_PATH), { recursive: true })
   writeFileSync(SCHEMA_PATH, generateSchemaText())
   console.log(`wrote ${SCHEMA_PATH}`)
+  writeFileSync(STYLE_SCHEMA_PATH, generateStyleSchemaText())
+  console.log(`wrote ${STYLE_SCHEMA_PATH}`)
 }

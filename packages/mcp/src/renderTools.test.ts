@@ -68,6 +68,18 @@ describe('arc-mcp render tools', () => {
     expect(text).toContain('API')
   })
 
+  test('render_svg takes a host style and paints literal colors', async () => {
+    await ready
+    const mode = { background: '#fbfaf7', foreground: '#1b1a17', muted: '#6b665c', surface: '#ffffff', border: '#d9d4c7', line: '#8a8475', accent: '#2f5bd3', success: '#1f9d6b', warning: '#b7791f', danger: '#c0392b' }
+    const style = { id: 'linea', version: '1.0.0', modes: { light: { ...mode, colors: { blue: '#123abc' } }, dark: mode } }
+    const result = await client.callTool({ name: 'render_svg', arguments: { diagram, style, mode: 'light' } })
+    expect(result.isError).toBeUndefined()
+    const text = result.content[0]?.type === 'text' ? result.content[0].text : ''
+    expect(text).toContain('#123abc')
+    expect(text).toContain('#1f9d6b')
+    expect(text).not.toContain('var(')
+  })
+
   test('render_html emits component, iframe, and standalone HTML outputs', async () => {
     await ready
     const component = await client.callTool({

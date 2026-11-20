@@ -380,6 +380,8 @@ npx arc render diagram.json --out flow.mp4 --duration 4 --fps 12
 npx arc schema
 npx arc live serve architecture --port 5190
 npx arc apply architecture --ops commands.json --port 5190
+npx arc apply diagram.arc.json --ops commands.json
+npx arc impacted src/auth/session.ts
 npx arc-ascii diagram.json --charset ascii --max-width 80
 ```
 
