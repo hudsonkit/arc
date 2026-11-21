@@ -167,7 +167,7 @@ header strip. The style owns the layout. The diagram owns the facts, in its
 `figure` block:
 
 ```json
-"figure": { "title": "Board custody", "code": "BC-01", "rev": "A", "sheet": "1 / 1" }
+"figure": { "title": "Checkout flow", "code": "CF-01", "rev": "A", "sheet": "1 / 1" }
 ```
 
 A panel is rows of cells. Each cell's `text` is a template, and `{name}` reads

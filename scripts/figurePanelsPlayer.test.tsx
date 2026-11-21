@@ -24,7 +24,7 @@ const style: ArcStyle = {
 }
 
 const diagram = {
-  id: 'custody',
+  id: 'checkout',
   layout: { width: 400, height: 200 },
   nodes: { a: { x: 20, y: 20, size: 'm' as const } },
   nodeData: { a: { name: 'A', icon: 'Server', color: 'blue' as const } },
@@ -35,11 +35,11 @@ const diagram = {
 describe('the player draws style panels', () => {
   test('from the diagram figure, in the panel corner', () => {
     const html = renderToStaticMarkup(
-      <ArcDiagram data={{ ...diagram, figure: { title: 'Board custody', code: 'BC-01', rev: 'A' } }} style={style} mode="light" />,
+      <ArcDiagram data={{ ...diagram, figure: { title: 'Checkout flow', code: 'CF-01', rev: 'A' } }} style={style} mode="light" />,
     )
     expect(html).toContain('data-arc-panel="plate"')
-    expect(html).toContain('>BOARD CUSTODY<')
-    expect(html).toContain('>BC-01<')
+    expect(html).toContain('>CHECKOUT FLOW<')
+    expect(html).toContain('>CF-01<')
     expect(html).toMatch(/data-arc-panel="plate"[^>]*style="[^"]*bottom:12px[^"]*right:12px/)
   })
 
@@ -49,10 +49,10 @@ describe('the player draws style panels', () => {
   })
 
   test('a panel takes over the label in its corner', () => {
-    const data = { ...diagram, figure: { title: 'Board custody', code: 'BC-01' } }
+    const data = { ...diagram, figure: { title: 'Checkout flow', code: 'CF-01' } }
     const shared = renderToStaticMarkup(<ArcDiagram data={data} style={style} labelPosition="bottom-right" />)
     const apart = renderToStaticMarkup(<ArcDiagram data={data} style={style} labelPosition="top-left" />)
-    expect(shared).not.toContain('>custody<')
-    expect(apart).toContain('>custody<')
+    expect(shared).not.toContain('>checkout<')
+    expect(apart).toContain('>checkout<')
   })
 })

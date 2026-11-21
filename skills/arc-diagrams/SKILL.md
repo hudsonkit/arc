@@ -222,7 +222,7 @@ such as a title plate, to the canvas corners. They are filled from the diagram's
 `figure` block, so give a finished figure one:
 
 ```json
-"figure": { "title": "Board custody", "code": "BC-01", "rev": "A", "sheet": "1 / 1" }
+"figure": { "title": "Checkout flow", "code": "CF-01", "rev": "A", "sheet": "1 / 1" }
 ```
 
 The code stays the same for the life of the figure; `rev` counts its edits.

@@ -361,9 +361,9 @@ export interface FileMeta {
  * variable; any other string key works the same way.
  */
 export interface DiagramFigure {
-  /** The figure's title, e.g. "Board custody". */
+  /** The figure's title, e.g. "Checkout flow". */
   title?: string
-  /** A short, stable code, e.g. "BC-01". Falls back to the diagram id. */
+  /** A short, stable code, e.g. "CF-01". Falls back to the diagram id. */
   code?: string
   /** Revision of this figure, e.g. "A". */
   rev?: string

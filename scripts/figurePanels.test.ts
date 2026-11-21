@@ -37,7 +37,7 @@ const plate: StylePanel = {
 const style: ArcStyle = { id: 'test', version: '1', modes: { light, dark }, panels: [plate] }
 
 const diagram = {
-  id: 'custody',
+  id: 'checkout',
   layout: { width: 400, height: 200 },
   nodes: { a: { x: 20, y: 20, size: 'm' as const } },
   nodeData: { a: { icon: 'Box', name: 'A', color: 'zinc' as const } },
@@ -58,18 +58,18 @@ describe('templates', () => {
   })
 
   test('figure strings become variables; code falls back to the diagram id', () => {
-    expect(figureVariables({ id: 'custody' })).toEqual({ id: 'custody', code: 'custody' })
-    expect(figureVariables({ id: 'custody', figure: { code: 'BC-01', title: 'Board custody', rev: '' } }))
-      .toEqual({ id: 'custody', code: 'BC-01', title: 'Board custody' })
+    expect(figureVariables({ id: 'checkout' })).toEqual({ id: 'checkout', code: 'checkout' })
+    expect(figureVariables({ id: 'checkout', figure: { code: 'CF-01', title: 'Checkout flow', rev: '' } }))
+      .toEqual({ id: 'checkout', code: 'CF-01', title: 'Checkout flow' })
   })
 })
 
 describe('layout', () => {
-  const full = { title: 'Board custody', code: 'BC-01', rev: 'A', sheet: '1 / 1' }
+  const full = { title: 'Checkout flow', code: 'CF-01', rev: 'A', sheet: '1 / 1' }
 
   test('lays out every row when every variable is set', () => {
     const layout = layoutPanel(plate, full)!
-    expect(layout.rows.map(r => r.cells.map(c => c.value))).toEqual([['BOARD CUSTODY'], ['BC-01', 'A', '1 / 1']])
+    expect(layout.rows.map(r => r.cells.map(c => c.value))).toEqual([['CHECKOUT FLOW'], ['CF-01', 'A', '1 / 1']])
     // Code spans two of four columns; every row fills the panel width.
     const [code, rev, sheet] = layout.rows[1].cells
     expect(code.width).toBe(rev.width + sheet.width)
@@ -80,19 +80,19 @@ describe('layout', () => {
   })
 
   test('drops a cell whose variable is missing and stretches the rest of its row', () => {
-    const layout = layoutPanel(plate, { title: 'Board custody', code: 'BC-01', sheet: '1 / 1' })!
+    const layout = layoutPanel(plate, { title: 'Checkout flow', code: 'CF-01', sheet: '1 / 1' })!
     const cells = layout.rows[1].cells
     expect(cells.map(c => c.label)).toEqual(['Code', 'Sheet'])
     expect(cells[1].x + cells[1].width).toBe(layout.width)
   })
 
   test('drops a row with no drawn cell', () => {
-    const layout = layoutPanel(plate, { title: 'Board custody' })!
+    const layout = layoutPanel(plate, { title: 'Checkout flow' })!
     expect(layout.rows).toHaveLength(1)
   })
 
   test('leaves the panel out when a required variable is missing', () => {
-    expect(layoutPanel(plate, { code: 'BC-01', rev: 'A' })).toBeNull()
+    expect(layoutPanel(plate, { code: 'CF-01', rev: 'A' })).toBeNull()
   })
 
   test('leaves the panel out when nothing in it is drawn', () => {
@@ -116,10 +116,10 @@ describe('layout', () => {
 
 describe('export', () => {
   test('draws the panel from the diagram figure', () => {
-    const { svg } = renderDiagramSvg({ ...diagram, figure: { title: 'Board custody', code: 'BC-01', rev: 'A', sheet: '1 / 1' } }, { style, mode: 'light' })
+    const { svg } = renderDiagramSvg({ ...diagram, figure: { title: 'Checkout flow', code: 'CF-01', rev: 'A', sheet: '1 / 1' } }, { style, mode: 'light' })
     expect(svg).toContain('data-arc-panel="plate"')
-    expect(svg).toContain('>BOARD CUSTODY<')
-    expect(svg).toContain('>BC-01<')
+    expect(svg).toContain('>CHECKOUT FLOW<')
+    expect(svg).toContain('>CF-01<')
     expect(svg).toContain(`stroke="${light.line}"`)
   })
 
@@ -129,7 +129,7 @@ describe('export', () => {
   })
 
   test('a style without panels draws none', () => {
-    const { svg } = renderDiagramSvg({ ...diagram, figure: { title: 'Board custody' } }, { style: { ...style, panels: undefined }, mode: 'light' })
+    const { svg } = renderDiagramSvg({ ...diagram, figure: { title: 'Checkout flow' } }, { style: { ...style, panels: undefined }, mode: 'light' })
     expect(svg).not.toContain('data-arc-panel')
   })
 })
@@ -165,7 +165,7 @@ describe('validation', () => {
   })
 
   test('a diagram figure must hold strings', () => {
-    const ok = validateDiagram({ ...diagram, figure: { title: 'Board custody', code: 'BC-01' } })
+    const ok = validateDiagram({ ...diagram, figure: { title: 'Checkout flow', code: 'CF-01' } })
     expect(ok.filter(d => d.code === 'semantic/invalid-figure')).toEqual([])
     const bad = validateDiagram({ ...diagram, figure: { rev: 2 } })
     expect(bad.find(d => d.code === 'semantic/invalid-figure')?.message).toBe('`figure.rev` must be a string')
