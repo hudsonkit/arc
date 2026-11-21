@@ -6,6 +6,7 @@ import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getTheme, resolveNodeRadius, type ThemeId, type Theme, type BrandSpec, type ArcStyle } from '../utils/themes'
 import { ARC_STYLE_CSS, arcStyleTheme, arcStyleVars, resolveStylePerspective, type PerspectiveMeta } from '../utils/arcStyle'
+import { figureVariables, layoutPanels, panelSvg } from '../utils/figurePanels'
 import { altitudeStack, childOf, type AltitudeStep, type DiagramSet } from '../utils/altitudes'
 import { useArcStyle } from './ArcStyleProvider'
 import {
@@ -37,7 +38,7 @@ import type { Connector as EditorConnector } from '../types/editor'
 import type { NodeKind } from '../types/diagram'
 import { resolveNodeColor, resolveNodeIcon } from '../utils/nodeKinds'
 import type { DiagramDelta } from '../utils/diffDiagram'
-import type { ArcDiagramData as CanonicalArcDiagramData, DiagramFlow, DiagramFlowLeg, DiagramSource, FileMeta, FlowDirection, FlowEasing, FlowMarker, FlowTrail, LegendMode } from '../types/diagram'
+import type { ArcDiagramData as CanonicalArcDiagramData, DiagramFigure, DiagramFlow, DiagramFlowLeg, DiagramSource, FileMeta, FlowDirection, FlowEasing, FlowMarker, FlowTrail, LegendMode } from '../types/diagram'
 import { LiveFlowLayer } from './LiveFlowLayer'
 import { sourceLabel } from '../utils/sourceRef'
 import { ARC_ROOT_CLASS } from '../utils/cssScope'
@@ -260,6 +261,8 @@ export interface ArcDiagramData {
   legend?: LegendMode
   /** Viewer/editor display state saved with the file — see `FileMeta`. */
   _meta?: FileMeta
+  /** Title, code, revision and other facts that style panels show. */
+  figure?: DiagramFigure
   layoutHints?: LayoutHints
   nodes: Record<string, NodePosition>
   nodeData: Record<string, NodeData>
@@ -2602,7 +2605,14 @@ function ArcDiagramPlate({
   const chromeInset = borderedFrame ? 28 : 12
 
   const showTitleBlock = titleBlock !== false && !!brand?.titleBlock && !showArc
-  const showLabel = !!displayLabel && !brand?.titleBlock
+  // Style panels — the same layout the SVG export draws (utils/figurePanels.ts).
+  // The technical iso plate draws its own title, so panels stand down there.
+  const panels = useMemo(
+    () => showArc || (isIso && isoStyle.technical) ? [] : layoutPanels(style?.panels, figureVariables(live.data)),
+    [showArc, isIso, isoStyle.technical, style?.panels, live.data],
+  )
+  const brPanel = panels.find(p => p.anchor === 'bottom-right')
+  const showLabel = !!displayLabel && !brand?.titleBlock && !panels.some(p => p.anchor === labelPosition)
   const zoomShown = (interactive || showControls) && !showArc
 
   // The bottom-right corner belongs to "content" — the title block (a drawing
@@ -2610,7 +2620,7 @@ function ArcDiagramPlate({
   // are utility chrome: they're the ones that yield, sliding up to clear that
   // content (measured height for the title block, ~one line for a label).
   const brLabel = showLabel && labelPosition === 'bottom-right'
-  const cornerContentH = showTitleBlock ? titleBlockH : (brLabel ? 14 : 0)
+  const cornerContentH = showTitleBlock ? titleBlockH : brPanel ? brPanel.height : (brLabel ? 14 : 0)
   const zoomBottom = chromeInset + (zoomShown && cornerContentH ? cornerContentH + 10 : 0)
 
   // Declarative label placement resolved to pixel offsets (respects the frame inset).
@@ -2881,6 +2891,29 @@ function ArcDiagramPlate({
         />
       )}
 
+
+      {/* Style panels - plates pinned to canvas corners, filled from `figure` */}
+      {panels.map(layout => (
+        <svg
+          key={layout.id}
+          data-arc-panel={layout.id}
+          className="absolute z-10 pointer-events-none"
+          width={layout.width}
+          height={layout.height}
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          style={{
+            ...(layout.anchor.startsWith('top') ? { top: chromeInset } : { bottom: chromeInset }),
+            ...(layout.anchor.endsWith('left') ? { left: chromeInset } : { right: chromeInset }),
+          }}
+          dangerouslySetInnerHTML={{ __html: panelSvg(layout, {
+            line: 'var(--arc-diagram-line)',
+            label: 'var(--arc-diagram-muted)',
+            value: 'var(--arc-diagram-foreground)',
+            fill: 'var(--arc-diagram-background)',
+            font: brand?.monoFamily || 'ui-monospace, monospace',
+          }) }}
+        />
+      ))}
 
       {/* .arc source overlay */}
       {showArc && (

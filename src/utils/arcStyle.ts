@@ -9,6 +9,7 @@
 
 import { HOST_COLOR_ROLES, hostFallbackTokens } from '../../packages/viewer/src/theme/host'
 import type { Diagnostic } from './diagramDiagnostics'
+import { validatePanels } from './figurePanels'
 import type { ArcStyle, ArcStyleColor, ArcStyleMode, BrandSpec, ColorPalette, Theme } from './themes'
 
 export type StyleMode = 'light' | 'dark'
@@ -172,8 +173,16 @@ export function validateArcStyle(value: unknown): string[] {
       if (p.isoStyle !== undefined && !['solid', 'blueprint', 'cyanotype'].includes(p.isoStyle as string)) problems.push('`perspective.isoStyle` must be solid, blueprint or cyanotype')
     }
   }
+  if (value.panels !== undefined) {
+    problems.push(...validatePanels(value.panels))
+    // The legacy title block owns the bottom-right corner when it is on.
+    if (Array.isArray(value.panels) && isObject(value.brand) && value.brand.titleBlock === true
+      && value.panels.some(p => isObject(p) && p.anchor === 'bottom-right')) {
+      problems.push('`brand.titleBlock` and a bottom-right panel both sit in the bottom-right corner; drop one')
+    }
+  }
   for (const key of Object.keys(value)) {
-    if (!['id', 'version', 'modes', 'type', 'brand', 'perspective'].includes(key)) problems.push(`unknown field \`${key}\``)
+    if (!['id', 'version', 'modes', 'type', 'brand', 'perspective', 'panels'].includes(key)) problems.push(`unknown field \`${key}\``)
   }
   return problems
 }

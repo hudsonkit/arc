@@ -30,6 +30,13 @@
           ],
           "type": "object"
         },
+        "panels": {
+          "description": "Plates pinned to canvas corners, filled from the diagram's `figure`.",
+          "items": {
+            "$ref": "#/definitions/StylePanel"
+          },
+          "type": "array"
+        },
         "perspective": {
           "additionalProperties": false,
           "properties": {
@@ -269,6 +276,80 @@
           "type": "boolean"
         }
       },
+      "type": "object"
+    },
+    "StylePanel": {
+      "additionalProperties": false,
+      "description": "A plate the style pins to a canvas corner, filled from the diagram's `figure`. Rows hold cells; a row with no drawn cell is dropped, and a panel with no drawn row is not shown.",
+      "properties": {
+        "anchor": {
+          "description": "The canvas corner the panel sits in.",
+          "enum": [
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "The style's name for this panel.",
+          "type": "string"
+        },
+        "requires": {
+          "description": "Variables that must all be set, or the whole panel is left out.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "items": {
+              "$ref": "#/definitions/StylePanelCell"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "anchor",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "StylePanelCell": {
+      "additionalProperties": false,
+      "description": "One cell of a style panel.",
+      "properties": {
+        "case": {
+          "const": "upper",
+          "description": "`upper` sets the value in capitals.",
+          "type": "string"
+        },
+        "label": {
+          "description": "Small caption over the value, e.g. \"Rev\".",
+          "type": "string"
+        },
+        "span": {
+          "description": "Columns this cell spans. Default 1.",
+          "type": "number"
+        },
+        "text": {
+          "description": "The value, as a template. `{name}` reads the diagram's `figure.name` (`{id}` is the diagram id; `{code}` falls back to it). A cell whose variables are not all set is not drawn.",
+          "type": "string"
+        },
+        "weight": {
+          "const": "strong",
+          "description": "`strong` sets the value in semibold.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
       "type": "object"
     }
   }

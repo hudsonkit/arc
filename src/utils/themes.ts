@@ -116,6 +116,39 @@ export interface ArcStyleMode {
   colors?: Partial<Record<ArcStyleColor, string>>
 }
 
+/** One cell of a style panel. */
+export interface StylePanelCell {
+  /** Small caption over the value, e.g. "Rev". */
+  label?: string
+  /**
+   * The value, as a template. `{name}` reads the diagram's `figure.name`
+   * (`{id}` is the diagram id; `{code}` falls back to it). A cell whose
+   * variables are not all set is not drawn.
+   */
+  text: string
+  /** Columns this cell spans. Default 1. */
+  span?: number
+  /** `upper` sets the value in capitals. */
+  case?: 'upper'
+  /** `strong` sets the value in semibold. */
+  weight?: 'strong'
+}
+
+/**
+ * A plate the style pins to a canvas corner, filled from the diagram's
+ * `figure`. Rows hold cells; a row with no drawn cell is dropped, and a panel
+ * with no drawn row is not shown.
+ */
+export interface StylePanel {
+  /** The style's name for this panel. */
+  id: string
+  /** The canvas corner the panel sits in. */
+  anchor: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  /** Variables that must all be set, or the whole panel is left out. */
+  requires?: string[]
+  rows: StylePanelCell[][]
+}
+
 /**
  * A host-owned style, passed to Arc as a value (`<ArcDiagram style>`,
  * `arc render --style`). Arc never looks a style up by name. With a style
@@ -135,6 +168,8 @@ export interface ArcStyle {
   }
   /** Drawing language: node shape, decor, frame, grid, arrowheads. Fonts come from `type`. */
   brand?: BrandSpec
+  /** Plates pinned to canvas corners, filled from the diagram's `figure`. */
+  panels?: StylePanel[]
   perspective?: {
     /** Used when the diagram has no `_meta.viewMode`. */
     default?: '2d' | 'isometric'

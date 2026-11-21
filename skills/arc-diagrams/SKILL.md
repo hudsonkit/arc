@@ -216,6 +216,19 @@ For a panel cube, inspect `progress` at 0, 0.5, and 1; confirm that the faces st
 attached to their callouts. Test hover, keyboard activation, touch controls, and
 reduced motion when delivering an interactive view.
 
+When the host has a style file, render with it (`arc render --style style.json`,
+or the MCP `style` argument) instead of a `--theme`. A style can pin panels,
+such as a title plate, to the canvas corners. They are filled from the diagram's
+`figure` block, so give a finished figure one:
+
+```json
+"figure": { "title": "Checkout flow", "code": "CF-01", "rev": "A", "sheet": "1 / 1" }
+```
+
+The code stays the same for the life of the figure; `rev` counts its edits.
+A panel cell whose variable is missing is not drawn, so a sketch needs no
+`figure`. See `docs/themes.md` for the panel format.
+
 ## Deliver
 
 Return the rendered artifact, its editable source, and a short caption explaining

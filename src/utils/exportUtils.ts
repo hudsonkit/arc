@@ -8,6 +8,7 @@ import { resolveNodeColor, resolveNodeIcon } from './nodeKinds'
 import { resolveNodeDecor, resolveNodeShape, shapeCut, shapeFillPath } from './nodeShape'
 import { getTheme, resolveNodeRadius, themeCanvas, type ArcStyle, type BrandSpec, type Theme, type ThemeId } from './themes'
 import { arcStyleTheme, resolveStyleTokens } from './arcStyle'
+import { figureVariables, layoutPanels, panelSvg, placePanel } from './figurePanels'
 
 // Anchor position on a node box — the same geometry the editor and player use.
 function getAnchorPosition(x: number, y: number, width: number, height: number, position: AnchorPosition) {
@@ -502,6 +503,26 @@ export function generateSVG(diagram: any, options: any = {}) {
     // frame treatment already rules an inset line the block would sit on.
     const chromeInset = brand?.frame === 'sheet' || brand?.frame === 'inset' ? 28 : 12
     svg += `  ${svgTitleBlock(theme, diagram.id || '', bounds.x + bounds.width + padding - chromeInset, bounds.y + bounds.height + padding - chromeInset, ink, mutedInk, accent)}\n`
+  }
+
+  // Style panels: plates filled from the diagram's `figure`, one layout shared
+  // with the player (utils/figurePanels.ts).
+  if (style?.panels?.length) {
+    const r = resolveStyleTokens(style, mode)
+    const wrap = (name: string, value: string) => styleOptions.literal ? value : `var(--arc-diagram-${name}, ${value})`
+    const paint = {
+      line: wrap('line', r.tokens.line),
+      label: mutedInk,
+      value: ink,
+      fill: backgroundColor,
+      font: monoFamily,
+    }
+    const box = { x: bounds.x - padding, y: bounds.y - padding, width: bounds.width + padding * 2, height: bounds.height + padding * 2 }
+    const inset = brand?.frame === 'sheet' || brand?.frame === 'inset' ? 28 : 12
+    for (const layout of layoutPanels(style.panels, figureVariables(diagram))) {
+      const at = placePanel(layout, box, inset)
+      svg += `  <g data-arc-panel="${escapeXml(layout.id)}" transform="translate(${at.x} ${at.y})">${panelSvg(layout, paint)}</g>\n`
+    }
   }
 
   svg += `</svg>`
