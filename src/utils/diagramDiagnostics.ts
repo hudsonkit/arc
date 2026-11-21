@@ -469,6 +469,21 @@ export function validateDiagram(value: unknown): Diagnostic[] {
     }
   }
 
+  if (d.figure !== undefined) {
+    const bad = !isObject(d.figure)
+      ? ['`figure` must be an object of strings']
+      : Object.entries(d.figure).filter(([, v]) => typeof v !== 'string').map(([k]) => `\`figure.${k}\` must be a string`)
+    if (bad.length) {
+      push({
+        code: 'semantic/invalid-figure',
+        severity: 'error',
+        subject: { type: 'diagram' },
+        message: bad.join('; '),
+        evidence: { field: 'figure', value: d.figure },
+      })
+    }
+  }
+
   const nodeIds = Object.keys(nodes)
 
   for (const [id, raw] of Object.entries(nodeData)) {

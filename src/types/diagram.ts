@@ -356,6 +356,24 @@ export interface FileMeta {
   locale?: string
 }
 
+/**
+ * Facts about the figure itself. Style panels read each one as a `{name}`
+ * variable; any other string key works the same way.
+ */
+export interface DiagramFigure {
+  /** The figure's title, e.g. "Board custody". */
+  title?: string
+  /** A short, stable code, e.g. "BC-01". Falls back to the diagram id. */
+  code?: string
+  /** Revision of this figure, e.g. "A". */
+  rev?: string
+  /** Sheet number, e.g. "1 / 1". */
+  sheet?: string
+  /** Status, e.g. "Draft". */
+  status?: string
+  [name: string]: string | undefined
+}
+
 // Full diagram format (internal Arc state)
 export interface ArcDiagram {
   /** Drawing number — the player's label and the Engineering title block's DWG NO. */
@@ -366,6 +384,8 @@ export interface ArcDiagram {
   legend?: LegendMode
   /** Viewer/editor display state saved with the file — see `FileMeta`. */
   _meta?: FileMeta
+  /** Title, code, revision and other facts that style panels show. */
+  figure?: DiagramFigure
   layoutHints?: LayoutHints
   nodes: Record<string, NodePosition>
   nodeData: Record<string, NodeData>
@@ -394,6 +414,8 @@ export interface ArcDiagramData {
   legend?: LegendMode
   /** Viewer/editor display state saved with the file — see `FileMeta`. */
   _meta?: FileMeta
+  /** Title, code, revision and other facts that style panels show. */
+  figure?: DiagramFigure
   layoutHints?: LayoutHints
   nodes: Record<string, NodePosition>
   nodeData: Record<string, NodeData>
@@ -417,6 +439,7 @@ export function toExportFormat(diagram: ArcDiagram): ArcDiagramData {
     layout: diagram.layout,
     legend: diagram.legend,
     _meta: diagram._meta,
+    ...(diagram.figure !== undefined ? { figure: diagram.figure } : {}),
     layoutHints: diagram.layoutHints,
     nodes: diagram.nodes,
     nodeData: diagram.nodeData,

@@ -34,6 +34,10 @@
           },
           "type": "array"
         },
+        "figure": {
+          "$ref": "#/definitions/DiagramFigure",
+          "description": "Title, code, revision and other facts that style panels show."
+        },
         "flows": {
           "description": "Animated message/packet routes across connectors.",
           "items": {
@@ -265,6 +269,42 @@
         "orange"
       ],
       "type": "string"
+    },
+    "DiagramFigure": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "not": {}
+          }
+        ]
+      },
+      "description": "Facts about the figure itself. Style panels read each one as a `{name}` variable; any other string key works the same way.",
+      "properties": {
+        "code": {
+          "description": "A short, stable code, e.g. \"BC-01\". Falls back to the diagram id.",
+          "type": "string"
+        },
+        "rev": {
+          "description": "Revision of this figure, e.g. \"A\".",
+          "type": "string"
+        },
+        "sheet": {
+          "description": "Sheet number, e.g. \"1 / 1\".",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status, e.g. \"Draft\".",
+          "type": "string"
+        },
+        "title": {
+          "description": "The figure's title, e.g. \"Board custody\".",
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
     "DiagramFlow": {
       "additionalProperties": false,

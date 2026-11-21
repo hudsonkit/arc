@@ -160,6 +160,55 @@ paint the drawing. `arc check --style style.json` reports this as
 render tools (`style` argument) resolve the style to literal colors and fonts,
 so a standalone SVG or PNG looks the same without the page CSS.
 
+### Panels and the figure
+
+A style can pin panels to the canvas corners: a title plate, a status stamp, a
+header strip. The style owns the layout. The diagram owns the facts, in its
+`figure` block:
+
+```json
+"figure": { "title": "Board custody", "code": "BC-01", "rev": "A", "sheet": "1 / 1" }
+```
+
+A panel is rows of cells. Each cell's `text` is a template, and `{name}` reads
+`figure.name`. Any string key in `figure` works. `{id}` is the diagram id, and
+`{code}` falls back to it.
+
+```json
+"panels": [
+  {
+    "id": "plate",
+    "anchor": "bottom-right",
+    "requires": ["title"],
+    "rows": [
+      [{ "text": "{title}", "case": "upper", "weight": "strong", "span": 4 }],
+      [{ "label": "Code", "text": "{code}", "span": 2 },
+       { "label": "Rev", "text": "{rev}" },
+       { "label": "Sheet", "text": "{sheet}" }]
+    ]
+  }
+]
+```
+
+What is missing is not drawn:
+
+| Part | Drawn when |
+|---|---|
+| Cell | every variable in its `text` is set |
+| Row | at least one of its cells is drawn; the cells left stretch to fill it |
+| Panel | every name in `requires` is set, and at least one row is drawn |
+
+So one style serves a quick sketch with no `figure` and a formal figure with
+one. A panel draws in the style's mono font. Its rules use the `line` token, its
+labels `muted`, and its values `foreground`. It sits on the `background` token.
+Anchors are `top-left`, `top-right`, `bottom-left` and `bottom-right`, one panel
+per corner. The player and the SVG export share one layout
+(`src/utils/figurePanels.ts`). In the player, the zoom controls move up to clear
+a bottom-right panel. A panel also hides the diagram label in its corner.
+
+`brand.titleBlock` is the older fixed plate (DWG NO, SCALE, REV, SHEET). It
+still works. A style cannot set both it and a bottom-right panel.
+
 ### Child diagrams
 
 A node can name a child diagram by id with `nodeData.child`. The host passes the
